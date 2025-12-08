@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Quai Controller Dashboard (Prime · d, d* and FX Signal Qi↔Quai)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #050307;
+      --bg-alt: #0a0509;
+      --panel: #12070b;
+      --accent: #ff253a;
+      --accent-soft: rgba(255, 37, 58, 0.18);
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --danger: #ff4b4b;
+      --success: #4ade80;
+      --border: #301219;
+      --card-radius: 16px;
+      --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.7);
+    }
+
+    * { box-sizing: border-box; }
+
+    @keyframes floatIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulseDot {
+      0%   { transform: scale(1);   opacity: 0.9; }
+      50%  { transform: scale(1.4); opacity: 0.4; }
+      100% { transform: scale(1);   opacity: 0.9; }
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top, #2b0005 0, #050307 40%, #020005 80%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px;
+      display: flex;
+      justify-content: center;
+      overflow-x: hidden;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 1200px;
+      animation: floatIn 0.6s ease-out both;
+    }
+
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px 16px;
+      margin-bottom: 20px;
+    }
+
+    .logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      flex-shrink: 0;
+      box-shadow: 0 0 0 2px rgba(255, 37, 58, 0.4);
+    }
+
+    .header-main {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    header h1 {
+      font-size: 1.4rem;
+      margin: 0;
+      letter-spacing: 0.03em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    header h1 span.badge {
+      font-size: 0.7rem;
+      padding: 3px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      color: var(--muted);
+      text-transform: uppercase;
+      background: rgba(7, 3, 6, 0.9);
+    }
+
+    header .subtitle {
+      font-size: 0.8rem;
+      color: var(--muted);
+      max-width: 650px;
+      margin-top: 4px;
+    }
+
+    .header-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .donate-pill,
+    .github-pill {
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      cursor: pointer;
+      transition:
+        transform 0.12s ease,
+        box-shadow 0.12s ease,
+        filter 0.12s ease,
+        border-color 0.12s ease,
+        background 0.12s ease;
+    }
+
+    .donate-pill {
+      border: 1px solid rgba(248, 250, 252, 0.12);
+      background: radial-gradient(circle at top left, rgba(255, 37, 58, 0.18), rgba(15, 5, 10, 0.96));
+      color: var(--muted);
+      box-shadow: 0 10px 24px rgba(255, 37, 58, 0.35);
+    }
+
+    .donate-pill:hover {
+      transform: translateY(-1px) scale(1.02);
+      box-shadow: 0 14px 30px rgba(255, 37, 58, 0.55);
+      border-color: rgba(255, 148, 178, 0.9);
+      filter: brightness(1.05);
+    }
+
+    .donate-heart {
+      font-size: 0.85rem;
+      color: #ff6b81;
+    }
+
+    .donate-label {
+      font-weight: 500;
+      color: #e5e7eb;
+    }
+
+    .donate-address {
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.68rem;
+      opacity: 0.9;
+    }
+
+    .github-pill {
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      background: rgba(8, 10, 15, 0.95);
+      color: var(--muted);
+      text-decoration: none;
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.45);
+    }
+
+    .github-pill:hover {
+      transform: translateY(-1px) scale(1.02);
+      border-color: rgba(255, 255, 255, 0.8);
+      box-shadow: 0 12px 26px rgba(15, 23, 42, 0.7);
+      filter: brightness(1.03);
+    }
+
+    .github-icon svg {
+      display: block;
+    }
+
+    .github-icon {
+      width: 16px;
+      height: 16px;
+    }
+
+    .github-label {
+      font-weight: 500;
+      color: #e5e7eb;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.3fr);
+      gap: 18px;
+    }
+
+    /* MOBILE: una sola columna, gráfico full-width y datos abajo */
+    @media (max-width: 900px) {
+      body {
+        padding: 16px 10px 24px;
+      }
+
+      header {
+        align-items: flex-start;
+      }
+
+      .grid {
+        grid-template-columns: minmax(0, 1fr); /* una sola columna */
+      }
+
+      /* el card del gráfico ocupa todo el ancho y gana altura */
+      #chart-card {
+        width: 100%;
+        min-height: 420px;
+      }
+
+      .header-actions {
+        margin-left: 0;
+      }
+
+      .github-pill,
+      .donate-pill {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    .card {
+      background:
+        radial-gradient(circle at top left, #1a060b 0, #060106 55%);
+      border-radius: var(--card-radius);
+      border: 1px solid rgba(56, 12, 24, 0.9);
+      box-shadow: var(--shadow-soft);
+      padding: 16px 16px 14px;
+      position: relative;
+      overflow: hidden;
+      transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease,
+        transform 0.15s ease,
+        background 0.2s ease;
+      animation: floatIn 0.7s ease-out both;
+    }
+
+    .grid > .card:nth-child(2) { animation-delay: 0.08s; }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at top right, rgba(255, 37, 58, 0.18), transparent 55%);
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    .card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 22px 54px rgba(255, 37, 58, 0.35);
+      transform: translateY(-2px);
+      background:
+        radial-gradient(circle at top left, #22060e 0, #060106 60%);
+    }
+
+    .card-header {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .card-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #e5e7eb;
+    }
+
+    .card-subtitle {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .settings-row {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 0.78rem;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .field-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+
+    .field-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      min-width: 0;
+      flex-wrap: wrap;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select {
+      background: rgba(10, 2, 9, 0.95);
+      border-radius: 999px;
+      border: 1px solid rgba(148, 27, 49, 0.8);
+      padding: 6px 10px;
+      color: var(--text);
+      font-size: 0.78rem;
+      outline: none;
+      min-width: 0;
+      transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease,
+        background 0.15s ease;
+    }
+
+    input[type="text"] {
+      width: 260px;
+      max-width: 100%;
+    }
+
+    input[type="number"] { width: 82px; }
+
+    select { padding-right: 26px; }
+
+    input:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(255, 37, 58, 0.32);
+      background: rgba(10, 2, 10, 1);
+    }
+
+    button {
+      border-radius: 999px;
+      border: none;
+      padding: 7px 14px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, #ff253a, #ff7a3c);
+      color: #050308;
+      box-shadow: 0 10px 24px rgba(255, 37, 58, 0.6);
+      white-space: nowrap;
+      transition:
+        transform 0.12s ease,
+        box-shadow 0.12s ease,
+        filter 0.12s ease,
+        opacity 0.12s ease;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-1px) scale(1.02);
+      box-shadow: 0 16px 32px rgba(255, 37, 58, 0.7);
+      filter: brightness(1.05);
+    }
+
+    button.secondary {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid rgba(75, 85, 99, 0.8);
+      box-shadow: none;
+    }
+
+    button.secondary:hover:not(:disabled) {
+      border-color: var(--accent);
+      color: #e5e7eb;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: default;
+      box-shadow: none;
+    }
+
+    .pill {
+      border-radius: 999px;
+      padding: 4px 9px;
+      font-size: 0.7rem;
+      border: 1px solid rgba(75, 85, 99, 0.7);
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(7, 3, 7, 0.95);
+    }
+
+    .pill-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--success);
+      animation: pulseDot 1.8s ease-out infinite;
+    }
+
+    .pill-dot.red {
+      background: var(--danger);
+      animation: none;
+    }
+
+    .legend {
+      position: relative;
+      z-index: 1;
+      margin-top: 6px;
+      font-size: 0.72rem;
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(8, 2, 8, 0.98);
+      border: 1px solid rgba(51, 16, 22, 0.95);
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .legend-item:hover {
+      background: rgba(18, 6, 18, 0.98);
+      border-color: rgba(255, 37, 58, 0.4);
+    }
+
+    .legend-swatch {
+      width: 10px;
+      height: 3px;
+      border-radius: 999px;
+      background: var(--accent);      /* d */
+    }
+
+    .legend-swatch.alt { background: #ff6b81; } /* d* */
+    .legend-swatch.delta { background: #ffb347; } /* ΔkQuai/kQuai */
+
+    /* FAST MODE NOTE */
+    .fast-note {
+      position: relative;
+      z-index: 1;
+      margin-top: 12px;
+      font-size: 0.72rem;
+      color: var(--muted);
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      background: rgba(7, 2, 8, 0.96);
+      line-height: 1.4;
+    }
+    .fast-note strong {
+      color: #e5e7eb;
+      font-weight: 500;
+      margin-right: 4px;
+    }
+
+    canvas {
+      position: relative;
+      z-index: 1;
+      width: 100% !important;
+      max-height: 360px;
+    }
+
+    .status-bar {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+      font-size: 0.72rem;
+      color: var(--muted);
+      border-top: 1px solid rgba(51, 16, 22, 0.9);
+      padding-top: 6px;
+    }
+
+    .status-bar span.em {
+      color: #e5e7eb;
+      font-weight: 500;
+    }
+
+    .status-bar .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--success);
+      margin-right: 5px;
+    }
+
+    .status-bar .status-dot.red { background: var(--danger); }
+
+    .status-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .status-tag {
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      background: rgba(7, 2, 8, 0.96);
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .status-tag strong {
+      color: #e5e7eb;
+      font-weight: 500;
+    }
+
+    .status-dot-mini {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #f97373;
+    }
+
+    .metrics-grid {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    @media (max-width: 600px) {
+      .metrics-grid { grid-template-columns: minmax(0, 1fr); }
+    }
+
+    .metric-card {
+      background:
+        radial-gradient(circle at top left, rgba(15, 5, 10, 0.96), #050205 65%);
+      border-radius: 10px;
+      border: 1px solid rgba(148, 27, 49, 0.8);
+      padding: 10px 11px 9px;
+      font-size: 0.78rem;
+      position: relative;
+      overflow: hidden;
+      transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease,
+        transform 0.15s ease,
+        background 0.2s ease;
+    }
+
+    .metric-card::after {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background:
+        radial-gradient(circle at top right, rgba(255, 37, 58, 0.12), transparent 55%);
+      opacity: 0.8;
+      pointer-events: none;
+    }
+
+    .metric-card:hover {
+      border-color: rgba(255, 37, 58, 0.7);
+      box-shadow: 0 16px 36px rgba(255, 37, 58, 0.5);
+      transform: translateY(-1px);
+      background:
+        radial-gradient(circle at top left, rgba(24, 8, 14, 0.98), #050205 70%);
+    }
+
+    .metric-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .metric-main {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .metric-main-exrate {
+      align-items: center;
+      gap: 4px;
+      flex-wrap: nowrap;
+    }
+
+    .metric-main-exrate .metric-prefix {
+      font-size: 0.78rem;
+      color: var(--muted);
+      opacity: 0.9;
+    }
+
+    .metric-main-exrate .metric-unit {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-left: 1px;
+    }
+
+    .metric-main-exrate .metric-value {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .metric-value {
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+
+    .metric-unit {
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .metric-badge {
+      font-size: 0.68rem;
+      padding: 3px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      background: rgba(8, 2, 8, 0.96);
+      color: var(--muted);
+    }
+
+    .metric-footer {
+      font-size: 0.7rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .metric-pill {
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.66rem;
+      background: rgba(8, 2, 8, 0.96);
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .metric-pill span.dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--success);
+    }
+
+    .metric-pill span.dot.red { background: var(--danger); }
+
+    footer {
+      margin-top: 18px;
+      font-size: 0.7rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+
+    footer a:hover { text-decoration: underline; color: #ff7a3c; }
+
+    .tf-btn {
+      padding: 4px 9px;
+      font-size: 0.7rem;
+      border-radius: 999px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <img src="quai-logo.png" alt="Quai logo" class="logo" />
+      <div class="header-main">
+        <h1>
+          Quai Controller Dashboard
+          <span class="badge">Prime · d vs d* · FX Qi↔Quai</span>
+        </h1>
+        <div class="subtitle">
+          Queries an official or local <strong>zone RPC</strong>, follows
+          <code>primeTerminusHash</code> to Prime headers, and rebuilds the Prime
+          controller (d, d*, FX Qi↔Quai) using only canonical on-chain data.
+        </div>
+      </div>
+      <div class="header-actions">
+        <a
+          href="https://github.com/Clonners/Controller-view-Quai-Network"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="github-pill"
+        >
+          <span class="github-icon" aria-hidden="true">
+            <svg viewBox="0 0 16 16" width="16" height="16" fill="#e5e7eb">
+              <path fill-rule="evenodd"
+                d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
+                0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52
+                -.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95
+                0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.62 7.62 0 0 1 8 3.13c.68.01
+                1.36.09 2 .26 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15
+                0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2
+                0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z">
+              </path>
+            </svg>
+          </span>
+          <span class="github-label">GitHub</span>
+        </a>
+
+        <button id="donation-pill" class="donate-pill" type="button">
+          <span class="donate-heart">♥</span>
+          <span class="donate-label">Donate</span>
+          <span class="donate-address">0x0042843bC5C3fcAFda51d2c6BB17d47370567C9a</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <section class="card" id="chart-card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">d vs d* (Prime history)</div>
+            <div class="card-subtitle">
+              History is measured in <strong>Prime blocks</strong>.
+              Zone headers are only used as a pointer to Prime via
+              <code>primeTerminusHash</code>.
+            </div>
+          </div>
+          <div class="pill">
+            <span class="pill-dot" id="conn-dot"></span>
+            <span id="conn-label">Waiting...</span>
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <div class="field-group">
+            <label class="field-label" for="rpc-url">RPC endpoint (zone / official)</label>
+            <div class="field-row">
+              <input
+                type="text"
+                id="rpc-url"
+                value="https://rpc.quai.network/cyprus1"
+                spellcheck="false"
+              />
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="window">Total history</label>
+            <div class="field-row">
+              <input type="number" id="window" min="200" max="400000" step="200" value="8000" />
+              <span style="color: var(--muted);">Prime blocks</span>
+              <button type="button" class="secondary tf-btn" data-window="4320">1d</button>
+              <button type="button" class="secondary tf-btn" data-window="30240">1w</button>
+              <button type="button" class="secondary tf-btn" data-window="120960">1m</button>
+              <button type="button" class="secondary tf-btn" data-window="388800">3m</button>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="chunk">Blocks per point</label>
+            <div class="field-row">
+              <input type="number" id="chunk" min="10" max="2000" step="50" value="200" />
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="alpha">d* window</label>
+            <div class="field-row">
+              <select id="alpha">
+                <option value="4000">4000 (spec)</option>
+                <option value="2000">2000</option>
+                <option value="1000">1000</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field-group" style="margin-left:auto;">
+            <label class="field-label">&nbsp;</label>
+            <div class="field-row">
+              <button id="refresh-btn"><span>Refresh</span></button>
+              <button id="auto-btn" class="secondary">Auto (10s)</button>
+            </div>
+          </div>
+        </div>
+
+        <canvas id="ddstar-chart"></canvas>
+
+        <div class="legend">
+          <span class="legend-item">
+            <span class="legend-swatch"></span> d (normalized difficulty, Prime)
+          </span>
+          <span class="legend-item">
+            <span class="legend-swatch alt"></span> d* (window average)
+          </span>
+          <span class="legend-item">
+            <span class="legend-swatch delta"></span> ΔkQuai/kQuai (%) estimate
+          </span>
+        </div>
+
+        <div class="status-bar">
+          <div>
+            <span class="status-dot" id="status-dot"></span>
+            <span id="status-text">No data yet.</span>
+          </div>
+          <div class="status-bar-right">
+            <span class="status-tag">
+              <span class="status-dot-mini"></span>
+              <span>
+                d*/d &gt; 1 ⇒ <strong>FX helps Qi</strong> (more Quai per 1 Qi)
+              </span>
+            </span>
+            <span class="status-tag">
+              <span class="status-dot-mini"></span>
+              <span>
+                d*/d &lt; 1 ⇒ <strong>FX helps Quai</strong> (more Qi per 1 Quai)
+              </span>
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Current state (Prime)</div>
+            <div class="card-subtitle">
+              Metrics from the latest slice of Prime blocks (via zone RPC).
+            </div>
+          </div>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-title">Latest Prime block</div>
+            <div class="metric-main">
+              <div class="metric-value" id="metric-block">–</div>
+              <div class="metric-unit">#</div>
+            </div>
+            <div class="metric-footer">
+              <span id="metric-ts">timestamp: –</span>
+              <span class="metric-pill">
+                <span class="dot" id="metric-side-dot"></span>
+                <span id="metric-side">no signal</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-title">d* / d (last point)</div>
+            <div class="metric-main">
+              <div class="metric-value" id="metric-ratio">–</div>
+              <div class="metric-unit">ratio</div>
+              <span class="metric-badge" id="metric-ratio-badge">–</span>
+            </div>
+            <div class="metric-footer">
+              <span id="metric-ratio-text">Waiting for data...</span>
+              <span class="metric-pill">
+                <span class="dot" id="metric-ratio-dot"></span>
+                <span id="metric-ratio-side">–</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="metrics-grid" style="margin-top:10px;">
+          <div class="metric-card">
+            <div class="metric-title">Exchange rate (Qi → Quai)</div>
+            <div class="metric-main metric-main-exrate">
+              <span class="metric-prefix">1 Qi =</span>
+              <div class="metric-value" id="metric-exrate">–</div>
+              <span class="metric-unit">Quai</span>
+            </div>
+            <div class="metric-footer">
+              <span>
+                From Prime header: <code id="metric-exrate-hex">–</code>
+              </span>
+              <span class="metric-pill">
+                <span class="dot" style="background:#ff253a;"></span>
+                <span>On-chain coefficient for Qi → Quai</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-title">Estimated ΔkQuai/kQuai</div>
+            <div class="metric-main">
+              <div class="metric-value" id="metric-dk">–</div>
+              <div class="metric-unit">/ block</div>
+            </div>
+            <div class="metric-footer">
+              <span id="metric-dk-text">Controller α = 0.001 (per spec)</span>
+              <span class="metric-pill">
+                <span class="dot" id="metric-dk-dot"></span>
+                <span id="metric-dk-side">–</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- FAST MODE / adjDiff NOTE -->
+        <div class="fast-note">
+          <strong>Fast mode:</strong>
+          adjDiff is currently approximated as <code>minerDifficulty</code>.
+          Once ETX data is exposed via RPC, <code>adjDiff</code> will be
+          recomputed using the full ETX-based controller logic.
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      <span>
+        Uses <code>quai_blockNumber</code>, <code>quai_getHeaderByNumber</code>,
+        <code>quai_getHeaderByHash</code> and <code>quai_qiToQuai</code> on a
+        zone RPC.
+      </span>
+      <span>
+        d and d* are from Prime headers; d*/d shows if Qi or Quai is favored.
+      </span>
+    </footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const alphaCtrl = 0.001; // controller α for kQuai
+
+    const rpcUrlInput   = document.getElementById("rpc-url");
+    const windowInput   = document.getElementById("window");
+    const chunkInput    = document.getElementById("chunk");
+    const alphaSelect   = document.getElementById("alpha");
+    const refreshBtn    = document.getElementById("refresh-btn");
+    const autoBtn       = document.getElementById("auto-btn");
+    const connDot       = document.getElementById("conn-dot");
+    const connLabel     = document.getElementById("conn-label");
+    const statusDot     = document.getElementById("status-dot");
+    const statusText    = document.getElementById("status-text");
+
+    const metricBlock      = document.getElementById("metric-block");
+    const metricTs         = document.getElementById("metric-ts");
+    const metricSideDot    = document.getElementById("metric-side-dot");
+    const metricSide       = document.getElementById("metric-side");
+
+    const metricRatio      = document.getElementById("metric-ratio");
+    const metricRatioBadge = document.getElementById("metric-ratio-badge");
+    const metricRatioText  = document.getElementById("metric-ratio-text");
+    const metricRatioDot   = document.getElementById("metric-ratio-dot");
+    const metricRatioSide  = document.getElementById("metric-ratio-side");
+
+    const metricExrate     = document.getElementById("metric-exrate");
+    const metricExrateHex  = document.getElementById("metric-exrate-hex");
+
+    const metricDk         = document.getElementById("metric-dk");
+    const metricDkText     = document.getElementById("metric-dk-text");
+    const metricDkDot      = document.getElementById("metric-dk-dot");
+    const metricDkSide     = document.getElementById("metric-dk-side");
+
+    const timeframeButtons = document.querySelectorAll(".tf-btn");
+    const donationPill     = document.getElementById("donation-pill");
+    const donationAddress  = "0x0042843bC5C3fcAFda51d2c6BB17d47370567C9a";
+
+    let autoInterval = null;
+    let chart = null;
+
+    // Copy donation address on click
+    if (donationPill) {
+      donationPill.addEventListener("click", async () => {
+        const labelEl = donationPill.querySelector(".donate-label");
+        const originalText = labelEl.textContent;
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(donationAddress);
+            labelEl.textContent = "Copied!";
+          } else {
+            const dummy = document.createElement("input");
+            dummy.value = donationAddress;
+            document.body.appendChild(dummy);
+            dummy.select();
+            document.execCommand("copy");
+            document.body.removeChild(dummy);
+            labelEl.textContent = "Copied!";
+          }
+        } catch (e) {
+          labelEl.textContent = "Copy failed";
+        }
+        setTimeout(() => {
+          labelEl.textContent = originalText;
+        }, 1600);
+      });
+    }
+
+    // Cache prime headers by hash
+    const primeHeaderCache = {};
+
+    function hexToInt(hex) {
+      if (!hex) return 0;
+      return parseInt(hex, 16);
+    }
+
+    function formatNumber(x, decimals = 2) {
+      if (x === null || x === undefined || isNaN(x)) return "–";
+      return x.toLocaleString("en-US", {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+      });
+    }
+
+    async function rpcCall(url, method, params = []) {
+      const body = { jsonrpc: "2.0", method, params, id: Date.now() };
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status} (${method})`);
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message || "RPC error");
+      return data.result;
+    }
+
+    async function fetchZoneHeadersRange(url, startBlock, endBlock, batchSize = 400) {
+      const headersMap = {};
+      for (let b = startBlock; b <= endBlock; b += batchSize) {
+        const batchEnd = Math.min(b + batchSize - 1, endBlock);
+        const batchReq = [];
+        for (let n = b; n <= batchEnd; n++) {
+          batchReq.push({
+            jsonrpc: "2.0",
+            method: "quai_getHeaderByNumber",
+            params: ["0x" + n.toString(16)],
+            id: n,
+          });
+        }
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(batchReq),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status} (zone headers)`);
+        const data = await res.json();
+        if (!Array.isArray(data)) throw new Error("Invalid batch response (zone)");
+        for (const item of data) {
+          if (item.error || !item.result) continue;
+          headersMap[item.id] = item.result;
+        }
+      }
+      return headersMap;
+    }
+
+    async function fetchPrimeHeadersByHash(url, hashes, batchSize = 200) {
+      const normalized = hashes
+        .filter(Boolean)
+        .map(h => h.toLowerCase())
+        .filter(h => h !== "0x0000000000000000000000000000000000000000000000000000000000000000");
+
+      const unique = Array.from(new Set(normalized));
+      const need = unique.filter(h => !primeHeaderCache[h]);
+
+      for (let i = 0; i < need.length; i += batchSize) {
+        const slice = need.slice(i, i + batchSize);
+        const batchReq = slice.map(h => ({
+          jsonrpc: "2.0",
+          method: "quai_getHeaderByHash",
+          params: [h],
+          id: h,
+        }));
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(batchReq),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status} (prime headers)`);
+        const data = await res.json();
+        if (!Array.isArray(data)) throw new Error("Invalid batch response (prime)");
+        for (const item of data) {
+          if (!item.result || item.error) continue;
+          const hash = (item.id || "").toLowerCase();
+          primeHeaderCache[hash] = item.result;
+        }
+      }
+
+      const out = {};
+      for (const h of unique) {
+        if (primeHeaderCache[h]) out[h] = primeHeaderCache[h];
+      }
+      return out;
+    }
+
+    async function fetchWindowData() {
+      const url = rpcUrlInput.value.trim();
+
+      const totalPrimeRaw = parseInt(windowInput.value, 10) || 8000;
+      const totalPrime = Math.min(Math.max(totalPrimeRaw, 200), 400000);
+      windowInput.value = totalPrime;
+
+      const chunkSizePrimeRaw = parseInt(chunkInput.value, 10) || 200;
+      const chunkSizePrime = Math.min(Math.max(chunkSizePrimeRaw, 10), totalPrime);
+      chunkInput.value = chunkSizePrime;
+
+      const windowDstar = parseInt(alphaSelect.value, 10);
+
+      connDot.classList.remove("red");
+      connLabel.textContent = "Querying RPC...";
+      refreshBtn.disabled = true;
+
+      try {
+        // latest zone block
+        const latestHex = await rpcCall(url, "quai_blockNumber", []);
+        const latestZoneBlock = parseInt(latestHex, 16);
+
+        // scan more zone blocks than prime blocks to be safe
+        const zoneWindow = Math.min(totalPrime * 3, 400000);
+        const startZoneBlock = Math.max(0, latestZoneBlock - zoneWindow + 1);
+
+        // 1) zone headers
+        const zoneHeaders = await fetchZoneHeadersRange(
+          url,
+          startZoneBlock,
+          latestZoneBlock,
+          400
+        );
+
+        // 2) collect prime hashes
+        const primeHashSet = new Set();
+        for (let b = startZoneBlock; b <= latestZoneBlock; b++) {
+          const zh = zoneHeaders[b];
+          if (!zh) continue;
+          const pHash = zh.primeTerminusHash;
+          if (pHash) primeHashSet.add(pHash.toLowerCase());
+        }
+        const primeHashes = Array.from(primeHashSet);
+
+        // 3) prime headers by hash
+        const primeHeadersByHash = await fetchPrimeHeadersByHash(url, primeHashes, 200);
+
+        // 4) map primeNumber -> {header, minerDiff}
+        const primeByNum = new Map();
+
+        for (let b = startZoneBlock; b <= latestZoneBlock; b++) {
+          const zoneHeader = zoneHeaders[b];
+          if (!zoneHeader) continue;
+
+          const pHashRaw = zoneHeader.primeTerminusHash;
+          const pHash = pHashRaw ? pHashRaw.toLowerCase() : null;
+          const primeHeader =
+            (pHash && primeHeadersByHash[pHash]) || zoneHeader;
+
+          const woPrime = primeHeader.woHeader || zoneHeader.woHeader;
+          if (!woPrime) continue;
+
+          const minerDiffHex =
+            primeHeader.minerDifficulty ||
+            (primeHeader.woHeader && primeHeader.woHeader.difficulty) ||
+            zoneHeader.minerDifficulty ||
+            (zoneHeader.woHeader && zoneHeader.woHeader.difficulty);
+
+          const minerDiff = hexToInt(minerDiffHex);
+          if (minerDiff <= 0) continue;
+
+          const numHex =
+            (primeHeader.woHeader && primeHeader.woHeader.number) ||
+            primeHeader.number ||
+            (zoneHeader.woHeader && zoneHeader.woHeader.number) ||
+            zoneHeader.number;
+
+          const primeNum = numHex ? hexToInt(numHex) : null;
+          if (!primeNum) continue;
+
+          if (!primeByNum.has(primeNum)) {
+            primeByNum.set(primeNum, { header: primeHeader, minerDiff });
+          }
+        }
+
+        const allPrimeNums = Array
+          .from(primeByNum.keys())
+          .sort((a, b) => a - b);
+
+        if (!allPrimeNums.length) {
+          throw new Error("No Prime blocks found in this window.");
+        }
+
+        const startIndex = Math.max(0, allPrimeNums.length - totalPrime);
+        const primeNums = allPrimeNums.slice(startIndex);
+
+        // 5) build series (per Prime block)
+        const series = [];
+        let dWindow = [];
+
+        const avg = (arr) => arr.reduce((acc, v) => acc + v, 0) / (arr.length || 1);
+
+        for (const primeNum of primeNums) {
+          const { header: pHeader, minerDiff } = primeByNum.get(primeNum);
+
+          const adjDiff = minerDiff; // fast mode
+          const dInstant = minerDiff / Math.log2(minerDiff);
+          const dAdj = adjDiff / Math.log2(adjDiff);
+
+          dWindow.push(dAdj);
+          if (dWindow.length > windowDstar) dWindow.shift();
+          const dStar = avg(dWindow);
+
+          const ratio = dInstant !== 0 ? dStar / dInstant : 1;
+          const deltaK = alphaCtrl * (ratio - 1) * 100;
+
+          series.push({
+            primeNum,
+            header: pHeader,
+            dInstant,
+            dStar,
+            deltaK,
+            ratio,
+          });
+        }
+
+        if (!series.length) {
+          throw new Error("No valid Prime samples in this window.");
+        }
+
+        // 6) chunk series into points
+        const labels = [];
+        const dValues = [];
+        const dStarValues = [];
+        const dkValues = [];
+
+        for (let i = 0; i < series.length; i += chunkSizePrime) {
+          const chunk = series.slice(i, i + chunkSizePrime);
+          if (!chunk.length) continue;
+          const firstPrime = chunk[0].primeNum;
+          const lastPrime = chunk[chunk.length - 1].primeNum;
+          labels.push(`${firstPrime}–${lastPrime}`);
+
+          dValues.push(avg(chunk.map(x => x.dInstant)));
+          dStarValues.push(avg(chunk.map(x => x.dStar)));
+          dkValues.push(avg(chunk.map(x => x.deltaK)));
+        }
+
+        renderChart(labels, dValues, dStarValues, dkValues);
+
+        // 7) latest Prime metrics
+        const lastEntry = series[series.length - 1];
+        const lastPrimeNum = lastEntry.primeNum;
+        const lastPrimeHeader = lastEntry.header;
+        const lastRatio = lastEntry.ratio;
+        const lastDeltaK = lastEntry.deltaK;
+
+        metricBlock.textContent = lastPrimeNum.toLocaleString("en-US");
+
+        const tsHex =
+          (lastPrimeHeader.woHeader && lastPrimeHeader.woHeader.timestamp) ||
+          lastPrimeHeader.timestamp;
+        const ts = tsHex ? new Date(hexToInt(tsHex) * 1000) : null;
+        metricTs.textContent = ts
+          ? "timestamp: " + ts.toLocaleString("en-US")
+          : "timestamp: –";
+
+        metricRatio.textContent = formatNumber(lastRatio, 4);
+        metricRatioBadge.textContent =
+          lastRatio > 1 ? "pro-Qi" : lastRatio < 1 ? "pro-Quai" : "neutral";
+
+        metricRatioText.textContent =
+          lastRatio > 1
+            ? "FX zone favors Qi (d* > d)."
+            : lastRatio < 1
+            ? "FX zone favors Quai (d* < d)."
+            : "FX is basically neutral (d* ≈ d).";
+
+        metricRatioDot.style.background =
+          lastRatio >= 1 ? "#4ade80" : "#f97373";
+        metricRatioSide.textContent =
+          lastRatio > 1
+            ? "FX zone pro-Qi"
+            : lastRatio < 1
+            ? "FX zone pro-Quai"
+            : "Approximate equilibrium";
+
+        // ===== Exchange rate: 1 Qi = X Quai =====
+        const exHexPrime = lastPrimeHeader.exchangeRate;
+        metricExrateHex.textContent = exHexPrime || "–";
+
+        let rate = null;
+        try {
+          const lastPrimeHex = "0x" + lastPrimeNum.toString(16);
+          const qiToQuaiHex = await rpcCall(
+            url,
+            "quai_qiToQuai",
+            ["0x3e8", lastPrimeHex]
+          );
+          if (qiToQuaiHex) {
+            const itsAmount = BigInt(qiToQuaiHex);
+            rate = Number(itsAmount) / 1e18;
+          }
+        } catch (convErr) {
+          console.warn("quai_qiToQuai RPC failed, trying fallback from exchangeRate:", convErr);
+        }
+
+        if ((rate === null || isNaN(rate)) && exHexPrime) {
+          try {
+            const exInt = parseInt(exHexPrime, 16);
+            rate = exInt / 1e12; // coarse fallback scaling
+          } catch (e) {
+            console.warn("fallback from header.exchangeRate failed:", e);
+          }
+        }
+
+        if (rate !== null && !isNaN(rate)) {
+          const decimals = rate >= 100 ? 2 : 6;
+          metricExrate.textContent = formatNumber(rate, decimals);
+        } else {
+          metricExrate.textContent = "–";
+        }
+
+        // ===== ΔkQuai/kQuai =====
+        metricDk.textContent = formatNumber(lastDeltaK, 4);
+        metricDkText.textContent =
+          "Controller α = 0.001 (per spec), estimated from d*/d (per Prime block).";
+        metricDkDot.style.background =
+          lastDeltaK >= 0 ? "#4ade80" : "#f97373";
+        metricDkSide.textContent =
+          lastDeltaK >= 0
+            ? "kQuai tends to increase ⇒ more Quai per 1 Qi"
+            : "kQuai tends to decrease ⇒ more Qi per 1 Quai";
+
+        metricSideDot.style.background =
+          lastRatio >= 1 ? "#4ade80" : "#f97373";
+        metricSide.textContent =
+          lastRatio > 1
+            ? "d* > d ⇒ pro-Qi (more Quai per 1 Qi)."
+            : lastRatio < 1
+            ? "d* < d ⇒ pro-Quai (more Qi per 1 Quai)."
+            : "Almost neutral (d* ≈ d).";
+
+        statusDot.classList.remove("red");
+        statusText.innerHTML =
+          '<span class="em">OK</span> · ' +
+          labels.length +
+          " points (" +
+          series.length +
+          " Prime blocks). Last d*/d = " +
+          formatNumber(lastRatio, 4);
+
+        connLabel.textContent = "Connected (zone RPC → Prime)";
+      } catch (err) {
+        console.error(err);
+        connDot.classList.add("red");
+        connLabel.textContent = "RPC error";
+        statusDot.classList.add("red");
+        statusText.textContent = "Error querying node: " + err.message;
+      } finally {
+        refreshBtn.disabled = false;
+      }
+    }
+
+    function renderChart(labels, dValues, dStarValues, dkValues) {
+      const ctx = document.getElementById("ddstar-chart").getContext("2d");
+      if (chart) chart.destroy();
+      chart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels,
+          datasets: [
+            {
+              label: "d (normalized)",
+              data: dValues,
+              borderWidth: 1.8,
+              tension: 0.25,
+              pointRadius: 0,
+              borderColor: "#ff253a",
+            },
+            {
+              label: "d* (window average)",
+              data: dStarValues,
+              borderWidth: 1.8,
+              borderDash: [4, 4],
+              tension: 0.25,
+              pointRadius: 0,
+              borderColor: "#ff6b81",
+            },
+            {
+              label: "ΔkQuai/kQuai (%)",
+              data: dkValues,
+              yAxisID: "y1",
+              borderWidth: 1.5,
+              tension: 0.25,
+              pointRadius: 0,
+              borderColor: "#ffb347",
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: "index",
+            intersect: false,
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function (ctx) {
+                  const label = ctx.dataset.label || "";
+                  if (label.includes("%")) {
+                    return label + ": " + formatNumber(ctx.parsed.y, 4) + " %";
+                  }
+                  return label + ": " + formatNumber(ctx.parsed.y, 4);
+                },
+              },
+            },
+          },
+          scales: {
+            x: {
+              title: { display: true, text: "Prime block range (chunked)" },
+              ticks: { maxTicksLimit: 8 },
+            },
+            y: {
+              title: { display: true, text: "d, d* (Prime, chunk averages)" },
+              ticks: { maxTicksLimit: 6 },
+              grid: { drawBorder: false },
+            },
+            y1: {
+              position: "right",
+              title: { display: true, text: "ΔkQuai/kQuai (%)" },
+              ticks: { maxTicksLimit: 5 },
+              grid: { drawOnChartArea: false },
+            },
+          },
+        },
+      });
+    }
+
+    refreshBtn.addEventListener("click", () => { fetchWindowData(); });
+
+    autoBtn.addEventListener("click", () => {
+      if (autoInterval) {
+        clearInterval(autoInterval);
+        autoInterval = null;
+        autoBtn.textContent = "Auto (10s)";
+        autoBtn.classList.add("secondary");
+      } else {
+        fetchWindowData();
+        autoInterval = setInterval(fetchWindowData, 10000);
+        autoBtn.textContent = "Auto: ON";
+        autoBtn.classList.remove("secondary");
+      }
+    });
+
+    timeframeButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const blocks = parseInt(btn.dataset.window, 10);
+        windowInput.value = blocks;
+        fetchWindowData();
+      });
+    });
+
+    // Initial render
+    fetchWindowData();
+  </script>
+</body>
+</html>
