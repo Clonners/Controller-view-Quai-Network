@@ -111,6 +111,27 @@ function formatNumber(x, decimals = 2) {
   });
 }
 
+// Abrevia d en nD, knD, MnD, GnD, TnD, PnD, EnD para el eje Y
+function formatNormalizedDifficultyTick(value) {
+  const v = Number(value);
+  const abs = Math.abs(v);
+  let scaled = v;
+  let suffix = " nD";
+
+  if (abs >= 1e18) { scaled = v / 1e18; suffix = " EnD"; }
+  else if (abs >= 1e15) { scaled = v / 1e15; suffix = " PnD"; }
+  else if (abs >= 1e12) { scaled = v / 1e12; suffix = " TnD"; }
+  else if (abs >= 1e9)  { scaled = v / 1e9;  suffix = " GnD"; }
+  else if (abs >= 1e6)  { scaled = v / 1e6;  suffix = " MnD"; }
+  else if (abs >= 1e3)  { scaled = v / 1e3;  suffix = " knD"; }
+
+  const dec =
+    Math.abs(scaled) < 10 ? 2 :
+    Math.abs(scaled) < 100 ? 1 : 0;
+
+  return scaled.toFixed(dec) + suffix;
+}
+
 function formatWeiToQuai(amountWeiBigInt, outDecimals = 6) {
   const WEI = 10n ** 18n;
   const whole = amountWeiBigInt / WEI;
@@ -589,8 +610,11 @@ function renderChart(labels, dValues, dStarValues, dkValues) {
           ticks: { maxTicksLimit: 8 },
         },
         y: {
-          title: { display: true, text: "d, d* (Prime, chunk averages)" },
-          ticks: { maxTicksLimit: 6 },
+          title: { display: true, text: "d, d* (Prime, chunk averages, nD)" },
+          ticks: {
+            maxTicksLimit: 6,
+            callback: (value) => formatNormalizedDifficultyTick(value),
+          },
           grid: { drawBorder: false },
         },
         y1: {
@@ -634,4 +658,3 @@ if (document.readyState === 'loading') {
 } else {
   fetchWindowData();
 }
-
