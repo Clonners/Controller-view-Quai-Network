@@ -489,9 +489,9 @@ async function fetchWindowData() {
       lastRatio >= 1 ? "#4ade80" : "#f97373";
     metricSide.textContent =
       lastRatio > 1
-        ? "d* > d ⇒ pro-Qi (less Quai per 1 Qi)."
+        ? "d* > d ⇒ pro-Qi (more Quai per 1 Qi)."
         : lastRatio < 1
-        ? "d* < d ⇒ pro-Quai (more Quai per 1 Qi)."
+        ? "d* < d ⇒ pro-Quai (less Quai per 1 Qi)."
         : "Almost neutral (d* ≈ d).";
 
     statusDot.classList.remove("red");
@@ -634,3 +634,4 @@ if (document.readyState === 'loading') {
 } else {
   fetchWindowData();
 }
+
