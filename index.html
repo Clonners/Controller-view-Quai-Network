@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Quai Controller Dashboard (Prime · d, d* and FX Signal Qi↔Quai)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <header>
+      <img src="quai-logo.png" alt="Quai logo" class="logo" />
+      <div class="header-main">
+        <h1>
+          Quai Controller Dashboard
+          <span class="badge">Prime · d vs d* · FX Qi↔Quai</span>
+        </h1>
+        <div class="subtitle">
+          Queries an official or local <strong>zone RPC</strong>, follows
+          <code>primeTerminusHash</code> to Prime headers, and rebuilds the Prime
+          controller (d, d*, FX Qi↔Quai) using only canonical on-chain data.
+        </div>
+      </div>
+      <div class="header-actions">
+        <a
+          href="https://github.com/Clonners/Controller-view-Quai-Network"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="github-pill"
+        >
+          <span class="github-icon" aria-hidden="true">
+            <svg viewBox="0 0 16 16" width="16" height="16" fill="#e5e7eb">
+              <path fill-rule="evenodd"
+                d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
+                0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52
+                -.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95
+                0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.62 7.62 0 0 1 8 3.13c.68.01
+                1.36.09 2 .26 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15
+                0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2
+                0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z">
+              </path>
+            </svg>
+          </span>
+          <span class="github-label">GitHub</span>
+        </a>
+
+        <button id="donation-pill" class="donate-pill" type="button">
+          <span class="donate-heart">♥</span>
+          <span class="donate-label">Donate</span>
+          <span class="donate-address">0x0042843bC5C3fcAFda51d2c6BB17d47370567C9a</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <section class="card" id="chart-card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">d vs d* (Prime history)</div>
+            <div class="card-subtitle">
+              History is measured in <strong>Prime blocks</strong>.
+              Zone headers are only used as a pointer to Prime via
+              <code>primeTerminusHash</code>.
+            </div>
+          </div>
+          <div class="pill">
+            <span class="pill-dot" id="conn-dot"></span>
+            <span id="conn-label">Waiting...</span>
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <div class="field-group">
+            <label class="field-label" for="rpc-url">RPC endpoint (zone / official)</label>
+            <div class="field-row">
+              <input
+                type="text"
+                id="rpc-url"
+                value="https://rpc.quai.network/cyprus1"
+                spellcheck="false"
+              />
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="window">Total history</label>
+            <div class="field-row">
+              <input type="number" id="window" min="200" max="400000" step="200" value="4000" />
+              <span style="color: var(--muted);">Prime blocks</span>
+              <button type="button" class="secondary tf-btn" data-window="4320">1d</button>
+              <button type="button" class="secondary tf-btn" data-window="30240">1w</button>
+              <button type="button" class="secondary tf-btn" data-window="120960">1m</button>
+              <button type="button" class="secondary tf-btn" data-window="388800">3m</button>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="chunk">Blocks per point</label>
+            <div class="field-row">
+              <input type="number" id="chunk" min="10" max="2000" step="50" value="200" />
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="alpha">d* window</label>
+            <div class="field-row">
+              <select id="alpha">
+                <option value="4000">4000 (spec)</option>
+                <option value="2000">2000</option>
+                <option value="1000">1000</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field-group" style="margin-left:auto;">
+            <label class="field-label">&nbsp;</label>
+            <div class="field-row">
+              <button id="refresh-btn"><span>Refresh</span></button>
+              <button id="auto-btn" class="secondary">Auto (10s)</button>
+            </div>
+          </div>
+        </div>
+
+        <canvas id="ddstar-chart"></canvas>
+
+        <div class="legend">
+          <span class="legend-item">
+            <span class="legend-swatch"></span> d (normalized difficulty, Prime)
+          </span>
+          <span class="legend-item">
+            <span class="legend-swatch alt"></span> d* (window average)
+          </span>
+          <span class="legend-item">
+            <span class="legend-swatch delta"></span> ΔkQuai/kQuai (%) estimate
+          </span>
+        </div>
+
+        <div class="status-bar">
+          <div>
+            <span class="status-dot" id="status-dot"></span>
+            <span id="status-text">No data yet.</span>
+          </div>
+          <div class="status-bar-right">
+            <span class="status-tag">
+              <span class="status-dot-mini"></span>
+              <span>
+                d*/d &gt; 1 ⇒ <strong>FX helps Qi</strong> (more Quai per 1 Qi)
+              </span>
+            </span>
+            <span class="status-tag">
+              <span class="status-dot-mini"></span>
+              <span>
+                d*/d &lt; 1 ⇒ <strong>FX helps Quai</strong> (less Quai per 1 Qi)
+              </span>
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Current state (Prime)</div>
+            <div class="card-subtitle">
+              Metrics from the latest slice of Prime blocks (via zone RPC).
+            </div>
+          </div>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-title">Latest Prime block</div>
+            <div class="metric-main">
+              <div class="metric-value" id="metric-block">–</div>
+              <div class="metric-unit">#</div>
+            </div>
+            <div class="metric-footer">
+              <span id="metric-ts">timestamp: –</span>
+              <span class="metric-pill">
+                <span class="dot" id="metric-side-dot"></span>
+                <span id="metric-side">no signal</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-title">d* / d (last point)</div>
+            <div class="metric-main">
+              <div class="metric-value" id="metric-ratio">–</div>
+              <div class="metric-unit">ratio</div>
+              <span class="metric-badge" id="metric-ratio-badge">–</span>
+            </div>
+            <div class="metric-footer">
+              <span id="metric-ratio-text">Waiting for data...</span>
+              <span class="metric-pill">
+                <span class="dot" id="metric-ratio-dot"></span>
+                <span id="metric-ratio-side">–</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="metrics-grid" style="margin-top:10px;">
+          <div class="metric-card">
+            <div class="metric-title metric-title-exrate">
+              <span class="metric-title-exrate-main">Exchange Rate</span>
+              <span class="metric-title-exrate-sub">(Qi → Quai)</span>
+            </div>
+            <div class="metric-main metric-main-exrate">
+              <span class="metric-prefix">1 Qi =</span>
+              <div class="metric-value" id="metric-exrate">–</div>
+              <span class="metric-unit">Quai</span>
+            </div>
+            <div class="metric-footer">
+              <!-- Mantengo metric-exrate-hex para el JS, pero oculto -->
+              <span style="display:none;">
+                Prime exchangeRate: <code id="metric-exrate-hex">–</code>
+              </span>
+              <span class="metric-pill">
+                <span class="dot" style="background:#22c55e;"></span>
+                <span>From zone RPC</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-title">Estimated ΔkQuai/kQuai</div>
+            <div class="metric-main">
+              <div class="metric-value" id="metric-dk">–</div>
+              <div class="metric-unit">/ block</div>
+            </div>
+            <div class="metric-footer">
+              <span id="metric-dk-text">Controller α = 0.001 (per spec)</span>
+              <span class="metric-pill">
+                <span class="dot" id="metric-dk-dot"></span>
+                <span id="metric-dk-side">–</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- FAST MODE / adjDiff NOTE -->
+        <div class="fast-note">
+          <strong>Fast mode:</strong>
+          adjDiff is currently approximated as <code>minerDifficulty</code>.
+          Once ETX data is exposed via RPC, <code>adjDiff</code> will be
+          recomputed using the full ETX-based controller logic.
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      <span>
+        Uses <code>quai_blockNumber</code>, <code>quai_getHeaderByNumber</code>,
+        <code>quai_getHeaderByHash</code> and <code>quai_qiToQuai</code> on a
+        zone RPC.
+      </span>
+      <span>
+        d and d* are from Prime headers; d*/d shows if Qi or Quai is favored.
+      </span>
+    </footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="main.js"></script>
