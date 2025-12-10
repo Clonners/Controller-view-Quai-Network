@@ -90,40 +90,85 @@ function hexToBigInt(hex) {
   }
 }
 
-function bigIntToNumberApprox(bi) {
-  if (bi === 0n) return 0;
-  const MAX_SAFE = BigInt(Number.MAX_SAFE_INTEGER);
-  if (bi <= MAX_SAFE) return Number(bi);
-  // approximate by taking top 53 bits
-  const bin = bi.toString(2);
-  const bitLength = bin.length;
-  const shift = bitLength - 53;
-  const topBits = bin.slice(0, 53);
-  const mantissa = parseInt(topBits, 2);
-  return mantissa * Math.pow(2, shift);
+// Calculate log2(n) for BigInt using bit length
+// log2(n) ≈ bitLength(n) - 1
+function bigIntLog2(bi) {
+  if (bi <= 0n) throw new Error("log2 requires positive integer");
+  const bitLength = bi.toString(2).length;
+  return bitLength - 1;
+}
+
+// Divide two BigInt with fixed-point precision (18 decimals for wei-like precision)
+function divideBigIntFixed(numerator, denominator, decimals = 18) {
+  if (denominator === 0n) throw new Error("Division by zero");
+  const multiplier = 10n ** BigInt(decimals);
+  return (numerator * multiplier) / denominator;
+}
+
+// Convert BigInt with fixed decimals to string representation
+function bigIntFixedToString(value, decimals = 18, displayDecimals = 4) {
+  if (value < 0n) {
+    return "-" + bigIntFixedToString(-value, decimals, displayDecimals);
+  }
+  const str = value.toString();
+  
+  if (str.length <= decimals) {
+    // Value is less than 1.0, like 0.0001
+    const padded = str.padStart(decimals, "0");
+    const whole = "0";
+    const frac = padded;
+    const fracTrimmed = frac.slice(0, displayDecimals).padEnd(displayDecimals, "0");
+    return whole + "." + fracTrimmed;
+  }
+  
+  // Value is >= 1.0
+  const whole = str.slice(0, -decimals);
+  const frac = str.slice(-decimals, -decimals + displayDecimals).padEnd(displayDecimals, "0");
+  return whole + "." + frac;
 }
 
 function formatNumber(x, decimals = 2) {
-  if (x === null || x === undefined || isNaN(x)) return "–";
-  return x.toLocaleString("en-US", {
+  if (x === null || x === undefined) return "–";
+  
+  // Handle BigInt fixed-point values (assume 18 decimals if BigInt)
+  if (typeof x === 'bigint') {
+    return bigIntFixedToString(x, 18, decimals);
+  }
+  
+  // Handle regular numbers
+  if (isNaN(x)) return "–";
+  return Number(x).toLocaleString("en-US", {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   });
 }
 
 // Abrevia d en nD, knD, MnD, GnD, TnD, PnD, EnD para el eje Y
+// Handles both BigInt (fixed-point with 18 decimals) and Number
 function formatNormalizedDifficultyTick(value) {
-  const v = Number(value);
-  const abs = Math.abs(v);
-  let scaled = v;
+  let num;
+  
+  // Convert BigInt fixed-point (18 decimals) to regular number for formatting
+  if (typeof value === 'bigint') {
+    const DECIMALS = 18n;
+    if (value < 0n) {
+      return "-" + formatNormalizedDifficultyTick(-value);
+    }
+    num = Number(value) / Math.pow(10, 18);
+  } else {
+    num = Number(value);
+  }
+  
+  const abs = Math.abs(num);
+  let scaled = num;
   let suffix = " nD";
 
-  if (abs >= 1e18) { scaled = v / 1e18; suffix = " EnD"; }
-  else if (abs >= 1e15) { scaled = v / 1e15; suffix = " PnD"; }
-  else if (abs >= 1e12) { scaled = v / 1e12; suffix = " TnD"; }
-  else if (abs >= 1e9)  { scaled = v / 1e9;  suffix = " GnD"; }
-  else if (abs >= 1e6)  { scaled = v / 1e6;  suffix = " MnD"; }
-  else if (abs >= 1e3)  { scaled = v / 1e3;  suffix = " knD"; }
+  if (abs >= 1e18) { scaled = num / 1e18; suffix = " EnD"; }
+  else if (abs >= 1e15) { scaled = num / 1e15; suffix = " PnD"; }
+  else if (abs >= 1e12) { scaled = num / 1e12; suffix = " TnD"; }
+  else if (abs >= 1e9)  { scaled = num / 1e9;  suffix = " GnD"; }
+  else if (abs >= 1e6)  { scaled = num / 1e6;  suffix = " MnD"; }
+  else if (abs >= 1e3)  { scaled = num / 1e3;  suffix = " knD"; }
 
   const dec =
     Math.abs(scaled) < 10 ? 2 :
@@ -345,13 +390,12 @@ async function fetchWindowData() {
 
       if (!minerDiffHex) continue;
 
-      // use BigInt-aware conversion and approximate to Number when needed
+      // Keep as BigInt throughout
       const minerDiffBig = hexToBigInt(minerDiffHex);
-      const minerDiff = bigIntToNumberApprox(minerDiffBig);
-      if (minerDiff <= 0) continue;
+      if (minerDiffBig <= 0n) continue;
 
       if (!primeByNum.has(primeNum)) {
-        primeByNum.set(primeNum, { header: primeHeader, minerDiff });
+        primeByNum.set(primeNum, { header: primeHeader, minerDiff: minerDiffBig });
       }
     }
 
@@ -370,21 +414,38 @@ async function fetchWindowData() {
     const series = [];
     let dWindow = [];
 
-    const avg = (arr) => arr.reduce((acc, v) => acc + v, 0) / (arr.length || 1);
+    // Using BigInt fixed-point math (18 decimals for precision)
+    const avgBigInt = (arr) => {
+      if (arr.length === 0) return 0n;
+      const sum = arr.reduce((acc, v) => acc + v, 0n);
+      return sum / BigInt(arr.length);
+    };
 
     for (const primeNum of primeNums) {
-      const { header: pHeader, minerDiff } = primeByNum.get(primeNum);
+      const { header: pHeader, minerDiff } = primeByNum.get(primeNum); // minerDiff is BigInt
 
-      const adjDiff = minerDiff; // fast mode
-      const dInstant = minerDiff / Math.log2(minerDiff);
-      const dAdj = adjDiff / Math.log2(adjDiff);
+      // d = minerDiff / log2(minerDiff)
+      // Using fixed-point arithmetic: d = (minerDiff * 10^18) / log2(minerDiff)
+      const log2Val = BigInt(bigIntLog2(minerDiff));
+      if (log2Val <= 0n) continue; // Skip invalid
+      
+      const adjDiff = minerDiff; // fast mode (same as minerDiff)
+      const dInstant = divideBigIntFixed(minerDiff, log2Val, 18);
+      const dAdj = divideBigIntFixed(adjDiff, log2Val, 18);
 
       dWindow.push(dAdj);
       if (dWindow.length > windowDstar) dWindow.shift();
-      const dStar = avg(dWindow);
+      const dStar = avgBigInt(dWindow);
 
-      const ratio = dInstant !== 0 ? dStar / dInstant : 1;
-      const deltaK = alphaCtrl * (ratio - 1) * 100;
+      // ratio = dStar / dInstant (both with 18 decimals)
+      const ratio = dInstant !== 0n ? divideBigIntFixed(dStar, dInstant, 18) : 1n * (10n ** 18n);
+      
+      // deltaK = alphaCtrl * (ratio - 1) * 100, where alphaCtrl=0.001
+      // ratio - 1 in fixed point is: ratio - 10^18
+      // alphaCtrl * (ratio - 1) * 100 = 0.001 * (ratio - 1) * 100 = 0.1 * (ratio - 1)
+      // In fixed-point: (ratio - 10^18) * 0.1 = (ratio - 10^18) * 10^17
+      const ratioMinusOne = ratio - (1n * (10n ** 18n));
+      const deltaK = (ratioMinusOne * (10n ** 17n)) / (10n ** 18n); // 0.1 * (ratio - 1)
 
       series.push({
         primeNum,
@@ -413,12 +474,23 @@ async function fetchWindowData() {
       const lastPrime = chunk[chunk.length - 1].primeNum;
       labels.push(`${firstPrime}–${lastPrime}`);
 
-      dValues.push(avg(chunk.map(x => x.dInstant)));
-      dStarValues.push(avg(chunk.map(x => x.dStar)));
-      dkValues.push(avg(chunk.map(x => x.deltaK)));
+      // Average BigInt values
+      const avgD = chunk.reduce((acc, x) => acc + x.dInstant, 0n) / BigInt(chunk.length);
+      const avgDStar = chunk.reduce((acc, x) => acc + x.dStar, 0n) / BigInt(chunk.length);
+      const avgDk = chunk.reduce((acc, x) => acc + x.deltaK, 0n) / BigInt(chunk.length);
+      
+      dValues.push(avgD);
+      dStarValues.push(avgDStar);
+      dkValues.push(avgDk);
     }
 
-    renderChart(labels, dValues, dStarValues, dkValues);
+    // Convert BigInt fixed-point values to numbers for charting
+    // dkValues needs to be multiplied by 100 for percentage display
+    const dValuesNum = dValues.map(v => Number(v) / Math.pow(10, 18));
+    const dStarValuesNum = dStarValues.map(v => Number(v) / Math.pow(10, 18));
+    const dkValuesNum = dkValues.map(v => (Number(v) / Math.pow(10, 18)) * 100); // Convert to percentage
+
+    renderChart(labels, dValuesNum, dStarValuesNum, dkValuesNum);
 
     // 7) latest Prime metrics
     const lastEntry = series[series.length - 1];
@@ -438,22 +510,25 @@ async function fetchWindowData() {
       : "timestamp: –";
 
     metricRatio.textContent = formatNumber(lastRatio, 4);
+    
+    // lastRatio is BigInt with 18 decimals, where 10^18 = 1.0
+    const ratioOne = 1n * (10n ** 18n);
     metricRatioBadge.textContent =
-      lastRatio > 1 ? "pro-Qi" : lastRatio < 1 ? "pro-Quai" : "neutral";
+      lastRatio > ratioOne ? "pro-Qi" : lastRatio < ratioOne ? "pro-Quai" : "neutral";
 
     metricRatioText.textContent =
-      lastRatio > 1
+      lastRatio > ratioOne
         ? "FX zone favors Qi (d* > d)."
-        : lastRatio < 1
+        : lastRatio < ratioOne
         ? "FX zone favors Quai (d* < d)."
         : "FX is basically neutral (d* ≈ d).";
 
     metricRatioDot.style.background =
-      lastRatio >= 1 ? "#4ade80" : "#f97373";
+      lastRatio >= ratioOne ? "#4ade80" : "#f97373";
     metricRatioSide.textContent =
-      lastRatio > 1
+      lastRatio > ratioOne
         ? "FX zone pro-Qi"
-        : lastRatio < 1
+        : lastRatio < ratioOne
         ? "FX zone pro-Quai"
         : "Approximate equilibrium";
 
@@ -500,18 +575,18 @@ async function fetchWindowData() {
     metricDkText.textContent =
       "Controller α = 0.001 (per spec), estimated from d*/d (per Prime block).";
     metricDkDot.style.background =
-      lastDeltaK >= 0 ? "#4ade80" : "#f97373";
+      lastDeltaK >= 0n ? "#4ade80" : "#f97373";
     metricDkSide.textContent =
-      lastDeltaK >= 0
+      lastDeltaK >= 0n
         ? "kQuai tends to increase ⇒ more Quai per 1 Qi"
         : "kQuai tends to decrease ⇒ less Quai per 1 Qi";
 
     metricSideDot.style.background =
-      lastRatio >= 1 ? "#4ade80" : "#f97373";
+      lastRatio >= ratioOne ? "#4ade80" : "#f97373";
     metricSide.textContent =
-      lastRatio > 1
+      lastRatio > ratioOne
         ? "d* > d ⇒ pro-Qi (more Quai per 1 Qi)."
-        : lastRatio < 1
+        : lastRatio < ratioOne
         ? "d* < d ⇒ pro-Quai (less Quai per 1 Qi)."
         : "Almost neutral (d* ≈ d).";
 
