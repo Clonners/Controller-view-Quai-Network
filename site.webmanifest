@@ -1,7 +1,8 @@
 {
-  "name": "Quai Controller Dashboard",
-  "short_name": "QuaiCtrl",
-  "start_url": "/Controller visualizator/",
+  "name": "QuaiLive Controller Dashboard",
+  "short_name": "QuaiLive",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#2b0211",
   "theme_color": "#2b0211",
