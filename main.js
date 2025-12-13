@@ -184,7 +184,6 @@ function computeRatioAndDeltaKFromNormHex(bestHex, minerHex) {
     return { ratio: new Decimal(1), deltaK: new Decimal(0) };
   }
 }
-// (helpers trimmed) unused helpers were removed to keep bundle small
 // Centralized status updater for the connection pill — keep messages informative.
 function setConnStatus(step, details = '') {
   try {
@@ -312,8 +311,7 @@ async function sendBatchWithLimit(url, batchReq, maxPer = 2000, opts = {}) {
 }
 
 // Prime header fetch implemented below.
-// Note: ETX/full-block processing and related helpers were removed — this
-// view operates only from canonical header data and node RPCs.
+// View operates from canonical header data and node RPCs.
 
 // Fetch headers by block number in batches (used to scan Prime headers to find Prime blocks)
 async function fetchHeadersByNumber(url, startBlock, endBlock, batchSize = 2000) {
@@ -724,4 +722,4 @@ async function fetchAndAppendLatest() {
   }
 }
 
-// Debug package functionality removed (ETX-based payloads disabled).
+ 
