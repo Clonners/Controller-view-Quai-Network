@@ -5,6 +5,21 @@
   <title>Quai Controller Dashboard (Prime · d, d* and FX Signal Qi↔Quai)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Responsive tweaks for the header controls */
+    .card-header.flex-between { display:flex; align-items:center; gap:12px; justify-content:space-between; flex-wrap:wrap; }
+    .card-header .left { display:flex; gap:12px; align-items:center; min-width:0; flex:1 1 auto; }
+    .rpc-input { flex:1 1 240px; min-width:0; max-width:100%; padding:8px 12px; border-radius:18px; border:1px solid rgba(255,255,255,0.08); background:transparent; color:inherit; }
+    .header-actions-btns { display:flex; gap:8px; align-items:center; white-space:nowrap; }
+    .pill { margin-left:auto; display:flex; gap:8px; align-items:center; }
+    @media (max-width:600px) {
+      .rpc-input { flex-basis:140px; }
+      .card-header.flex-between { align-items:flex-start; }
+      .pill { order:3; }
+      .header-actions-btns { order:2; }
+      .card-header .left { order:1; }
+    }
+  </style>
 </head>
 <body>
   <div class="app">
@@ -15,11 +30,6 @@
           Quai Controller Dashboard
           <span class="badge">Prime · d vs d* · FX Qi↔Quai</span>
         </h1>
-        <div class="subtitle">
-          Queries an official or local <strong>zone RPC</strong>, follows
-          <code>primeTerminusHash</code> to Prime headers, and rebuilds the Prime
-          controller (d, d*, FX Qi↔Quai) using only canonical on-chain data.
-        </div>
       </div>
       <div class="header-actions">
         <a
@@ -54,70 +64,17 @@
 
     <div class="grid">
       <section class="card" id="chart-card">
-        <div class="card-header">
-          <div>
-            <div class="card-title">d vs d* (Prime history)</div>
-            <div class="card-subtitle">
-              History is measured in <strong>Prime blocks</strong>.
-              Zone headers are only used as a pointer to Prime via
-              <code>primeTerminusHash</code>.
-            </div>
-          </div>
-          <div class="pill">
-            <span class="pill-dot" id="conn-dot"></span>
-            <span id="conn-label">Waiting...</span>
-          </div>
-        </div>
-
-        <div class="settings-row">
-          <div class="field-group">
-            <label class="field-label" for="rpc-url">RPC endpoint (zone / official)</label>
-            <div class="field-row">
-              <input
-                type="text"
-                id="rpc-url"
-                value="https://rpc.quai.network/cyprus1"
-                spellcheck="false"
-              />
-            </div>
-          </div>
-
-          <div class="field-group">
-            <label class="field-label" for="window">Total history</label>
-            <div class="field-row">
-              <input type="number" id="window" min="200" max="400000" step="200" value="4000" />
-              <span style="color: var(--muted);">Prime blocks</span>
-              <button type="button" class="secondary tf-btn" data-window="4320">1d</button>
-              <button type="button" class="secondary tf-btn" data-window="30240">1w</button>
-              <button type="button" class="secondary tf-btn" data-window="120960">1m</button>
-              <button type="button" class="secondary tf-btn" data-window="388800">3m</button>
-            </div>
-          </div>
-
-          <div class="field-group">
-            <label class="field-label" for="chunk">Blocks per point</label>
-            <div class="field-row">
-              <input type="number" id="chunk" min="10" max="2000" step="50" value="200" />
-            </div>
-          </div>
-
-          <div class="field-group">
-            <label class="field-label" for="alpha">d* window</label>
-            <div class="field-row">
-              <select id="alpha">
-                <option value="4000">4000 (spec)</option>
-                <option value="2000">2000</option>
-                <option value="1000">1000</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="field-group" style="margin-left:auto;">
-            <label class="field-label">&nbsp;</label>
-            <div class="field-row">
+        <div class="card-header flex-between">
+          <div class="left">
+            <input class="rpc-input" type="text" id="rpc-url" placeholder="RPC endpoint (prime)" value="https://prime.bitquai.live" spellcheck="false" />
+            <div class="header-actions-btns">
               <button id="refresh-btn"><span>Refresh</span></button>
               <button id="auto-btn" class="secondary">Auto (10s)</button>
             </div>
+          </div>
+          <div class="pill">
+            <span class="pill-dot" id="conn-dot" style="background:#22c55e;"></span>
+            <span id="conn-label">Prime RPC connected</span>
           </div>
         </div>
 
@@ -162,7 +119,7 @@
           <div>
             <div class="card-title">Current state (Prime)</div>
             <div class="card-subtitle">
-              Metrics from the latest slice of Prime blocks (via zone RPC).
+              Metrics from the latest Prime blocks (via Prime RPC).
             </div>
           </div>
         </div>
@@ -218,7 +175,7 @@
               </span>
               <span class="metric-pill">
                 <span class="dot" style="background:#22c55e;"></span>
-                <span>From zone RPC</span>
+                <span>From Prime RPC</span>
               </span>
             </div>
           </div>
@@ -239,27 +196,16 @@
           </div>
         </div>
 
-        <!-- FAST MODE / adjDiff NOTE -->
-        <div class="fast-note">
-          <strong>Fast mode:</strong>
-          adjDiff is currently approximated as <code>minerDifficulty</code>.
-          Once ETX data is exposed via RPC, <code>adjDiff</code> will be
-          recomputed using the full ETX-based controller logic.
-        </div>
+        <!-- Debug package removed -->
       </section>
     </div>
 
     <footer>
-      <span>
-        Uses <code>quai_blockNumber</code>, <code>quai_getHeaderByNumber</code>,
-        <code>quai_getHeaderByHash</code> and <code>quai_qiToQuai</code> on a
-        zone RPC.
-      </span>
-      <span>
-        d and d* are from Prime headers; d*/d shows if Qi or Quai is favored.
-      </span>
+      <!-- Footer notes removed per UX request -->
     </footer>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="main.js"></script>
+      <!-- Load local vendor libraries (decimal.js & Chart UMD) and then `main.js`.
+           `vendor/load-libs.js` will inject `vendor/decimal.min.js` and
+           `vendor/chart.min.js` synchronously and then load `main.js`. -->
+      <script src="vendor/load-libs.js"></script>
