@@ -158,7 +158,19 @@ window.addEventListener('unhandledrejection', (ev) => {
 });
 
 function hexToInt(hex) { if (!hex) return 0; return parseInt(hex, 16); }
-function hexToBigInt(hex) { if (!hex) return 0n; try { if (typeof hex === 'string' && hex.startsWith('0x')) return BigInt(hex); return BigInt(hex); } catch (e) { return 0n; } }
+function hexToBigInt(hex) { 
+  if (!hex) return 0n; 
+  try { 
+    if (typeof hex === 'string') {
+      const clean = hex.startsWith('0x') ? hex : '0x' + hex;
+      return BigInt(clean);
+    }
+    return BigInt(hex); 
+  } catch (e) { 
+    console.error('hexToBigInt parse error:', hex, e);
+    return 0n; 
+  } 
+}
 
 // Decimal helpers
 const DECIMAL_PREC = 40;
@@ -607,17 +619,29 @@ refreshBtn.addEventListener("click", async () => {
 
 autoBtn.addEventListener("click", async () => {
   try {
+    // Prevent repeated clicks while toggling state
+    if (autoBtn.disabled) return;
+    autoBtn.disabled = true;
+
     if (autoInterval) {
+      // turning auto off
       clearInterval(autoInterval);
       autoInterval = null;
       autoBtn.textContent = "Auto (10s)";
       autoBtn.classList.add("secondary");
-    } else {
+      autoBtn.disabled = false;
+      return;
+    }
+
+    // turning auto on: fetch initial window then start polling
+    try {
       await fetchWindowData();
-      // start incremental polling: check latest prime every 10s and append if new
       autoInterval = setInterval(fetchAndAppendLatest, 10000);
       autoBtn.textContent = "Auto: On";
       autoBtn.classList.remove("secondary");
+    } finally {
+      // re-enable button regardless of fetch result so user can retry/stop
+      autoBtn.disabled = false;
     }
   } catch (e) {
     console.error('Auto toggle failed', e);
@@ -721,5 +745,129 @@ async function fetchAndAppendLatest() {
     try { console.error('fetchAndAppendLatest failed', err); } catch (e) {}
   }
 }
+
+// ========== Conversion Calculator ==========
+let isQiToQuai = true; // Default direction
+
+const swapBtn = document.getElementById('swap-direction-btn');
+const fromCurrency = document.getElementById('from-currency');
+const toCurrency = document.getElementById('to-currency');
+const conversionAmount = document.getElementById('conversion-amount');
+const conversionResult = document.getElementById('conversion-result');
+const conversionDetails = document.getElementById('conversion-details');
+const calculateBtn = document.getElementById('calculate-btn');
+
+// Swap direction
+swapBtn.addEventListener('click', () => {
+  isQiToQuai = !isQiToQuai;
+  fromCurrency.textContent = isQiToQuai ? 'Qi' : 'Quai';
+  toCurrency.textContent = isQiToQuai ? 'Quai' : 'Qi';
+  conversionResult.textContent = '–';
+  conversionDetails.textContent = '';
+});
+
+// Calculate conversion
+calculateBtn.addEventListener('click', async () => {
+  const amount = conversionAmount.value.trim();
+  if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
+    conversionResult.textContent = 'Invalid amount';
+    conversionResult.style.color = 'var(--danger)';
+    conversionDetails.textContent = '';
+    return;
+  }
+
+  conversionResult.textContent = 'Calculating...';
+  conversionResult.style.color = 'var(--muted)';
+  conversionDetails.textContent = '';
+
+  try {
+    const url = rpcUrlInput.value.trim();
+
+    // Use Decimal.js for maximum precision throughout
+    const inputAmount = new Decimal(amount);
+
+    // Build tx.value in ledger-native smallest units:
+    // - If converting Qi -> Quai: RPC expects Qi amount in "qits" (1 Qi = 1e3 qits)
+    // - If converting Quai -> Qi: RPC expects Quai amount in "wei" (1 Quai = 1e18 wei)
+    const QITS_MULTIPLIER = new Decimal('1e3');
+    const WEI_MULTIPLIER = new Decimal('1e18');
+
+    // Convert to integer BigInt according to direction
+    let valueBigInt;
+    if (isQiToQuai) {
+      // input is Qi, convert to qits (integer)
+      const amountQits = inputAmount.mul(QITS_MULTIPLIER);
+      valueBigInt = BigInt(amountQits.toFixed(0));
+    } else {
+      // input is Quai, convert to wei
+      const amountWeiDecimal = inputAmount.mul(WEI_MULTIPLIER);
+      valueBigInt = BigInt(amountWeiDecimal.toFixed(0));
+    }
+
+    // Use proper Cyprus-1 Zone-0-0 addresses with correct ledger scope
+    const quaiAddress = '0x00629D04C9ce8cDC83052F8CbC0dC01fEE026329';
+    const qiAddress = '0x1a9C8182C09F50C8318d769245beA52c32BE35BC';
+
+    const tx = {
+      from: isQiToQuai ? qiAddress : quaiAddress,
+      to: isQiToQuai ? quaiAddress : qiAddress,
+      value: '0x' + valueBigInt.toString(16)
+    };
+
+    // Batch: ask node for canonical base conversion + calculated (discounted) amount
+    const methodBase = isQiToQuai ? 'quai_qiToQuai' : 'quai_quaiToQi';
+    const valueHex = '0x' + valueBigInt.toString(16);
+    const batchReq = [
+      { jsonrpc: '2.0', method: 'quai_calculateConversionAmount', params: [tx], id: 'calc' },
+      { jsonrpc: '2.0', method: methodBase, params: [valueHex, 'latest'], id: 'base' }
+    ];
+
+    const batchMap = await rpcBatch(url, batchReq, { timeout: 20000, retries: 0 });
+    const calcRes = batchMap['calc'];
+    const baseRes = batchMap['base'];
+
+    if (!calcRes) throw new Error('Calculation RPC failed');
+
+    // Parse both results
+    const calcBig = hexToBigInt(calcRes);
+    const baseBig = hexToBigInt(baseRes);
+
+    if (!calcBig || calcBig === 0n) throw new Error('Result is zero');
+
+    // Convert to human amounts based on direction
+    const calcDec = new Decimal(calcBig.toString());
+    let resultAmount;
+    if (isQiToQuai) {
+      resultAmount = calcDec.div(new Decimal('1e18')); // Quai
+    } else {
+      resultAmount = calcDec.div(new Decimal('1e3')); // Qi
+    }
+
+    // Display the conversion result
+    conversionResult.textContent = resultAmount.toFixed(6) + ' ' + toCurrency.textContent;
+    conversionResult.style.color = 'var(--success)';
+
+    // Require canonical base conversion result (no fallbacks)
+    if (!baseBig || baseBig === 0n) {
+      throw new Error('Base conversion RPC failed or returned zero (no fallback allowed)');
+    }
+
+    // Compute canonical baseReceived from baseBig and the discount percentage
+    const baseDec = new Decimal(baseBig.toString());
+    const baseReceived = isQiToQuai ? baseDec.div(new Decimal('1e18')) : baseDec.div(new Decimal('1e3'));
+    let discountPercent = new Decimal(0);
+    if (!baseReceived.isZero()) {
+      discountPercent = baseReceived.sub(resultAmount).div(baseReceived).mul(100);
+      if (discountPercent.isNegative()) discountPercent = new Decimal(0);
+      if (discountPercent.gt(100)) discountPercent = new Decimal(100);
+    }
+    conversionDetails.textContent = `Total discount: ${discountPercent.toFixed(2)}%`;
+  } catch (err) {
+    console.info('Conversion calculation error:', err);
+    conversionResult.textContent = 'Error';
+    conversionResult.style.color = 'var(--danger)';
+    conversionDetails.textContent = err.message || 'Unknown error';
+  }
+});
 
  

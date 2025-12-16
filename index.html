@@ -219,6 +219,39 @@
 
         
       </section>
+
+      <section class="card" id="conversion-card">
+        <div class="card-header">
+          <h3 class="card-title">Conversion Calculator</h3>
+        </div>
+        <div class="conversion-container">
+          <div class="conversion-input-group">
+            <label for="conversion-amount">Amount</label>
+            <input type="text" id="conversion-amount" class="conversion-input" placeholder="Enter amount" />
+          </div>
+          
+          <div class="conversion-direction">
+            <button id="swap-direction-btn" class="swap-btn" title="Swap direction">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M7 16V4M7 4L3 8M7 4L11 8M17 8V20M17 20L21 16M17 20L13 16"/>
+              </svg>
+            </button>
+            <div class="direction-labels">
+              <span id="from-currency">Qi</span>
+              <span class="arrow">→</span>
+              <span id="to-currency">Quai</span>
+            </div>
+          </div>
+
+          <div class="conversion-result">
+            <div class="result-label">You will receive:</div>
+            <div class="result-value" id="conversion-result">–</div>
+            <div class="result-details" id="conversion-details"></div>
+          </div>
+
+          <button id="calculate-btn" class="calc-btn">Calculate</button>
+        </div>
+      </section>
     </div>
 
     <footer>
@@ -226,7 +259,9 @@
     </footer>
   </div>
 
-      <!-- Load local vendor libraries (decimal.js & Chart UMD) and then `main.js`.
-           `vendor/load-libs.js` will inject `vendor/decimal.min.js` and
-           `vendor/chart.min.js` synchronously and then load `main.js`. -->
-      <script src="vendor/load-libs.js"></script>
+  <!-- Load local vendor libraries (decimal.js & Chart UMD) and then `main.js`.
+       `vendor/load-libs.js` will inject `vendor/decimal.min.js` and
+       `vendor/chart.min.js` synchronously and then load `main.js`. -->
+  <script src="vendor/load-libs.js"></script>
+</body>
+</html>

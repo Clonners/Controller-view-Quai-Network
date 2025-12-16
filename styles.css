@@ -218,6 +218,19 @@ header .subtitle {
   }
 }
 
+/* Conversion card goes in second column */
+#conversion-card {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+@media (max-width: 900px) {
+  #conversion-card {
+    grid-column: 1;
+    grid-row: 2;
+  }
+}
+
 .card {
   background:
     radial-gradient(circle at top left, #1a060b 0, #060106 55%);
@@ -722,3 +735,137 @@ footer a:hover { text-decoration: underline; color: #ff7a3c; }
   animation: spin 0.9s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* Conversion Calculator */
+
+.conversion-container {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.conversion-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.conversion-input-group label {
+  font-size: 0.85rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.conversion-input {
+  padding: 12px 16px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 1.1rem;
+  transition: border-color 0.2s ease;
+}
+
+.conversion-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.conversion-direction {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: var(--bg);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.swap-btn {
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--accent);
+}
+
+.swap-btn:hover {
+  background: var(--accent);
+  color: white;
+  transform: rotate(180deg);
+}
+
+.direction-labels {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  flex: 1;
+}
+
+.direction-labels .arrow {
+  color: var(--muted);
+  font-size: 1.4rem;
+}
+
+.conversion-result {
+  padding: 20px;
+  background: var(--bg-alt);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.result-label {
+  font-size: 0.85rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.result-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--success);
+}
+
+.result-details {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+.calc-btn {
+  padding: 14px 24px;
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.calc-btn:hover {
+  background: #ff4a5e;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 37, 58, 0.4);
+}
+
+.calc-btn:active {
+  transform: translateY(0);
+}
