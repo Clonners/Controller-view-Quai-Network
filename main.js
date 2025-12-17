@@ -25,6 +25,13 @@ const metricRatioDot   = document.getElementById("metric-ratio-dot");
 const metricRatioSide  = document.getElementById("metric-ratio-side");
 
 const metricExrate     = document.getElementById("metric-exrate");
+  const metricConversionFlow = document.getElementById('metric-conversionflow')
+  const metricKQuai = document.getElementById('metric-kquai')
+  const metricKQuaiDirection = document.getElementById('metric-kquai-direction')
+  const cubicAmount = document.getElementById('cubic-amount')
+  const cubicIsQi = document.getElementById('cubic-isqi')
+  const cubicResult = document.getElementById('cubic-result')
+  const cubicDiscount = document.getElementById('cubic-discount')
 const metricExrateHex  = document.getElementById("metric-exrate-hex");
 
 const metricDk         = document.getElementById("metric-dk");
@@ -229,6 +236,230 @@ function formatWeiToQuai(amountWei, decimals = 6) {
   }
 }
 
+// Generic formatter for RPC big values (hex strings, BigInt, numeric)
+function formatBig(x) {
+  try {
+    if (x === null || typeof x === 'undefined') return '–';
+    // If RPC returned an object with hex string inside, try toString
+    if (typeof x === 'object' && typeof x.toString === 'function') {
+      const s = x.toString();
+      if (s && s.startsWith('0x')) return formatBig(s);
+    }
+    if (typeof x === 'string') {
+      if (x.startsWith('0x')) {
+        const bi = hexToBigInt(x);
+        if (bi === 0n) return '0';
+        if (bi >= 10n ** 18n) return formatWeiToQuai(bi, 6);
+        if (bi >= 10n ** 3n) return (bi / 10n ** 3n).toString() + ' Qi';
+        return bi.toString();
+      }
+      // plain decimal string
+      if (!isNaN(Number(x))) return Number(x).toLocaleString('en-US');
+      return x;
+    }
+    if (typeof x === 'bigint') {
+      if (x === 0n) return '0';
+      if (x >= 10n ** 18n) return formatWeiToQuai(x, 6);
+      if (x >= 10n ** 3n) return (x / 10n ** 3n).toString() + ' Qi';
+      return x.toString();
+    }
+    if (typeof x === 'number') return formatNumber(x, 6);
+    return String(x);
+  } catch (e) {
+    try { console.error('formatBig error', e, x); } catch (ee) {}
+    return String(x);
+  }
+}
+
+// Format qits (integer, 1 Qi = 1e3 qits) to Qi string with decimals
+function formatQitsToQi(qitsBigInt, decimals = 6) {
+  try {
+    let bi = qitsBigInt;
+    if (typeof bi === 'string' && bi.startsWith('0x')) bi = hexToBigInt(bi);
+    if (typeof bi === 'string') bi = BigInt(bi);
+    if (typeof bi === 'number') bi = BigInt(Math.floor(bi));
+    if (typeof bi !== 'bigint') return String(qitsBigInt);
+    const WHOLE = bi / 1000n;
+    const REM = bi % 1000n;
+    const scale = 10n ** BigInt(decimals);
+    const frac = (REM * scale) / 1000n;
+    let fracStr = frac.toString().padStart(decimals, '0');
+    // trim trailing zeros
+    fracStr = fracStr.replace(/0+$/, '');
+    return fracStr.length ? `${WHOLE.toString()}.${fracStr} Qi` : `${WHOLE.toString()} Qi`;
+  } catch (e) {
+    return String(qitsBigInt);
+  }
+}
+
+// Fetch conversionFlow and kQuai metrics and update UI
+async function fetchConversionAndKQuai() {
+  const url = rpcUrlInput.value.trim();
+  try { console.debug('fetchConversionAndKQuai start', { url }); } catch (e) {}
+    try {
+    const conv = await rpcCall(url, 'quai_conversionFlow', ['latest']);
+    if (conv && metricConversionFlow) {
+      metricConversionFlow.textContent = formatBig(conv);
+      try { console.debug('quai_conversionFlow raw', conv); } catch (e) {}
+      try { console.info('conversionFlow displayed', { raw: conv, display: metricConversionFlow.textContent }); } catch (e) {}
+    } else console.error('quai_conversionFlow returned empty or invalid result', conv);
+  } catch (e) { console.warn('conversionFlow rpc', e); }
+  try {
+    const kq = await rpcCall(url, 'quai_kQuaiDiscount', ['latest']);
+    if (kq) {
+      // kQuaiDiscount is returned as hex big; convert to percent using protocol multiplier
+      try {
+        const raw = kq.kQuaiDiscount || kq.discount || kq;
+        // expose raw hex in console for debugging
+        try { console.debug('quai_kQuaiDiscount raw', raw); } catch (e) {}
+        let pct = null;
+        const KQUAI_MULT = new Decimal('100000'); // from params.KQuaiDiscountMultiplier
+        if (typeof raw === 'string' && raw.startsWith('0x')) {
+          const bi = hexToBigInt(raw);
+          pct = new Decimal(bi.toString()).mul(100).div(KQUAI_MULT);
+        } else if (typeof raw === 'number' || typeof raw === 'bigint') {
+          pct = new Decimal(raw.toString()).mul(100).div(KQUAI_MULT);
+        }
+        if (metricKQuai) {
+            if (pct) {
+            const pctDec = new Decimal(pct.toString());
+            // Restore previous UX: show '<0.0001 %' for very small non-zero values
+            // and fixed 4-decimal percent otherwise. If value is exactly zero,
+            // it remains '0.0000 %' (RPC raw hex visible in tooltip).
+            let display;
+            if (pctDec.gt(0) && pctDec.lt(new Decimal('0.0001'))) {
+              display = '<0.0001 %';
+            } else {
+              display = pctDec.toFixed(4) + ' %';
+            }
+            metricKQuai.textContent = display;
+            try { metricKQuai.title = String(raw); } catch (e) {}
+            if (pctDec.gt(0)) {
+              try { console.info('kQuai percent computed', { raw, percent: display }); } catch (e) {}
+            } else {
+              try { console.warn('kQuai percent is zero (or below display threshold)', { raw, percent: pctDec.toString() }); } catch (e) {}
+            }
+          } else {
+            metricKQuai.textContent = String(raw);
+            try { metricKQuai.title = String(raw); } catch (e) {}
+          }
+        }
+      } catch (e) {
+        if (metricKQuai) metricKQuai.textContent = (kq.kQuaiDiscount || kq.discount || kq).toString();
+      }
+      if (metricKQuaiDirection && kq.direction) {
+        try {
+          const dir = String(kq.direction);
+          if (dir === 'QuaiToQi') metricKQuaiDirection.textContent = 'direction: Quai → Qi';
+          else if (dir === 'QiToQuai') metricKQuaiDirection.textContent = 'direction: Qi → Quai';
+          else metricKQuaiDirection.textContent = 'direction: ' + dir;
+        } catch (e) {
+          metricKQuaiDirection.textContent = 'direction: ' + kq.direction;
+        }
+      }
+    } else {
+      console.error('quai_kQuaiDiscount returned empty or invalid result', kq);
+    }
+  } catch (e) { console.warn('kQuai rpc', e); }
+}
+
+// cubic preview: debounce input and call cubic RPC
+function debounce(fn, wait) {
+  let t;
+  return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), wait); };
+}
+
+const callCubicPreview = debounce(async () => {
+  const url = rpcUrlInput.value.trim();
+  if (!cubicAmount) return;
+  let val = cubicAmount.value.trim();
+  if (!val) {
+    cubicResult.textContent = '–';
+    cubicDiscount.textContent = '–';
+    return;
+  }
+  const isQi = (cubicIsQi && cubicIsQi.value === 'true');
+  try {
+    // convert decimal input to ledger-native smallest units and send as hex (0x...)
+    let paramsAmount;
+    try {
+      if (isQi) {
+        const amountQits = new Decimal(val).mul(new Decimal('1e3')); // Qi -> qits
+        const bi = BigInt(amountQits.toFixed(0));
+        paramsAmount = '0x' + bi.toString(16);
+      } else {
+        const amountWei = new Decimal(val).mul(new Decimal('1e18')); // Quai -> wei
+        const bi = BigInt(amountWei.toFixed(0));
+        paramsAmount = '0x' + bi.toString(16);
+      }
+    } catch (e) {
+      console.error('invalid cubic input value', val, e);
+      cubicResult.textContent = '–';
+      cubicDiscount.textContent = '–';
+      return;
+    }
+    try { console.debug('calling quai_cubicConversionDiscount', { paramsAmount, isQi, block: 'latest', url }); } catch (e) {}
+    const res = await rpcCall(url, 'quai_cubicConversionDiscount', [paramsAmount, isQi, 'latest']);
+    if (!res) {
+      console.error('quai_cubicConversionDiscount returned empty result', { paramsAmount, isQi, res });
+      return;
+    }
+    try { console.debug('quai_cubicConversionDiscount result', res); } catch (e) {}
+    if (isQi) {
+      try {
+        if (res.valueAfterCubic) {
+          const afterQi = await rpcCall(url, 'quai_quaiToQi', [res.valueAfterCubic, 'latest']);
+          if (afterQi) {
+            // afterQi is returned in qits (integer); format as Qi with decimals
+            cubicResult.textContent = formatQitsToQi(afterQi);
+          } else {
+            cubicResult.textContent = formatBig(res.valueAfterCubic);
+          }
+        }
+        // compute percent discount (discountQuai / inputQuaiValue * 100)
+        let pctDisplay = null;
+        try {
+          if (res.inputQuaiValue && res.discountQuai) {
+            const inBI = hexToBigInt(res.inputQuaiValue);
+            const discBI = hexToBigInt(res.discountQuai);
+            if (inBI > 0n) {
+              pctDisplay = new Decimal(discBI.toString()).mul(100).div(new Decimal(inBI.toString())).toFixed(4) + ' %';
+            }
+          }
+        } catch (e) { /* noop */ }
+        // show only percentage if available
+        if (pctDisplay) {
+          cubicDiscount.textContent = pctDisplay;
+        } else {
+          cubicDiscount.textContent = '–';
+        }
+      } catch (e) {
+        console.error('convert-to-qi failed', e, { res });
+        if (res.valueAfterCubic) cubicResult.textContent = formatBig(res.valueAfterCubic);
+        if (res.discountQuai) cubicDiscount.textContent = formatBig(res.discountQuai);
+      }
+    } else {
+      if (res.valueAfterCubic) cubicResult.textContent = formatBig(res.valueAfterCubic);
+      // compute percent discount if possible
+      try {
+        let pctDisplay = null;
+        if (res.inputQuaiValue && res.discountQuai) {
+          const inBI = hexToBigInt(res.inputQuaiValue);
+          const discBI = hexToBigInt(res.discountQuai);
+          if (inBI > 0n) pctDisplay = new Decimal(discBI.toString()).mul(100).div(new Decimal(inBI.toString())).toFixed(4) + ' %';
+        }
+        if (pctDisplay) cubicDiscount.textContent = pctDisplay; else cubicDiscount.textContent = '–';
+      } catch (e) { cubicDiscount.textContent = formatBig(res.discountQuai); }
+    }
+  } catch (e) {
+    console.error('cubic rpc failed', e, { amount: val, isQi });
+  }
+}, 400);
+
+if (cubicAmount) cubicAmount.addEventListener('input', callCubicPreview);
+if (cubicIsQi) cubicIsQi.addEventListener('change', callCubicPreview);
+
+
 function formatNormalizedDifficultyTick(value) { let dec; if (value instanceof Decimal) dec = value; else if (typeof value === 'bigint') dec = new Decimal(value.toString()).div(new Decimal('1e18')); else dec = new Decimal(value); const abs = dec.abs(); let scaled = dec; let suffix = " nD"; const thousand = new Decimal('1e3'); const million = new Decimal('1e6'); const billion = new Decimal('1e9'); const trillion = new Decimal('1e12'); const peta = new Decimal('1e15'); const exa = new Decimal('1e18'); if (abs.greaterThanOrEqualTo(exa)) { scaled = dec.div(exa); suffix = " EnD"; } else if (abs.greaterThanOrEqualTo(peta)) { scaled = dec.div(peta); suffix = " PnD"; } else if (abs.greaterThanOrEqualTo(trillion)) { scaled = dec.div(trillion); suffix = " TnD"; } else if (abs.greaterThanOrEqualTo(billion)) { scaled = dec.div(billion); suffix = " GnD"; } else if (abs.greaterThanOrEqualTo(million)) { scaled = dec.div(million); suffix = " MnD"; } else if (abs.greaterThanOrEqualTo(thousand)) { scaled = dec.div(thousand); suffix = " knD"; } const decPlaces = scaled.abs().lessThan(10) ? 2 : scaled.abs().lessThan(100) ? 1 : 0; return scaled.toFixed(decPlaces) + suffix; }
 
 async function rpcCall(url, method, params = [], opts = {}) {
@@ -243,6 +474,7 @@ async function rpcCall(url, method, params = [], opts = {}) {
       if (!res.ok) throw new Error(`HTTP ${res.status} (${method})`);
       const data = await res.json();
       if (data.error) throw new Error(data.error.message || "RPC error");
+      try { console.debug('rpcCall success', { method, params, result: data.result }); } catch (e) {}
       return data.result;
     } catch (err) {
       clearTimeout(timer);
@@ -502,6 +734,7 @@ async function fetchWindowData() {
     // delegate UI update to helper that also fetches latest header/exchange rate
     currentSeries = series;
     await updateUIFromSeries(series, chunkSizePrime, url);
+    try { await fetchConversionAndKQuai(); } catch (e) { /* best-effort */ }
     // Display a concise, accurate connection pill label
     setConnStatus('Prime RPC connected', '');
   } catch (err) {
@@ -741,6 +974,7 @@ async function fetchAndAppendLatest() {
     // Update UI
     const chunkSizePrime = parseInt(chunkInput.value, 10) || 200;
     await updateUIFromSeries(currentSeries, chunkSizePrime, rpcUrlInput.value.trim());
+    try { await fetchConversionAndKQuai(); } catch (e) { /* best-effort */ }
   } catch (err) {
     try { console.error('fetchAndAppendLatest failed', err); } catch (e) {}
   }
@@ -861,7 +1095,19 @@ calculateBtn.addEventListener('click', async () => {
       if (discountPercent.isNegative()) discountPercent = new Decimal(0);
       if (discountPercent.gt(100)) discountPercent = new Decimal(100);
     }
-    conversionDetails.textContent = `Total discount: ${discountPercent.toFixed(2)}%`;
+    // Show higher precision like cubic discount: use 4 decimals
+    let discountDisplay;
+    try {
+      const pctDec = new Decimal(discountPercent.toString());
+      if (pctDec.gt(0) && pctDec.lt(new Decimal('0.0001'))) {
+        discountDisplay = '<0.0001 %';
+      } else {
+        discountDisplay = pctDec.toFixed(4) + ' %';
+      }
+    } catch (e) {
+      discountDisplay = discountPercent.toFixed(4) + '%';
+    }
+    conversionDetails.textContent = `Total discount: ${discountDisplay}`;
   } catch (err) {
     console.info('Conversion calculation error:', err);
     conversionResult.textContent = 'Error';

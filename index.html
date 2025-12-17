@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>QuaiLive — Controller Dashboard (Prime · d, d* and FX Signal Qi↔Quai)</title>
+  <title>Quai Controller Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" href="quai-logo.ico" type="image/x-icon">
@@ -49,7 +49,6 @@
       <div class="header-main">
         <h1>
           Quai Controller Dashboard
-          <span class="badge">Prime · d vs d* · FX Qi↔Quai</span>
         </h1>
       </div>
       <div class="header-actions">
@@ -218,6 +217,57 @@
         </div>
 
         
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Conversion & Discounts</div>
+            <div class="card-subtitle">Live conversion flow, kQuai discount and cubic preview</div>
+          </div>
+        </div>
+
+        <div class="metrics-grid" style="margin-top:8px;">
+          <div class="metric-card">
+            <div class="metric-title">Conversion Flow (EMA)</div>
+            <div class="metric-main">
+              <div class="metric-value" id="metric-conversionflow">–</div>
+              <div class="metric-unit">Quai</div>
+            </div>
+            <div class="metric-footer">
+              <span class="metric-pill"><span class="dot" style="background:#22c55e"></span><span>From Prime RPC</span></span>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-title">kQuai Discount</div>
+            <div class="metric-main">
+                <div class="metric-value" id="metric-kquai">–</div>
+                <div class="metric-unit"></div>
+              </div>
+            <div class="metric-footer">
+              <span id="metric-kquai-direction">direction: –</span>
+              <span class="metric-pill"><span class="dot" style="background:#22c55e"></span><span>From Prime RPC</span></span>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-title">Cubic Discount (preview)</div>
+            <div class="metric-main">
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                <input id="cubic-amount" class="conversion-input" placeholder="Amount" style="width:120px" />
+                <select id="cubic-isqi" style="padding:6px;border-radius:6px">
+                  <option value="true">Qi</option>
+                  <option value="false">Quai</option>
+                </select>
+              </div>
+            </div>
+            <div class="metric-footer">
+              <div>After cubic: <strong id="cubic-result">–</strong></div>
+              <div>Discount: <code id="cubic-discount">–</code></div>
+            </div>
+          </div>
+        </div>
       </section>
 
       <section class="card" id="conversion-card">
