@@ -39,6 +39,8 @@ const metricDkText     = document.getElementById("metric-dk-text");
 const metricDkDot      = document.getElementById("metric-dk-dot");
 const metricDkSide     = document.getElementById("metric-dk-side");
 
+const chartSpinner     = document.getElementById("chart-loading-overlay");
+
 const timeframeButtons = document.querySelectorAll(".tf-btn");
 const donationPill     = document.getElementById("donation-pill");
 const donationAddress  = "0x0042843bC5C3fcAFda51d2c6BB17d47370567C9a";
@@ -616,6 +618,7 @@ async function fetchHeadersByNumber(url, startBlock, endBlock, batchSize = 2000)
 // We fetch Prime headers by number and use header fields for metrics.
 
 async function fetchWindowData() {
+  if (chartSpinner) chartSpinner.style.display = 'flex';
 
   const url = rpcUrlInput.value.trim();
 
@@ -752,6 +755,7 @@ async function fetchWindowData() {
     statusDot.classList.add("red");
     statusText.textContent = "Error querying node: " + err.message;
   } finally {
+    if (chartSpinner) chartSpinner.style.display = 'none';
     refreshBtn.disabled = false;
     try {
       // Only clear the persistent auto spinner if auto isn't running.

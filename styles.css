@@ -881,3 +881,42 @@ footer a:hover { text-decoration: underline; color: #ff7a3c; }
 .calc-btn:active {
   transform: translateY(0);
 }
+
+/* Spinner Overlay */
+.chart-loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(5, 3, 7, 0.75);
+  z-index: 10;
+  backdrop-filter: blur(4px);
+  border-radius: var(--card-radius);
+  transition: opacity 0.3s ease;
+}
+
+.spinner-large {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(255, 37, 58, 0.3);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+  box-shadow: 0 0 15px rgba(255, 37, 58, 0.2);
+}
+
+.spinner-text {
+  color: var(--text);
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
