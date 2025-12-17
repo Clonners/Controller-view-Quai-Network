@@ -25,13 +25,13 @@ const metricRatioDot   = document.getElementById("metric-ratio-dot");
 const metricRatioSide  = document.getElementById("metric-ratio-side");
 
 const metricExrate     = document.getElementById("metric-exrate");
-  const metricConversionFlow = document.getElementById('metric-conversionflow')
-  const metricKQuai = document.getElementById('metric-kquai')
-  const metricKQuaiDirection = document.getElementById('metric-kquai-direction')
-  const cubicAmount = document.getElementById('cubic-amount')
-  const cubicIsQi = document.getElementById('cubic-isqi')
-  const cubicResult = document.getElementById('cubic-result')
-  const cubicDiscount = document.getElementById('cubic-discount')
+const metricConversionFlow = document.getElementById('metric-conversionflow');
+const metricKQuai = document.getElementById('metric-kquai');
+const metricKQuaiDirection = document.getElementById('metric-kquai-direction');
+const cubicAmount = document.getElementById('cubic-amount');
+const cubicIsQi = document.getElementById('cubic-isqi');
+const cubicResult = document.getElementById('cubic-result');
+const cubicDiscount = document.getElementById('cubic-discount');
 const metricExrateHex  = document.getElementById("metric-exrate-hex");
 
 const metricDk         = document.getElementById("metric-dk");
@@ -43,7 +43,8 @@ const timeframeButtons = document.querySelectorAll(".tf-btn");
 const donationPill     = document.getElementById("donation-pill");
 const donationAddress  = "0x0042843bC5C3fcAFda51d2c6BB17d47370567C9a";
 
-let autoInterval = null;
+let autoRunning = false; // controls sequential auto loop
+let autoDetectedPrimes = 0; // cumulative count since Auto was activated
 let chart = null;
 let currentSeries = []; // holds the in-memory series used for incremental updates
 
@@ -147,7 +148,7 @@ async function updateUIFromSeries(series, chunkSizePrime, url) {
 // Global error handlers
 window.addEventListener('error', (ev) => {
   try {
-    const msg = ev && ev.message ? ev.message : String(ev.error || ev);
+    try { connDot.classList.remove('fetching'); } catch (e) {}
     console.error('Unhandled error:', ev.error || ev);
     if (connLabel) connLabel.textContent = 'JS error';
     if (statusText) statusText.textContent = 'Runtime error: ' + msg;
@@ -204,8 +205,15 @@ function computeRatioAndDeltaKFromNormHex(bestHex, minerHex) {
   }
 }
 // Centralized status updater for the connection pill — keep messages informative.
-function setConnStatus(step, details = '') {
+function setConnStatus(step, details = '', opts = {}) {
   try {
+    // opts: { force: true } will force update even when auto is running
+    const force = opts && opts.force;
+    // When Auto is running, keep the pill reserved for the auto message
+    if (autoRunning && !force) {
+      // Allow only the incremental auto status to update the label
+      if (step !== 'Fetching new primes') return;
+    }
     const ts = new Date().toLocaleTimeString();
     connLabel.textContent = `${step}${details ? ' · ' + details : ''}`;
   } catch (e) { /* noop */ }
@@ -621,7 +629,7 @@ async function fetchWindowData() {
 
   const windowDstar = parseInt(alphaSelect.value, 10);
 
-  connDot.classList.remove("red");
+  try { connDot.classList.remove('red'); connDot.classList.add('fetching'); } catch (e) {}
   setConnStatus('Connecting to RPC', 'starting');
   refreshBtn.disabled = true;
 
@@ -745,7 +753,14 @@ async function fetchWindowData() {
     statusText.textContent = "Error querying node: " + err.message;
   } finally {
     refreshBtn.disabled = false;
-    
+    try {
+      // Only clear the persistent auto spinner if auto isn't running.
+      if (!autoRunning) {
+        connDot.classList.remove('fetching');
+        connDot.classList.remove('red');
+        connDot.style.background = '#22c55e';
+      }
+    } catch (e) {}
   }
 }
 
@@ -856,20 +871,22 @@ autoBtn.addEventListener("click", async () => {
     if (autoBtn.disabled) return;
     autoBtn.disabled = true;
 
-    if (autoInterval) {
+    if (autoRunning) {
       // turning auto off
-      clearInterval(autoInterval);
-      autoInterval = null;
+      stopAutoLoop();
       autoBtn.textContent = "Auto (10s)";
       autoBtn.classList.add("secondary");
       autoBtn.disabled = false;
       return;
     }
 
-    // turning auto on: fetch initial window then start polling
+    // turning auto on: fetch initial window then start sequential loop
     try {
       await fetchWindowData();
-      autoInterval = setInterval(fetchAndAppendLatest, 10000);
+      // Keep spinner active while Auto is running and hide connLabel text
+      try { connDot.classList.add('fetching'); } catch (e) {}
+      try { autoDetectedPrimes = 0; setConnStatus('Fetching new primes', '0 primes'); } catch (e) {}
+      startAutoLoop();
       autoBtn.textContent = "Auto: On";
       autoBtn.classList.remove("secondary");
     } finally {
@@ -906,6 +923,7 @@ if (document.readyState === 'loading') {
 // Incremental polling: fetch latest prime and append if new
 async function fetchAndAppendLatest() {
   try {
+    try { connDot.classList.remove('red'); connDot.classList.add('fetching'); } catch (e) {}
     const url = rpcUrlInput.value.trim();
     const latestHex = await rpcCall(url, 'quai_blockNumber', []);
     const latestPrimeBlock = parseInt(latestHex, 16);
@@ -924,7 +942,8 @@ async function fetchAndAppendLatest() {
     for (let n = lastPrimeNum + 1; n <= latestPrimeBlock; n++) newPrimes.push(n);
     if (!newPrimes.length) return;
 
-    setConnStatus('Fetching new primes', `${newPrimes.length} primes`);
+    // Show current cumulative count (will be incremented per-successful-prime below)
+    try { setConnStatus('Fetching new primes', `${autoDetectedPrimes} primes`); } catch (e) {}
 
     const batch = [];
     for (const n of newPrimes) {
@@ -965,6 +984,15 @@ async function fetchAndAppendLatest() {
       const kQuai = header && header.exchangeRate ? header.exchangeRate : null;
 
       currentSeries.push({ primeNum: n, header, dInstant, dStar, deltaK, ratio, convInfo: null, kQuai });
+      try {
+        // Count only primes with complete basic info (miner, best, header)
+        // and with parsed difficulty values (dInstant, dStar) since the
+        // window rendering relies on those.
+        if (minerRaw && bestRaw && headerRaw && dInstant !== null && dStar !== null) {
+          autoDetectedPrimes += 1;
+          setConnStatus('Fetching new primes', `${autoDetectedPrimes} primes`);
+        }
+      } catch (e) {}
     }
 
     // Trim to window size
@@ -978,6 +1006,42 @@ async function fetchAndAppendLatest() {
   } catch (err) {
     try { console.error('fetchAndAppendLatest failed', err); } catch (e) {}
   }
+  finally {
+    try {
+      // If Auto is running, keep spinner active persistently; only remove when Auto stopped
+      if (!autoRunning) connDot.classList.remove('fetching');
+    } catch (e) {}
+  }
+}
+
+// Sequential auto loop: waits for each fetch to finish before scheduling next
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function startAutoLoop() {
+  if (autoRunning) return;
+  autoRunning = true;
+  // Ensure spinner stays active while auto loop runs
+  try { connDot.classList.add('fetching'); } catch (e) {}
+  (async () => {
+    while (autoRunning) {
+      try {
+        await fetchAndAppendLatest();
+      } catch (e) {
+        try { console.error('auto loop fetch error', e); } catch (ee) {}
+      }
+      // wait fixed interval after each completed fetch
+      for (let waited = 0; waited < 10000 && autoRunning; waited += 500) {
+        await sleep(500);
+      }
+    }
+  })();
+}
+
+function stopAutoLoop() {
+  autoRunning = false;
+  // When stopping auto, remove persistent spinner and restore green dot
+  try { connDot.classList.remove('fetching'); connDot.style.background = '#22c55e'; } catch (e) {}
+  try { setConnStatus('Prime RPC connected', ''); } catch (e) {}
 }
 
 // ========== Conversion Calculator ==========
@@ -1117,3 +1181,37 @@ calculateBtn.addEventListener('click', async () => {
 });
 
  
+// Donation pill: copy address to clipboard when clicked
+if (donationPill) {
+  donationPill.addEventListener('click', async (ev) => {
+    ev.preventDefault();
+    const addr = donationAddress || (donationPill.querySelector('.donate-address') && donationPill.querySelector('.donate-address').textContent.trim());
+    if (!addr) return;
+    try {
+      if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+        await navigator.clipboard.writeText(addr);
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = addr;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+      const labelEl = donationPill.querySelector('.donate-label');
+      const orig = labelEl ? labelEl.textContent : null;
+      if (labelEl) labelEl.textContent = 'Copied';
+      donationPill.classList.add('copied');
+      setTimeout(() => {
+        if (labelEl && orig) labelEl.textContent = orig;
+        donationPill.classList.remove('copied');
+      }, 1800);
+    } catch (e) {
+      try { console.error('copy donation address failed', e); } catch (ee) {}
+    }
+  });
+}
+
+

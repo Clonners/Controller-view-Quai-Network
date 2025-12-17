@@ -427,6 +427,18 @@ button:disabled {
   animation: none;
 }
 
+/* Fetching state for pill-dot: show a small green spinner */
+.pill-dot.fetching {
+  width: 14px;
+  height: 14px;
+  background: transparent !important;
+  border: 2px solid rgba(255,255,255,0.08);
+  border-top-color: var(--success);
+  border-radius: 50%;
+  box-sizing: border-box;
+  animation: spin 0.9s linear infinite;
+}
+
 .legend {
   position: relative;
   z-index: 1;
