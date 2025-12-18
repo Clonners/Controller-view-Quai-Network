@@ -360,8 +360,8 @@ async function fetchConversionAndKQuai() {
       if (metricKQuaiDirection && kq.direction) {
         try {
           const dir = String(kq.direction);
-          if (dir === 'QuaiToQi') metricKQuaiDirection.textContent = 'direction: Qi → Quai';
-          else if (dir === 'QiToQuai') metricKQuaiDirection.textContent = 'direction: Quai → Qi';
+          if (dir === 'QuaiToQi') metricKQuaiDirection.textContent = 'direction: Quai → Qi';
+          else if (dir === 'QiToQuai') metricKQuaiDirection.textContent = 'direction: Qi → Quai';
           else metricKQuaiDirection.textContent = 'direction: ' + dir;
         } catch (e) {
           metricKQuaiDirection.textContent = 'direction: ' + kq.direction;
