@@ -151,6 +151,7 @@ async function updateUIFromSeries(series, chunkSizePrime, url) {
 window.addEventListener('error', (ev) => {
   try {
     try { connDot.classList.remove('fetching'); } catch (e) {}
+    const msg = ev.error?.message || ev.message || String(ev.error || ev);
     console.error('Unhandled error:', ev.error || ev);
     if (connLabel) connLabel.textContent = 'JS error';
     if (statusText) statusText.textContent = 'Runtime error: ' + msg;
@@ -186,10 +187,81 @@ function hexToBigInt(hex) {
 const DECIMAL_PREC = 40;
 Decimal.set({ precision: DECIMAL_PREC, rounding: Decimal.ROUND_HALF_UP });
 function toDecimalFromBigInt(bi) { return new Decimal(bi.toString()); }
-// Compute ratio and deltaK using integer arithmetic mirroring node behavior.
-// Uses floor integer divisions to match node truncation. Returns Decimal values.
+
+// LogBig implementation matching go-quai common.LogBig
+// Returns log2(x) * 2^64 as BigInt (fixed-point representation)
+const MANT_BITS = 64n;
+const SCALE_2E64 = 1n << 64n;
+function logBigInt(x) {
+  if (x <= 0n) return 0n;
+  // Find c = floor(log2(x)) by counting bits
+  let c = 0n;
+  let temp = x;
+  while (temp > 1n) {
+    temp = temp >> 1n;
+    c++;
+  }
+  // Calculate mantissa: we want the fractional part of log2(x)
+  // m = (x * 2^64) / (2^c) - 2^64, but we need high precision
+  // Actually mathutil.BinaryLog returns (c, m) where result = c * 2^64 + m
+  // m represents the fractional bits scaled by 2^64
+  // m = floor((x - 2^c) * 2^64 / 2^c)
+  const twoPowC = 1n << c;
+  const remainder = x - twoPowC;
+  const m = (remainder * SCALE_2E64) / twoPowC;
+  // result = c * 2^64 + m
+  return c * SCALE_2E64 + m;
+}
+
+// Compute ratio and deltaK using the EXACT formula from go-quai CalculateKQuai
+// This matches consensus/misc/rewards.go CalculateKQuai function
 const ONE_OVER_ALPHA_BI = 1000n; // matches node OneOverAlpha (1000)
 const SCALE_BI = 1n << 64n; // 2^64 scaling to mirror node fixed-point behavior
+
+// New function that uses raw minerDifficulty (not normalized) like the node does
+function computeExactDeltaK(bestDiffNormHex, minerDiffHex) {
+  try {
+    const xbStar = hexToBigInt(bestDiffNormHex); // bestDiff * 2^64 / log(bestDiff) - already normalized
+    const minerDiff = hexToBigInt(minerDiffHex); // raw miner difficulty from header
+    
+    if (!xbStar || !minerDiff || minerDiff <= 0n) {
+      return { ratio: new Decimal(1), deltaK: new Decimal(0), kQuaiIncrease: false };
+    }
+    
+    // Node formula from CalculateKQuai:
+    // d1 = 2^64 * minerDifficulty
+    // d2 = LogBig(minerDifficulty)
+    // num = xbStar * d2 - d1
+    // deltaK direction = (num > 0)
+    
+    const d1 = SCALE_BI * minerDiff;
+    const d2 = logBigInt(minerDiff);
+    
+    // num = xbStar * d2 - d1
+    const xbStarTimesD2 = xbStar * d2;
+    const num = xbStarTimesD2 - d1;
+    
+    const kQuaiIncrease = num > 0n;
+    
+    // For display: deltaK/k = num / (d1 * OneOverAlpha)
+    // denum = d1 * OneOverAlpha
+    const denum = d1 * ONE_OVER_ALPHA_BI;
+    
+    // deltaK as Decimal (can be negative)
+    const deltaKDec = new Decimal(num.toString()).div(new Decimal(denum.toString()));
+    
+    // ratio = xbStar / minerDiffNormalized where minerDiffNormalized = d1/d2
+    // ratio = xbStar * d2 / d1
+    const ratioDec = new Decimal(xbStarTimesD2.toString()).div(new Decimal(d1.toString()));
+    
+    return { ratio: ratioDec, deltaK: deltaKDec, kQuaiIncrease };
+  } catch (e) {
+    console.error('computeExactDeltaK error:', e);
+    return { ratio: new Decimal(1), deltaK: new Decimal(0), kQuaiIncrease: false };
+  }
+}
+
+// Legacy function kept for compatibility - uses normalized values (approximate)
 function computeRatioAndDeltaKFromNormHex(bestHex, minerHex) {
   try {
     const best = hexToBigInt(bestHex);
@@ -415,51 +487,46 @@ const callCubicPreview = debounce(async () => {
       return;
     }
     try { console.debug('quai_cubicConversionDiscount result', res); } catch (e) {}
+    
+    // Compute percent discount (discountQuai / inputQuaiValue * 100)
+    let pctDisplay = null;
+    try {
+      if (res.inputQuaiValue && res.discountQuai) {
+        const inBI = hexToBigInt(res.inputQuaiValue);
+        const discBI = hexToBigInt(res.discountQuai);
+        if (inBI > 0n) {
+          pctDisplay = new Decimal(discBI.toString()).mul(100).div(new Decimal(inBI.toString())).toFixed(4) + ' %';
+        }
+      }
+    } catch (e) { /* noop */ }
+    cubicDiscount.textContent = pctDisplay || '–';
+
     if (isQi) {
-      try {
-        if (res.valueAfterCubic) {
-          const afterQi = await rpcCall(url, 'quai_quaiToQi', [res.valueAfterCubic, 'latest']);
-          if (afterQi) {
-            // afterQi is returned in qits (integer); format as Qi with decimals
-            cubicResult.textContent = formatQitsToQi(afterQi);
-          } else {
-            cubicResult.textContent = formatBig(res.valueAfterCubic);
-          }
-        }
-        // compute percent discount (discountQuai / inputQuaiValue * 100)
-        let pctDisplay = null;
-        try {
-          if (res.inputQuaiValue && res.discountQuai) {
-            const inBI = hexToBigInt(res.inputQuaiValue);
-            const discBI = hexToBigInt(res.discountQuai);
-            if (inBI > 0n) {
-              pctDisplay = new Decimal(discBI.toString()).mul(100).div(new Decimal(inBI.toString())).toFixed(4) + ' %';
-            }
-          }
-        } catch (e) { /* noop */ }
-        // show only percentage if available
-        if (pctDisplay) {
-          cubicDiscount.textContent = pctDisplay;
-        } else {
-          cubicDiscount.textContent = '–';
-        }
-      } catch (e) {
-        console.error('convert-to-qi failed', e, { res });
-        if (res.valueAfterCubic) cubicResult.textContent = formatBig(res.valueAfterCubic);
-        if (res.discountQuai) cubicDiscount.textContent = formatBig(res.discountQuai);
+      // Qi → Quai conversion: valueAfterCubic is already in Quai (wei)
+      // Show the result directly as Quai
+      if (res.valueAfterCubic) {
+        cubicResult.textContent = formatBig(res.valueAfterCubic) + ' Quai';
+      } else {
+        cubicResult.textContent = '–';
       }
     } else {
-      if (res.valueAfterCubic) cubicResult.textContent = formatBig(res.valueAfterCubic);
-      // compute percent discount if possible
-      try {
-        let pctDisplay = null;
-        if (res.inputQuaiValue && res.discountQuai) {
-          const inBI = hexToBigInt(res.inputQuaiValue);
-          const discBI = hexToBigInt(res.discountQuai);
-          if (inBI > 0n) pctDisplay = new Decimal(discBI.toString()).mul(100).div(new Decimal(inBI.toString())).toFixed(4) + ' %';
+      // Quai → Qi conversion: valueAfterCubic is in Quai (wei) after discount
+      // Convert to Qi to show what user would receive
+      if (res.valueAfterCubic) {
+        try {
+          const afterQi = await rpcCall(url, 'quai_quaiToQi', [res.valueAfterCubic, 'latest']);
+          if (afterQi) {
+            cubicResult.textContent = formatQitsToQi(afterQi);
+          } else {
+            cubicResult.textContent = formatBig(res.valueAfterCubic) + ' Quai';
+          }
+        } catch (e) {
+          console.error('quai_quaiToQi failed', e);
+          cubicResult.textContent = formatBig(res.valueAfterCubic) + ' Quai';
         }
-        if (pctDisplay) cubicDiscount.textContent = pctDisplay; else cubicDiscount.textContent = '–';
-      } catch (e) { cubicDiscount.textContent = formatBig(res.discountQuai); }
+      } else {
+        cubicResult.textContent = '–';
+      }
     }
   } catch (e) {
     console.error('cubic rpc failed', e, { amount: val, isQi });
@@ -713,7 +780,17 @@ async function fetchWindowData() {
         }
       } catch (e) { dStar = null; }
 
-      if (minerRaw && bestRaw) {
+      // Attach header and kQuai if available
+      const header = headerRaw || null;
+      const kQuai = header && header.exchangeRate ? header.exchangeRate : null;
+
+      // Use EXACT formula from go-quai CalculateKQuai with raw minerDifficulty
+      if (bestRaw && header && header.minerDifficulty) {
+        const r = computeExactDeltaK(bestRaw, header.minerDifficulty);
+        ratio = r.ratio;
+        deltaK = r.deltaK;
+      } else if (minerRaw && bestRaw) {
+        // Fallback to approximate formula if header.minerDifficulty not available
         const r = computeRatioAndDeltaKFromNormHex(bestRaw, minerRaw);
         ratio = r.ratio;
         deltaK = r.deltaK;
@@ -721,10 +798,6 @@ async function fetchWindowData() {
         ratio = new Decimal(1);
         deltaK = new Decimal(0);
       }
-
-      // Attach header and kQuai if available
-      const header = headerRaw || null;
-      const kQuai = header && header.exchangeRate ? header.exchangeRate : null;
 
       series.push({
         primeNum,
@@ -974,8 +1047,17 @@ async function fetchAndAppendLatest() {
       try { if (minerRaw) { const mBig = hexToBigInt(minerRaw); if (mBig && mBig > 0n) dInstant = toDecimalFromBigInt(mBig); } } catch (e) { dInstant = null; }
       try { if (bestRaw) { const bBig = hexToBigInt(bestRaw); if (bBig && bBig > 0n) dStar = toDecimalFromBigInt(bBig); } } catch (e) { dStar = null; }
 
+      const header = headerRaw || null;
+      const kQuai = header && header.exchangeRate ? header.exchangeRate : null;
+
+      // Use EXACT formula from go-quai CalculateKQuai with raw minerDifficulty
       let ratio, deltaK;
-      if (minerRaw && bestRaw) {
+      if (bestRaw && header && header.minerDifficulty) {
+        const r = computeExactDeltaK(bestRaw, header.minerDifficulty);
+        ratio = r.ratio;
+        deltaK = r.deltaK;
+      } else if (minerRaw && bestRaw) {
+        // Fallback to approximate formula if header.minerDifficulty not available
         const r = computeRatioAndDeltaKFromNormHex(bestRaw, minerRaw);
         ratio = r.ratio;
         deltaK = r.deltaK;
@@ -983,9 +1065,6 @@ async function fetchAndAppendLatest() {
         ratio = new Decimal(1);
         deltaK = new Decimal(0);
       }
-
-      const header = headerRaw || null;
-      const kQuai = header && header.exchangeRate ? header.exchangeRate : null;
 
       currentSeries.push({ primeNum: n, header, dInstant, dStar, deltaK, ratio, convInfo: null, kQuai });
       try {
