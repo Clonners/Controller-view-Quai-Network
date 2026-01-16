@@ -54,6 +54,7 @@ export const Config = {
     storage: {
         serverIp: 'quai_dashboard_serverIp',
         serverPort: 'quai_dashboard_serverPort',
+        serverHost: 'quai_dashboard_serverHost',
         chartHistory: 'quai_dashboard_chartHistory',
         addressHistory: 'quai_dashboard_addressHistory',
         theme: 'quai_dashboard_theme'

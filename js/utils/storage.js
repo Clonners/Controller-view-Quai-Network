@@ -17,11 +17,42 @@ export function saveServerConfig(ip, port) {
 }
 
 /**
+ * Save combined server host/url to localStorage (preferred)
+ * @param {string} hostValue - domain or full url (e.g. dpool.bitquai.live or https://host:3336)
+ */
+export function saveServerHost(hostValue) {
+    try {
+        // Normalize: if user saved default host including default port, strip the port
+        if (hostValue) {
+            try {
+                let hv = hostValue.trim();
+                // If provided as URL, extract hostname:port
+                if (hv.startsWith('http://') || hv.startsWith('https://')) {
+                    const p = new URL(hv);
+                    hv = p.hostname + (p.port ? (':' + p.port) : '');
+                }
+                const defaultHost = Config.defaults.serverIp || '';
+                const defaultPort = String(Config.defaults.serverPort || '');
+                if (defaultHost && hv.startsWith(defaultHost + ':') && hv.endsWith(':' + defaultPort)) {
+                    hv = defaultHost; // strip default port for default host
+                }
+                localStorage.setItem(Config.storage.serverHost, hv);
+            } catch (e) {
+                localStorage.setItem(Config.storage.serverHost, hostValue || '');
+            }
+        } else {
+            localStorage.setItem(Config.storage.serverHost, '');
+        }
+    } catch (e) {}
+}
+
+/**
  * Load server configuration from localStorage
  * @returns {Object} Server configuration { ip, port }
  */
 export function loadServerConfig() {
     return {
+        host: localStorage.getItem(Config.storage.serverHost) || '',
         ip: localStorage.getItem(Config.storage.serverIp) || '',
         port: localStorage.getItem(Config.storage.serverPort) || ''
     };
@@ -33,6 +64,7 @@ export function loadServerConfig() {
 export function clearServerConfig() {
     localStorage.removeItem(Config.storage.serverIp);
     localStorage.removeItem(Config.storage.serverPort);
+    localStorage.removeItem(Config.storage.serverHost);
 }
 
 /**

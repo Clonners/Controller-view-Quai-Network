@@ -6,7 +6,7 @@
 import { AppState, setUpdateInterval, clearUpdateInterval } from './state.js';
 import { Config } from './config.js';
 import { formatHashrate, formatNumber, formatUptime, hashStats } from './utils/formatters.js';
-import { initHistory, recordHistory, saveServerConfig, loadServerConfig, clearServerConfig } from './utils/storage.js';
+import { initHistory, recordHistory, saveServerConfig, saveServerHost, loadServerConfig, clearServerConfig } from './utils/storage.js';
 import { 
     initNotifications, showSuccess, showError, showWarning, showInfo,
     showLoading, hideLoading, showTableSkeleton 
@@ -58,33 +58,75 @@ try {
  * Connect to server
  */
 async function connectToServer() {
-    const ip = document.getElementById('serverIp').value.trim();
-    const port = document.getElementById('serverPort').value.trim();
+    const hostInputEl = document.getElementById('serverHost');
     const connectBtn = document.querySelector('.btn-connect');
     if (connectBtn) connectBtn.disabled = true;
-    
-    if (!ip || !port) {
-        showWarning('Enter IP and port');
-        updateStatus('Enter IP and port', 'disconnected');
+
+    // Prevent concurrent connection attempts
+    if (AppState.connection.isConnected || AppState.connection.isConnecting) {
+        hideLoading();
+        showInfo(AppState.connection.isConnected ? 'Already connected' : 'Connection in progress');
+        if (connectBtn) connectBtn.disabled = false;
         return;
     }
-    
-    let host = ip;
-    let protocol = window.location.protocol === 'https:' ? 'https' : 'http';
-    let portNum = parseInt(port);
-    
-    // Allow protocol in the IP field
-    if (ip.startsWith('http://') || ip.startsWith('https://')) {
-        try {
-            const parsed = new URL(ip);
-            protocol = parsed.protocol.replace(':', '');
-            host = parsed.hostname;
-            if (!port && parsed.port) {
-                portNum = parseInt(parsed.port);
-            }
-        } catch (e) {
-            // Fall back to raw input
+
+    AppState.connection.isConnecting = true;
+
+    let ip = '';
+    let port = '';
+    let inputProtocol = null;
+
+    if (hostInputEl) {
+        const val = hostInputEl.value.trim();
+        if (!val) {
+            showWarning('Enter server host or URL');
+            updateStatus('Enter server host', 'disconnected');
+            return;
         }
+        if (val.startsWith('http://') || val.startsWith('https://')) {
+            try {
+                const parsed = new URL(val);
+                inputProtocol = parsed.protocol.replace(':', '');
+                ip = parsed.hostname;
+                port = parsed.port || '';
+            } catch (e) {
+                ip = val;
+            }
+        } else if (val.includes(':')) {
+            // host:port
+            const idx = val.lastIndexOf(':');
+            ip = val.slice(0, idx);
+            port = val.slice(idx + 1);
+        } else {
+            ip = val;
+        }
+    } else {
+        const ipEl = document.getElementById('serverIp');
+        const portEl = document.getElementById('serverPort');
+        const rawIp = ipEl ? ipEl.value.trim() : '';
+        const rawPort = portEl ? portEl.value.trim() : '';
+        if (!rawIp || !rawPort) {
+            showWarning('Enter IP and port');
+            updateStatus('Enter IP and port', 'disconnected');
+            return;
+        }
+        ip = rawIp;
+        port = rawPort;
+    }
+
+    let host = ip;
+    let protocol = inputProtocol || (window.location.protocol === 'https:' ? 'https' : 'http');
+    let portNum;
+    if (inputProtocol) {
+        // If user provided a full URL with scheme but no port, use standard ports
+        if (port) {
+            portNum = parseInt(port);
+        } else {
+            portNum = protocol === 'https' ? 443 : 80;
+        }
+    } else {
+        // If no explicit port provided, default to standard port for the chosen protocol
+        portNum = parseInt(port) || (protocol === 'https' ? 443 : 80);
     }
     
     if (!isValidIP(host)) {
@@ -99,8 +141,10 @@ async function connectToServer() {
         return;
     }
     
-    // Construct API URL
-    const newApiBase = `${protocol}://${host}:${portNum}`;
+    // Construct API URL — omit port when it's the default for the protocol
+    const defaultPort = protocol === 'https' ? 443 : 80;
+    const includePort = portNum && portNum !== defaultPort;
+    const newApiBase = includePort ? `${protocol}://${host}:${portNum}` : `${protocol}://${host}`;
 
     // Helper: compare host and port of two URLs (ignore protocol differences)
     function sameHostPort(a, b) {
@@ -141,18 +185,27 @@ async function connectToServer() {
     showLoading('Connecting to server...');
     
     try {
+        console.info('Attempting connection to', host, 'protocol=', protocol, 'port=', portNum);
         try {
             await testConnection(AppState.connection.apiBaseUrl);
         } catch (firstError) {
             // Retry with the other protocol if initial attempt fails
             const fallbackProtocol = protocol === 'https' ? 'http' : 'https';
-            const fallbackUrl = `${fallbackProtocol}://${host}:${portNum}`;
+            // If the user explicitly provided a port, keep using it for the fallback.
+            // Otherwise, switch to the default port for the fallback protocol and omit the explicit port.
+            let fallbackUrl;
+            if (port) {
+                fallbackUrl = `${fallbackProtocol}://${host}:${port}`;
+            } else {
+                fallbackUrl = `${fallbackProtocol}://${host}`;
+            }
             await testConnection(fallbackUrl);
             AppState.connection.apiBaseUrl = fallbackUrl;
         }
         
         hideLoading();
         AppState.connection.isConnected = true;
+        AppState.connection.isConnecting = false;
         AppState.connection.failureCount = 0;
         updateStatus('Connected', 'connected');
         showSuccess('Connected to mining pool');
@@ -160,8 +213,17 @@ async function connectToServer() {
         document.getElementById('mainContent').classList.add('active');
         document.getElementById('loadingState').style.display = 'none';
         
-        // Save to localStorage
-        saveServerConfig(ip, port);
+        // Save to localStorage (prefer combined host string)
+        try {
+            const hostInputEl = document.getElementById('serverHost');
+            if (hostInputEl && hostInputEl.value.trim()) {
+                saveServerHost(hostInputEl.value.trim());
+            } else {
+                saveServerConfig(ip, port);
+            }
+        } catch (e) {
+            try { saveServerConfig(ip, port); } catch (e) {}
+        }
         
         // Show loading states for tables
         showTableSkeleton('workersBody', Config.ui.skeletonRows, 4);
@@ -182,6 +244,7 @@ async function connectToServer() {
     } catch (error) {
         hideLoading();
         AppState.connection.isConnected = false;
+        AppState.connection.isConnecting = false;
         const errorMsg = error.name === 'AbortError' 
             ? 'Timeout - server not responding (5s)' 
             : error.message;
@@ -200,6 +263,11 @@ async function connectToServer() {
         
         console.error('Connection error:', error);
         if (connectBtn) connectBtn.disabled = false;
+    }
+
+    // ensure flag cleaned if function exits unexpectedly
+    finally {
+        AppState.connection.isConnecting = false;
     }
 }
 
@@ -229,15 +297,23 @@ function updateStatus(text, status) {
  */
 function clearConfig() {
     clearUpdateInterval();
-    closeWebSocket();
+    try { closeWebSocket(); } catch (e) { /* ignore if not open */ }
     AppState.connection.isConnected = false;
     AppState.connection.failureCount = 0;
-    
-    document.getElementById('serverIp').value = '';
-    document.getElementById('serverPort').value = '';
+    // Clean websocket references
+    try { AppState.connection.wsConnection = null; } catch (e) {}
+    try { AppState.connection.wsReconnectTimeout && clearTimeout(AppState.connection.wsReconnectTimeout); AppState.connection.wsReconnectTimeout = null; } catch (e) {}
+    // Reset input fields if present. Some builds use a single `serverHost` input.
+    const hostEl = document.getElementById('serverHost');
+    if (hostEl) hostEl.value = '';
+    const ipEl = document.getElementById('serverIp');
+    const portEl = document.getElementById('serverPort');
+    if (ipEl) ipEl.value = '';
+    if (portEl) portEl.value = '';
     document.getElementById('mainContent').classList.remove('active');
     document.getElementById('loadingState').style.display = 'block';
-    document.getElementById('loadingState').textContent = 'Waiting for connection...';
+    const loadingState = document.getElementById('loadingState');
+    if (loadingState) loadingState.textContent = 'Waiting for connection...';
     updateStatus('Disconnected', 'disconnected');
     
     clearServerConfig();
@@ -268,6 +344,10 @@ function clearConfig() {
     if (mb) mb.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #999;">Waiting for connection...</td></tr>';
     const bb = document.getElementById('blocksTableBody');
     if (bb) bb.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #999;">Waiting for connection...</td></tr>';
+
+    // Ensure connect button is enabled after clearing
+    const connectBtn = document.querySelector('.btn-connect');
+    if (connectBtn) connectBtn.disabled = false;
 }
 
 // =====================
@@ -500,11 +580,51 @@ function init() {
     
     // Load saved configuration
     const config = loadServerConfig();
-    if (config.ip) {
-        document.getElementById('serverIp').value = config.ip;
-    }
-    if (config.port) {
-        document.getElementById('serverPort').value = config.port;
+    const hostEl = document.getElementById('serverHost');
+    if (hostEl) {
+        if (config.host) {
+            // If stored host equals default host plus default port, show without port
+            try {
+                let hv = config.host;
+                if (hv.startsWith('http://') || hv.startsWith('https://')) {
+                    const p = new URL(hv);
+                    hv = p.hostname + (p.port ? (':' + p.port) : '');
+                }
+                const defaultHost = Config.defaults.serverIp || '';
+                const defaultPort = String(Config.defaults.serverPort || '');
+                if (defaultHost && hv.startsWith(defaultHost + ':') && hv.endsWith(':' + defaultPort)) {
+                    hostEl.value = defaultHost;
+                } else {
+                    hostEl.value = config.host;
+                }
+            } catch (e) {
+                hostEl.value = config.host;
+            }
+        } else if (config.ip && config.port) {
+            hostEl.value = config.ip + (config.port ? ':' + config.port : '');
+        } else if (config.ip) {
+            hostEl.value = config.ip;
+        }
+    } else {
+        if (config.host) {
+            // attempt to split host into ip/port for legacy fields
+            try {
+                const parsed = new URL(config.host.startsWith('http') ? config.host : ('http://' + config.host));
+                const ipEl = document.getElementById('serverIp');
+                const portEl = document.getElementById('serverPort');
+                if (ipEl) ipEl.value = parsed.hostname;
+                if (portEl) portEl.value = parsed.port || '';
+            } catch (e) {}
+        } else {
+            if (config.ip) {
+                const ipEl = document.getElementById('serverIp');
+                if (ipEl) ipEl.value = config.ip;
+            }
+            if (config.port) {
+                const portEl = document.getElementById('serverPort');
+                if (portEl) portEl.value = config.port;
+            }
+        }
     }
     
     // Initialize modal event listeners

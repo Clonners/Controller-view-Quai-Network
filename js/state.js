@@ -8,6 +8,7 @@ export const AppState = {
     // Connection
     connection: {
         isConnected: false,
+        isConnecting: false,
         apiBaseUrl: '',
         wsConnection: null,
         wsReconnectTimeout: null,
