@@ -69,7 +69,7 @@ export const Config = {
     
     // Default values
     defaults: {
-        serverIp: 'localhost',
+        serverIp: 'dpool.bitquai.live',
         serverPort: '3336',
         chartPeriod: '1h'
     }
