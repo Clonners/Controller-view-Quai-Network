@@ -657,8 +657,17 @@ function init() {
         }
     });
     
-    // Auto-connect if saved config exists
-    if (config.ip && config.port) {
+    // Auto-connect if saved config exists or host field contains a value
+    let shouldAutoConnect = false;
+    if (hostEl) {
+        const hv = (hostEl.value || '').trim();
+        if (hv) shouldAutoConnect = true;
+    } else {
+        if (config.host) shouldAutoConnect = true;
+        else if (config.ip && config.port) shouldAutoConnect = true;
+    }
+
+    if (shouldAutoConnect) {
         showInfo('Auto-connecting to saved server...');
         setTimeout(connectToServer, 500);
     }
