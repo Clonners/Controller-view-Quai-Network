@@ -181,27 +181,55 @@ async function connectToServer() {
 
     AppState.connection.apiBaseUrl = newApiBase;
 
+    // Decide whether proxy is required by probing a direct /health
+    async function probeDirectHealth(base) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        try {
+            const url = base.replace(/\/$/, '') + '/health';
+            const res = await fetch(url, { method: 'GET', signal: controller.signal });
+            clearTimeout(timeoutId);
+            return res.ok;
+        } catch (err) {
+            clearTimeout(timeoutId);
+            // Mixed content (https page -> http target) will fail here; treat as not directly reachable
+            return false;
+        }
+    }
+
+    // Default to direct; set to true if probe fails
+    AppState.connection.useProxy = false;
+
+    // Probe the initially constructed base; if it fails, try protocol fallback before enabling proxy
+    let directReachable = false;
+    try {
+        directReachable = await probeDirectHealth(AppState.connection.apiBaseUrl);
+    } catch (e) { directReachable = false; }
+
     updateStatus('Connecting...', 'loading');
     showLoading('Connecting to server...');
     
     try {
-        console.info('Attempting connection to', host, 'protocol=', protocol, 'port=', portNum);
-        try {
-            await testConnection(AppState.connection.apiBaseUrl);
-        } catch (firstError) {
-            // Retry with the other protocol if initial attempt fails
+        console.info('Attempting connection to', host, 'protocol=', protocol, 'port=', portNum, 'directReachable=', directReachable);
+
+        if (!directReachable) {
+            // Try the protocol fallback (http <-> https) to see if direct is available there
             const fallbackProtocol = protocol === 'https' ? 'http' : 'https';
-            // If the user explicitly provided a port, keep using it for the fallback.
-            // Otherwise, switch to the default port for the fallback protocol and omit the explicit port.
-            let fallbackUrl;
-            if (port) {
-                fallbackUrl = `${fallbackProtocol}://${host}:${port}`;
-            } else {
-                fallbackUrl = `${fallbackProtocol}://${host}`;
-            }
-            await testConnection(fallbackUrl);
-            AppState.connection.apiBaseUrl = fallbackUrl;
+            let fallbackUrl = port ? `${fallbackProtocol}://${host}:${port}` : `${fallbackProtocol}://${host}`;
+            try {
+                const fbReachable = await probeDirectHealth(fallbackUrl);
+                if (fbReachable) {
+                    AppState.connection.apiBaseUrl = fallbackUrl;
+                    directReachable = true;
+                }
+            } catch (e) { /* ignore */ }
         }
+
+        // If still not reachable directly, enable proxy mode (proxy must be configured in `Config.proxy`)
+        AppState.connection.useProxy = !directReachable;
+
+        // Use the higher-level testConnection which will use proxy fallback if needed
+        await testConnection(AppState.connection.apiBaseUrl);
         
         hideLoading();
         AppState.connection.isConnected = true;
@@ -666,6 +694,14 @@ function init() {
         if (config.host) shouldAutoConnect = true;
         else if (config.ip && config.port) shouldAutoConnect = true;
     }
+
+    // Respect previously saved proxy preference if present; otherwise keep current detection/default
+    try {
+        const stored = localStorage.getItem(Config.storage.useProxy);
+        if (stored === 'true' || stored === 'false') {
+            AppState.connection.useProxy = stored === 'true';
+        }
+    } catch (e) { /* ignore */ }
 
     if (shouldAutoConnect) {
         showInfo('Auto-connecting to saved server...');

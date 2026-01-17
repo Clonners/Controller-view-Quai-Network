@@ -329,6 +329,10 @@
         return new Promise(function(resolve, reject){
           var s = document.createElement('script');
           s.src = src;
+          // Load the app entry as an ES module so module files with `export`/`import` parse correctly
+          if (/main\.js$/.test(src)) {
+            s.type = 'module';
+          }
           s.async = false;
           s.onload = function(){ setStatus('Loaded: ' + src); resolve(); };
           s.onerror = function(err){ setStatus('Failed to load: ' + src, true); reject(new Error('Failed to load ' + src)); };

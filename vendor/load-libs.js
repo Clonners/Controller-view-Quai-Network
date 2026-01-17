@@ -10,6 +10,10 @@
     return new Promise(function (resolve, reject) {
       const s = document.createElement('script');
       s.src = src;
+      // If we're injecting the app entry (main.js), load it as an ES module
+      if (/main\.js$/.test(src)) {
+        s.type = 'module';
+      }
       s.async = false;
       s.onload = () => resolve(src);
       s.onerror = (e) => reject(new Error('Failed to load ' + src));

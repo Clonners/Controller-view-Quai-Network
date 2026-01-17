@@ -55,6 +55,7 @@ export const Config = {
         serverIp: 'quai_dashboard_serverIp',
         serverPort: 'quai_dashboard_serverPort',
         serverHost: 'quai_dashboard_serverHost',
+        useProxy: 'quai_dashboard_useProxy',
         chartHistory: 'quai_dashboard_chartHistory',
         addressHistory: 'quai_dashboard_addressHistory',
         theme: 'quai_dashboard_theme'
@@ -74,6 +75,16 @@ export const Config = {
         serverPort: '3336',
         chartPeriod: '1h'
     }
+};
+
+// Proxy configuration (optional)
+// Default configured to use the existing node proxy at /api/proxy?ip=...&port=...&path=...
+Config.proxy = {
+    base: 'https://proxy.bitquai.live',
+    // endpoint can be either '/getdata?target=' (single-arg) or '/api/proxy' (ip/port/path)
+    endpoint: '/api/proxy',
+    // wsEndpoint left null unless your proxy supports websocket upgrades via query target
+    wsEndpoint: null
 };
 
 /**

@@ -9,6 +9,8 @@ export const AppState = {
     connection: {
         isConnected: false,
         isConnecting: false,
+        // Default to false and detect when proxy is required at connect time
+        useProxy: false,
         apiBaseUrl: '',
         wsConnection: null,
         wsReconnectTimeout: null,

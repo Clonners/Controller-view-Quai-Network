@@ -6,6 +6,60 @@
 import { AppState } from '../state.js';
 import { Config } from '../config.js';
 
+// Helper: build fetch URL, using proxy if configured
+function buildFetchUrl(path, baseOverride = null, forceProxy = false) {
+    const base = baseOverride || AppState.connection.apiBaseUrl || '';
+    const target = base + path;
+
+    if ((AppState.connection.useProxy && Config.proxy && Config.proxy.base && Config.proxy.endpoint) || forceProxy) {
+        const proxyBase = Config.proxy.base.replace(/\/$/, '');
+        const endpoint = Config.proxy.endpoint;
+
+        // If endpoint contains a 'target=' param, use single-argument encoding
+        if (endpoint.includes('target=')) {
+            // allow endpoint to include the param prefix like '/getdata?target='
+            return `${proxyBase}${endpoint}${encodeURIComponent(target)}`;
+        }
+
+        // Otherwise assume the proxy expects ip/port/path as query params (legacy /api/proxy)
+        try {
+            const u = new URL(target);
+            const hostname = u.hostname;
+            const port = u.port || (u.protocol === 'https:' ? '443' : '80');
+            const pathname = u.pathname + (u.search || '');
+
+            // Ensure endpoint doesn't double '?'
+            const sep = endpoint.includes('?') ? '&' : '?';
+            return `${proxyBase}${endpoint}${sep}ip=${encodeURIComponent(hostname)}&port=${encodeURIComponent(port)}&path=${encodeURIComponent(pathname)}`;
+        } catch (e) {
+            // Fallback: send encoded full target to endpoint
+            return `${proxyBase}${endpoint}${encodeURIComponent(target)}`;
+        }
+    }
+
+    return target;
+}
+
+// Try fetch directly to the target first; on network/CORS failure, fall back to proxy URL
+async function fetchWithProxyFallback(path, options = {}, baseOverride = null) {
+    const base = baseOverride || AppState.connection.apiBaseUrl || '';
+    const target = base + path;
+
+    try {
+        const res = await fetch(target, options);
+        return res;
+    } catch (err) {
+        // Network or CORS error — try proxy
+        try {
+            const proxyUrl = buildFetchUrl(path, baseOverride, true);
+            const res2 = await fetch(proxyUrl, options);
+            return res2;
+        } catch (err2) {
+            throw err2;
+        }
+    }
+}
+
 /**
  * Validate IP address or domain
  * @param {string} str - IP or domain string
@@ -41,13 +95,9 @@ export async function testConnection(baseUrl = null) {
     const timeoutId = setTimeout(() => controller.abort(), Config.timeouts.api);
     
     try {
-        const url = baseUrl || AppState.connection.apiBaseUrl;
-        const response = await fetch(`${url}/health`, {
-            method: 'GET',
-            headers: { 'Accept': 'application/json' },
-            signal: controller.signal
-        });
-        
+        const base = baseUrl || AppState.connection.apiBaseUrl;
+        const response = await fetchWithProxyFallback('/health', { method: 'GET', headers: { 'Accept': 'application/json' }, signal: controller.signal }, base);
+
         clearTimeout(timeoutId);
         return response.ok;
     } catch (error) {
@@ -75,15 +125,13 @@ export async function fetchPoolStats(forceRefresh = false) {
     const timeoutId = setTimeout(() => controller.abort(), Config.timeouts.api);
     
     try {
-        const response = await fetch(`${AppState.connection.apiBaseUrl}/api/pool/stats`, {
-            signal: controller.signal
-        });
+        const response = await fetchWithProxyFallback('/api/pool/stats', { signal: controller.signal });
         clearTimeout(timeoutId);
-        
+
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
         }
-        
+
         const stats = await response.json();
         AppState.cache.poolStats = stats;
         AppState.cache.lastStatsFetch = now;
@@ -113,15 +161,13 @@ export async function fetchWorkers(forceRefresh = false) {
     const timeoutId = setTimeout(() => controller.abort(), Config.timeouts.api);
     
     try {
-        const response = await fetch(`${AppState.connection.apiBaseUrl}/api/pool/workers`, {
-            signal: controller.signal
-        });
+        const response = await fetchWithProxyFallback('/api/pool/workers', { signal: controller.signal });
         clearTimeout(timeoutId);
-        
+
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
         }
-        
+
         const workers = await response.json();
         AppState.cache.workers = workers || [];
         AppState.cache.lastWorkersFetch = now;
@@ -141,15 +187,13 @@ export async function fetchPoolBlocks() {
     const timeoutId = setTimeout(() => controller.abort(), Config.timeouts.api);
     
     try {
-        const response = await fetch(`${AppState.connection.apiBaseUrl}/api/blocks`, {
-            signal: controller.signal
-        });
+        const response = await fetchWithProxyFallback('/api/blocks', { signal: controller.signal });
         clearTimeout(timeoutId);
-        
+
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
         }
-        
+
         return await response.json();
     } catch (error) {
         clearTimeout(timeoutId);
@@ -176,13 +220,11 @@ export async function fetchShareHistory(forceRefresh = false) {
     const timeoutId = setTimeout(() => controller.abort(), Config.timeouts.api);
     
     try {
-        const response = await fetch(`${AppState.connection.apiBaseUrl}/api/pool/shares`, {
-            signal: controller.signal
-        });
+        const response = await fetchWithProxyFallback('/api/pool/shares', { signal: controller.signal });
         clearTimeout(timeoutId);
-        
+
         if (!response.ok) return AppState.cache.shareStats || null;
-        
+
         const data = await response.json();
         AppState.cache.shareStats = data;
         AppState.cache.lastSharesFetch = now;
@@ -213,13 +255,11 @@ export async function fetchMinerStats(address) {
     
     try {
         const encodedAddress = encodeURIComponent(address);
-        const response = await fetch(`${AppState.connection.apiBaseUrl}/api/miner/${encodedAddress}/stats`, {
-            signal: controller.signal
-        });
+        const response = await fetchWithProxyFallback(`/api/miner/${encodedAddress}/stats`, { signal: controller.signal });
         clearTimeout(timeoutId);
-        
+
         if (!response.ok) return null;
-        
+
         const data = await response.json();
         
         // Cache the result
@@ -281,15 +321,13 @@ export async function fetchPoolBlocksEndpoint() {
     const timeoutId = setTimeout(() => controller.abort(), Config.timeouts.api);
     
     try {
-        const response = await fetch(`${AppState.connection.apiBaseUrl}/api/pool/blocks`, {
-            signal: controller.signal
-        });
+        const response = await fetchWithProxyFallback('/api/pool/blocks', { signal: controller.signal });
         clearTimeout(timeoutId);
-        
+
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
         }
-        
+
         return await response.json();
     } catch (error) {
         clearTimeout(timeoutId);
@@ -309,15 +347,13 @@ export async function fetchMinerWorkers(address) {
     
     try {
         const encodedAddress = encodeURIComponent(address);
-        const response = await fetch(`${AppState.connection.apiBaseUrl}/api/miner/${encodedAddress}/workers`, {
-            signal: controller.signal
-        });
+        const response = await fetchWithProxyFallback(`/api/miner/${encodedAddress}/workers`, { signal: controller.signal });
         clearTimeout(timeoutId);
-        
+
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
         }
-        
+
         return await response.json();
     } catch (error) {
         clearTimeout(timeoutId);
@@ -339,11 +375,9 @@ export async function fetchAllMiners() {
     const timeoutId = setTimeout(() => controller.abort(), Config.timeouts.api);
     
     try {
-        const response = await fetch(`${AppState.connection.apiBaseUrl}/api/miners`, {
-            signal: controller.signal
-        });
+        const response = await fetchWithProxyFallback('/api/miners', { signal: controller.signal });
         clearTimeout(timeoutId);
-        
+
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
         }
