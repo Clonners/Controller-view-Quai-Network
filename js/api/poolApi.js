@@ -41,7 +41,7 @@ function buildFetchUrl(path, baseOverride = null, forceProxy = false) {
 }
 
 // Try fetch directly to the target first; on network/CORS failure, fall back to proxy URL
-async function fetchWithProxyFallback(path, options = {}, baseOverride = null) {
+export async function fetchWithProxyFallback(path, options = {}, baseOverride = null) {
     const base = baseOverride || AppState.connection.apiBaseUrl || '';
     const target = base + path;
 

@@ -5,6 +5,7 @@
 
 import { AppState, Constants } from '../state.js';
 import { testWebSocket } from './websocket.js';
+import { fetchWithProxyFallback } from '../api/poolApi.js';
 
 // Store last diagnostic results for download
 let lastDiagnosticResults = null;
@@ -61,10 +62,10 @@ export async function openApiDiagnostic() {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 5000);
             
-            const response = await fetch(`${baseUrl}${endpoint.path}`, {
+            const response = await fetchWithProxyFallback(endpoint.path, {
                 signal: controller.signal,
                 method: 'GET'
-            });
+            }, baseUrl);
             clearTimeout(timeoutId);
             
             let responseData = null;
