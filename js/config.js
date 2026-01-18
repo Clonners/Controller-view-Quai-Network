@@ -83,8 +83,10 @@ Config.proxy = {
     base: 'https://proxy.bitquai.live',
     // endpoint can be either '/getdata?target=' (single-arg) or '/api/proxy' (ip/port/path)
     endpoint: '/api/proxy',
-    // wsEndpoint left null unless your proxy supports websocket upgrades via query target
-    wsEndpoint: null
+    // wsEndpoint should point to the proxy path that accepts websocket upgrades
+    // and a `target=` query parameter (e.g. '/?target='). Default uses root
+    // which matches the bundled `node-proxy.js` upgrade handler.
+    wsEndpoint: '/?target='
 };
 
 /**
