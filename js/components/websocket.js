@@ -29,7 +29,11 @@ export function initWebSocket() {
     if (!AppState.connection.apiBaseUrl) return;
     closeWebSocket();
 
-    const backendWsUrl = AppState.connection.apiBaseUrl.replace(/^https?:/, 'ws:') + '/api/ws';
+    // For direct connections we want `ws` for http and `wss` for https.
+    const backendWsUrlDirect = AppState.connection.apiBaseUrl.replace(/^http/, 'ws') + '/api/ws';
+    // For proxy targets we always send a plain `ws:` target so the proxy connects
+    // to the upstream using non-TLS if configured to do so.
+    const backendWsUrlProxy = AppState.connection.apiBaseUrl.replace(/^https?:/, 'ws:') + '/api/ws';
     let triedProxy = false;
     // build proxy URL if configured. If wsEndpoint is not set but proxy base exists,
     // assume default '/?target=' which is supported by `proxy-deploy/node-proxy.js`.
@@ -37,7 +41,8 @@ export function initWebSocket() {
     if (Config.proxy && Config.proxy.base) {
         const proxyWsBase = Config.proxy.base.replace(/^https?:/, AppState.connection.apiBaseUrl.startsWith('https') ? 'wss:' : 'ws:');
         const endpoint = (Config.proxy.wsEndpoint || '/?target=');
-        proxyUrl = `${proxyWsBase}${endpoint}${encodeURIComponent(backendWsUrl)}`;
+        // encode the proxy-target using the proxy-specific backend URL (non-TLS scheme)
+        proxyUrl = `${proxyWsBase}${endpoint}${encodeURIComponent(backendWsUrlProxy)}`;
     }
 
     function openWs(url, isProxy = false) {
@@ -52,21 +57,8 @@ export function initWebSocket() {
 
             ws.onmessage = (ev) => {
                 try {
-                    if (typeof ev.data === 'string') {
-                        const data = JSON.parse(ev.data);
-                        handleWSMessage(data);
-                    } else if (ev.data instanceof Blob) {
-                        ev.data.text().then(txt => {
-                            try { handleWSMessage(JSON.parse(txt)); } catch (e) { console.warn('WS parse error', e); }
-                        }).catch(err => console.warn('WS blob read error', err));
-                    } else if (ev.data instanceof ArrayBuffer) {
-                        try {
-                            const txt = new TextDecoder().decode(ev.data);
-                            handleWSMessage(JSON.parse(txt));
-                        } catch (e) { console.warn('WS parse error', e); }
-                    } else {
-                        console.warn('WS: unknown message type', typeof ev.data);
-                    }
+                    const data = JSON.parse(ev.data);
+                    handleWSMessage(data);
                 } catch (e) {
                     console.warn('WS parse error', e);
                 }
@@ -111,8 +103,8 @@ export function initWebSocket() {
         triedProxy = true;
         openWs(proxyUrl, true);
     } else {
-        // otherwise try direct and let async handlers fallback to proxy if needed
-        openWs(backendWsUrl, false);
+        // otherwise try direct (use the direct URL which will be wss: when appropriate)
+        openWs(backendWsUrlDirect, false);
     }
 }
 
@@ -157,7 +149,7 @@ export function showBlockNotification(block) {
 export async function testWebSocket() {
     return new Promise((resolve) => {
         try {
-            const backendWsUrl = AppState.connection.apiBaseUrl.replace(/^https?:/, 'ws:') + '/api/ws';
+            const backendWsUrl = AppState.connection.apiBaseUrl.replace(/^http/, 'ws') + '/api/ws';
             let wsUrl = backendWsUrl;
             if (AppState.connection.useProxy && Config.proxy && Config.proxy.base && Config.proxy.wsEndpoint) {
                 const proxyWsBase = Config.proxy.base.replace(/^https?:/, AppState.connection.apiBaseUrl.startsWith('https') ? 'wss:' : 'ws:');
