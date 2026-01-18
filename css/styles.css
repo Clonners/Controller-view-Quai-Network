@@ -1175,6 +1175,62 @@ font-size: 0.8rem;
 padding: 20px;
 }
 
+/* Tablet-specific adjustments (iPad sizes, landscape and portrait) */
+@media (min-width: 600px) and (max-width: 1024px) {
+    /* Keep chart and controls stacked vertically, center-aligned */
+    .chart-container {
+        padding: 14px;
+        min-height: auto;
+        max-height: none;
+    }
+
+    .chart-canvas-wrapper {
+        max-width: 420px; /* allow larger donut on tablet but bounded */
+        margin: 0 auto;
+    }
+
+    .chart-canvas-wrapper canvas {
+        max-width: 360px;
+        width: 90%;
+        height: auto !important;
+        aspect-ratio: 1 / 1; /* ensure a round donut that scales */
+        max-height: none;
+    }
+
+    /* Place controls below the canvas in normal flow to avoid overlay */
+    .chart-controls {
+        position: static !important;
+        left: auto !important;
+        transform: none !important;
+        bottom: auto !important;
+        margin-top: 14px;
+        justify-content: center;
+    }
+
+    /* Use a two-row legend/control layout to prevent label crowding */
+    .chart-legend {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    .chart-controls .toggle-btn {
+        padding: 8px 10px;
+        font-size: 0.88rem;
+    }
+}
+
+/* Smaller tablets / large phones: stack legend and controls vertically */
+@media (min-width: 420px) and (max-width: 700px) {
+    .chart-legend {
+        flex-direction: column;
+        gap: 8px;
+        align-items: center;
+    }
+    .chart-controls { gap: 8px; }
+}
+
 /* Estilos adicionales para visibilidad */
 .charts-section > div:first-child:not(.charts-grid) {
     display: flex !important;
