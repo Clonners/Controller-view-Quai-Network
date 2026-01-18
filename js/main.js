@@ -202,9 +202,21 @@ async function connectToServer() {
 
     // Probe the initially constructed base; if it fails, try protocol fallback before enabling proxy
     let directReachable = false;
-    try {
-        directReachable = await probeDirectHealth(AppState.connection.apiBaseUrl);
-    } catch (e) { directReachable = false; }
+    // If the page is HTTPS and the user did not provide an explicit scheme
+    // but is connecting to a non-standard port (likely not TLS), avoid
+    // probing the direct HTTPS endpoint which will cause browser SSL errors.
+    const likelyNonTlsPort = portNum && portNum !== 443;
+    const shouldSkipDirectProbe = !inputProtocol && window.location.protocol === 'https:' && likelyNonTlsPort;
+
+    if (shouldSkipDirectProbe) {
+        directReachable = false;
+        AppState.connection.useProxy = true; // prefer proxy without probing
+        console.info('Skipping direct HTTPS probe (likely non-TLS port); using proxy');
+    } else {
+        try {
+            directReachable = await probeDirectHealth(AppState.connection.apiBaseUrl);
+        } catch (e) { directReachable = false; }
+    }
 
     updateStatus('Connecting...', 'loading');
     showLoading('Connecting to server...');
