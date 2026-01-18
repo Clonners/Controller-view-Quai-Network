@@ -149,11 +149,12 @@ export function showBlockNotification(block) {
 export async function testWebSocket() {
     return new Promise((resolve) => {
         try {
-            const backendWsUrl = AppState.connection.apiBaseUrl.replace(/^http/, 'ws') + '/api/ws';
-            let wsUrl = backendWsUrl;
+            const backendWsUrlDirect = AppState.connection.apiBaseUrl.replace(/^http/, 'ws') + '/api/ws';
+            const backendWsUrlProxy = AppState.connection.apiBaseUrl.replace(/^https?:/, 'ws:') + '/api/ws';
+            let wsUrl = backendWsUrlDirect;
             if (AppState.connection.useProxy && Config.proxy && Config.proxy.base && Config.proxy.wsEndpoint) {
                 const proxyWsBase = Config.proxy.base.replace(/^https?:/, AppState.connection.apiBaseUrl.startsWith('https') ? 'wss:' : 'ws:');
-                wsUrl = `${proxyWsBase}${Config.proxy.wsEndpoint}${encodeURIComponent(backendWsUrl)}`;
+                wsUrl = `${proxyWsBase}${Config.proxy.wsEndpoint}${encodeURIComponent(backendWsUrlProxy)}`;
             }
 
             const ws = new WebSocket(wsUrl);

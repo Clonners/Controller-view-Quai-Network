@@ -421,12 +421,15 @@ export async function captureWebSocketSample() {
         return;
     }
 
-    // Build backend WS URL and, if configured or required, route via proxy
-    const backendWsUrl = baseUrl.replace(/^http/, 'ws') + '/api/ws';
-    let wsUrl = backendWsUrl;
+    // Build backend WS URLs:
+    // - direct: mirror http->ws (https -> wss)
+    // - proxyBackend: force non-TLS ws: scheme so proxy connects to upstream without TLS
+    const backendWsUrlDirect = baseUrl.replace(/^http/, 'ws') + '/api/ws';
+    const backendWsUrlProxy = baseUrl.replace(/^https?:/, 'ws:') + '/api/ws';
+    let wsUrl = backendWsUrlDirect;
     if (AppState.connection.useProxy && Config.proxy && Config.proxy.base && Config.proxy.wsEndpoint) {
         const proxyWsBase = Config.proxy.base.replace(/^https?:/, baseUrl.startsWith('https') ? 'wss:' : 'ws:');
-        wsUrl = `${proxyWsBase}${Config.proxy.wsEndpoint}${encodeURIComponent(backendWsUrl)}`;
+        wsUrl = `${proxyWsBase}${Config.proxy.wsEndpoint}${encodeURIComponent(backendWsUrlProxy)}`;
     }
 
     const result = await new Promise((resolve) => {
