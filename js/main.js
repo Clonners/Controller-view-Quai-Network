@@ -340,10 +340,18 @@ function updateStatus(text, status) {
  * Clear configuration and disconnect
  */
 function clearConfig() {
-    clearUpdateInterval();
-    try { closeWebSocket(); } catch (e) { /* ignore if not open */ }
-    AppState.connection.isConnected = false;
-    AppState.connection.failureCount = 0;
+    try {
+        clearUpdateInterval();
+    } catch (e) {
+        console.warn('clearConfig: clearUpdateInterval error', e);
+    }
+    try {
+        if (typeof closeWebSocket === 'function') closeWebSocket();
+    } catch (e) { console.warn('clearConfig: closeWebSocket error', e); }
+    try {
+        AppState.connection.isConnected = false;
+        AppState.connection.failureCount = 0;
+    } catch (e) { console.warn('clearConfig: AppState mutation error', e); }
     // Clean websocket references
     try { AppState.connection.wsConnection = null; } catch (e) {}
     try { AppState.connection.wsReconnectTimeout && clearTimeout(AppState.connection.wsReconnectTimeout); AppState.connection.wsReconnectTimeout = null; } catch (e) {}
@@ -354,13 +362,18 @@ function clearConfig() {
     const portEl = document.getElementById('serverPort');
     if (ipEl) ipEl.value = '';
     if (portEl) portEl.value = '';
-    document.getElementById('mainContent').classList.remove('active');
-    document.getElementById('loadingState').style.display = 'block';
-    const loadingState = document.getElementById('loadingState');
-    if (loadingState) loadingState.textContent = 'Waiting for connection...';
-    updateStatus('Disconnected', 'disconnected');
+    try {
+        const mainContentEl = document.getElementById('mainContent');
+        if (mainContentEl && mainContentEl.classList) mainContentEl.classList.remove('active');
+        const loadingStateEl = document.getElementById('loadingState');
+        if (loadingStateEl) {
+            loadingStateEl.style.display = 'block';
+            loadingStateEl.textContent = 'Waiting for connection...';
+        }
+        updateStatus('Disconnected', 'disconnected');
+    } catch (e) { console.warn('clearConfig: DOM update error', e); }
     
-    clearServerConfig();
+    try { clearServerConfig(); } catch (e) { console.warn('clearConfig: clearServerConfig error', e); }
     
     AppState.connection.apiBaseUrl = '';
     // Clear cached data and hashes so a subsequent connect performs fresh fetches
@@ -389,9 +402,11 @@ function clearConfig() {
     const bb = document.getElementById('blocksTableBody');
     if (bb) bb.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #999;">Waiting for connection...</td></tr>';
 
-    // Ensure connect button is enabled after clearing
-    const connectBtn = document.querySelector('.btn-connect');
-    if (connectBtn) connectBtn.disabled = false;
+    try {
+        // Ensure connect button is enabled after clearing
+        const connectBtn = document.querySelector('.btn-connect');
+        if (connectBtn) connectBtn.disabled = false;
+    } catch (e) { console.warn('clearConfig: connect button update error', e); }
 }
 
 // =====================

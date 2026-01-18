@@ -444,14 +444,23 @@ export async function captureWebSocketSample() {
                 });
             }, 5000);
 
-            ws.onmessage = (event) => {
+            ws.onmessage = async (event) => {
                 clearTimeout(timeout);
                 ws.close();
                 let payload = null;
                 try {
-                    payload = JSON.parse(event.data);
-                } catch {
-                    payload = { _raw: event.data };
+                    let raw = event.data;
+                    let text = null;
+                    if (raw instanceof Blob) {
+                        text = await raw.text();
+                    } else if (raw instanceof ArrayBuffer) {
+                        text = new TextDecoder().decode(raw);
+                    } else {
+                        text = raw;
+                    }
+                    payload = (typeof text === 'string' && text.length) ? JSON.parse(text) : text;
+                } catch (err) {
+                    payload = { _raw: event.data, _error: String(err) };
                 }
                 resolve({
                     ok: true,

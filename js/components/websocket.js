@@ -11,7 +11,15 @@ let wsReconnectTimeout = null;
 export function closeWebSocket() {
     try {
         if (AppState.connection.wsConnection) {
-            try { AppState.connection.wsConnection.close(); } catch (e) {}
+            try {
+                const ws = AppState.connection.wsConnection;
+                // remove handlers to avoid noisy errors firing during teardown
+                try { ws.onopen = null; } catch (e) {}
+                try { ws.onmessage = null; } catch (e) {}
+                try { ws.onerror = null; } catch (e) {}
+                try { ws.onclose = null; } catch (e) {}
+                try { ws.close(); } catch (e) {}
+            } catch (e) {}
             AppState.connection.wsConnection = null;
         }
         if (wsReconnectTimeout) {
@@ -55,9 +63,18 @@ export function initWebSocket() {
                 updateWSIndicator(true);
             };
 
-            ws.onmessage = (ev) => {
+            ws.onmessage = async (ev) => {
                 try {
-                    const data = JSON.parse(ev.data);
+                    let raw = ev.data;
+                    let text = null;
+                    if (raw instanceof Blob) {
+                        text = await raw.text();
+                    } else if (raw instanceof ArrayBuffer) {
+                        text = new TextDecoder().decode(raw);
+                    } else {
+                        text = raw;
+                    }
+                    const data = typeof text === 'string' && text.length ? JSON.parse(text) : text;
                     handleWSMessage(data);
                 } catch (e) {
                     console.warn('WS parse error', e);
