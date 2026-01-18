@@ -6,6 +6,7 @@
 import { AppState, Constants } from '../state.js';
 import { testWebSocket } from './websocket.js';
 import { fetchWithProxyFallback } from '../api/poolApi.js';
+import { Config } from '../config.js';
 
 // Store last diagnostic results for download
 let lastDiagnosticResults = null;
@@ -420,9 +421,13 @@ export async function captureWebSocketSample() {
         return;
     }
 
-    const wsProtocol = baseUrl.startsWith('https') ? 'wss' : 'ws';
-    const wsHost = baseUrl.replace(/^https?:\/\//, '');
-    const wsUrl = `${wsProtocol}://${wsHost}/api/ws`;
+    // Build backend WS URL and, if configured or required, route via proxy
+    const backendWsUrl = baseUrl.replace(/^http/, 'ws') + '/api/ws';
+    let wsUrl = backendWsUrl;
+    if (AppState.connection.useProxy && Config.proxy && Config.proxy.base && Config.proxy.wsEndpoint) {
+        const proxyWsBase = Config.proxy.base.replace(/^https?:/, baseUrl.startsWith('https') ? 'wss:' : 'ws:');
+        wsUrl = `${proxyWsBase}${Config.proxy.wsEndpoint}${encodeURIComponent(backendWsUrl)}`;
+    }
 
     const result = await new Promise((resolve) => {
         try {
