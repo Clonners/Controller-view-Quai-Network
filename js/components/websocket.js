@@ -52,8 +52,21 @@ export function initWebSocket() {
 
             ws.onmessage = (ev) => {
                 try {
-                    const data = JSON.parse(ev.data);
-                    handleWSMessage(data);
+                    if (typeof ev.data === 'string') {
+                        const data = JSON.parse(ev.data);
+                        handleWSMessage(data);
+                    } else if (ev.data instanceof Blob) {
+                        ev.data.text().then(txt => {
+                            try { handleWSMessage(JSON.parse(txt)); } catch (e) { console.warn('WS parse error', e); }
+                        }).catch(err => console.warn('WS blob read error', err));
+                    } else if (ev.data instanceof ArrayBuffer) {
+                        try {
+                            const txt = new TextDecoder().decode(ev.data);
+                            handleWSMessage(JSON.parse(txt));
+                        } catch (e) { console.warn('WS parse error', e); }
+                    } else {
+                        console.warn('WS: unknown message type', typeof ev.data);
+                    }
                 } catch (e) {
                     console.warn('WS parse error', e);
                 }
