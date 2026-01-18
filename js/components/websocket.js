@@ -29,7 +29,7 @@ export function initWebSocket() {
     if (!AppState.connection.apiBaseUrl) return;
     closeWebSocket();
 
-    const backendWsUrl = AppState.connection.apiBaseUrl.replace(/^http/, 'ws') + '/api/ws';
+    const backendWsUrl = AppState.connection.apiBaseUrl.replace(/^https?:/, 'ws:') + '/api/ws';
     let triedProxy = false;
     // build proxy URL if configured. If wsEndpoint is not set but proxy base exists,
     // assume default '/?target=' which is supported by `proxy-deploy/node-proxy.js`.
@@ -144,7 +144,7 @@ export function showBlockNotification(block) {
 export async function testWebSocket() {
     return new Promise((resolve) => {
         try {
-            const backendWsUrl = AppState.connection.apiBaseUrl.replace(/^http/, 'ws') + '/api/ws';
+            const backendWsUrl = AppState.connection.apiBaseUrl.replace(/^https?:/, 'ws:') + '/api/ws';
             let wsUrl = backendWsUrl;
             if (AppState.connection.useProxy && Config.proxy && Config.proxy.base && Config.proxy.wsEndpoint) {
                 const proxyWsBase = Config.proxy.base.replace(/^https?:/, AppState.connection.apiBaseUrl.startsWith('https') ? 'wss:' : 'ws:');

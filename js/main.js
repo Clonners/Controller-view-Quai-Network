@@ -215,14 +215,18 @@ async function connectToServer() {
         if (!directReachable) {
             // Try the protocol fallback (http <-> https) to see if direct is available there
             const fallbackProtocol = protocol === 'https' ? 'http' : 'https';
-            let fallbackUrl = port ? `${fallbackProtocol}://${host}:${port}` : `${fallbackProtocol}://${host}`;
-            try {
-                const fbReachable = await probeDirectHealth(fallbackUrl);
-                if (fbReachable) {
-                    AppState.connection.apiBaseUrl = fallbackUrl;
-                    directReachable = true;
-                }
-            } catch (e) { /* ignore */ }
+            // Avoid attempting an insecure HTTP probe from a secure HTTPS page
+            // (browsers will block mixed-content requests and spam console errors).
+            if (!(window.location.protocol === 'https:' && fallbackProtocol === 'http')) {
+                let fallbackUrl = port ? `${fallbackProtocol}://${host}:${port}` : `${fallbackProtocol}://${host}`;
+                try {
+                    const fbReachable = await probeDirectHealth(fallbackUrl);
+                    if (fbReachable) {
+                        AppState.connection.apiBaseUrl = fallbackUrl;
+                        directReachable = true;
+                    }
+                } catch (e) { /* ignore */ }
+            }
         }
 
         // If still not reachable directly, enable proxy mode (proxy must be configured in `Config.proxy`)
