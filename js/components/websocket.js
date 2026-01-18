@@ -31,6 +31,14 @@ export function initWebSocket() {
 
     const backendWsUrl = AppState.connection.apiBaseUrl.replace(/^http/, 'ws') + '/api/ws';
     let triedProxy = false;
+    // build proxy URL if configured. If wsEndpoint is not set but proxy base exists,
+    // assume default '/?target=' which is supported by `proxy-deploy/node-proxy.js`.
+    let proxyUrl = null;
+    if (Config.proxy && Config.proxy.base) {
+        const proxyWsBase = Config.proxy.base.replace(/^https?:/, AppState.connection.apiBaseUrl.startsWith('https') ? 'wss:' : 'ws:');
+        const endpoint = (Config.proxy.wsEndpoint || '/?target=');
+        proxyUrl = `${proxyWsBase}${endpoint}${encodeURIComponent(backendWsUrl)}`;
+    }
 
     function openWs(url, isProxy = false) {
         try {
@@ -54,10 +62,23 @@ export function initWebSocket() {
             ws.onerror = (err) => {
                 console.warn('WebSocket error', err);
                 updateWSIndicator(false);
+                // If direct attempt failed asynchronously, try proxy fallback
+                if (!isProxy && !triedProxy && proxyUrl) {
+                    triedProxy = true;
+                    try { ws.close(); } catch (e) {}
+                    openWs(proxyUrl, true);
+                }
             };
 
             ws.onclose = () => {
                 updateWSIndicator(false);
+                // If closed and we haven't tried proxy yet, try proxy fallback
+                if (!isProxy && !triedProxy && proxyUrl) {
+                    triedProxy = true;
+                    try { ws.close(); } catch (e) {}
+                    openWs(proxyUrl, true);
+                    return;
+                }
                 if (AppState.connection.isConnected) {
                     wsReconnectTimeout = setTimeout(initWebSocket, Config.timeouts.reconnect);
                 }
@@ -65,17 +86,21 @@ export function initWebSocket() {
         } catch (e) {
             console.warn('Failed to open WebSocket:', e);
             // attempt proxy if available and not yet tried
-            if (!triedProxy && Config.proxy && Config.proxy.base && Config.proxy.wsEndpoint) {
+            if (!triedProxy && proxyUrl) {
                 triedProxy = true;
-                const proxyWsBase = Config.proxy.base.replace(/^https?:/, AppState.connection.apiBaseUrl.startsWith('https') ? 'wss:' : 'ws:');
-                const proxyUrl = `${proxyWsBase}${Config.proxy.wsEndpoint}${encodeURIComponent(backendWsUrl)}`;
                 openWs(proxyUrl, true);
             }
         }
     }
 
-    // Primary attempt: direct
-    openWs(backendWsUrl, false);
+    // Primary attempt: if connection flagged to use proxy, try proxy first
+    if (AppState.connection.useProxy && proxyUrl) {
+        triedProxy = true;
+        openWs(proxyUrl, true);
+    } else {
+        // otherwise try direct and let async handlers fallback to proxy if needed
+        openWs(backendWsUrl, false);
+    }
 }
 
 function handleWSMessage(data) {
