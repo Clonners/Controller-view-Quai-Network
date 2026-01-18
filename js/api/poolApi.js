@@ -45,11 +45,21 @@ async function fetchWithProxyFallback(path, options = {}, baseOverride = null) {
     const base = baseOverride || AppState.connection.apiBaseUrl || '';
     const target = base + path;
 
+    // If the app is flagged to use proxy (and proxy configured), avoid direct fetch
+    // and call the proxy directly. This prevents simultaneous direct+proxy calls
+    // which can cause errors when direct connections are blocked or mixed-content
+    // scenarios occur.
+    if (AppState.connection.useProxy && Config.proxy && Config.proxy.base && Config.proxy.endpoint) {
+        const proxyUrl = buildFetchUrl(path, baseOverride, true);
+        const res = await fetch(proxyUrl, options);
+        return res;
+    }
+
     try {
         const res = await fetch(target, options);
         return res;
     } catch (err) {
-        // Network or CORS error — try proxy
+        // Network or CORS error — try proxy fallback
         try {
             const proxyUrl = buildFetchUrl(path, baseOverride, true);
             const res2 = await fetch(proxyUrl, options);
