@@ -46,6 +46,8 @@ export const AppState = {
         currentChartPeriod: '1h',
         currentStatsPeriod: '1h',
         currentPerformanceFilter: null,
+        // currentSharesFilter controls which shares category is focused (null = none)
+        currentSharesFilter: null,
         currentBlockAddressFilter: null,
         currentMinerAddress: null,
         charts: {}

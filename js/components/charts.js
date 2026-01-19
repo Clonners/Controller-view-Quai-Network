@@ -287,8 +287,17 @@ function updateSharesChart(stats) {
     sharesData.datasets[0].cutout = '50%'; // smaller cutout => thicker/wider ring
 
     if (AppState.ui.charts.shares) {
-        AppState.ui.charts.shares.data.datasets[0].data = sharesData.datasets[0].data;
-        AppState.ui.charts.shares.update({duration: 600, easing: 'easeOutQuart'});
+        // Respect any active shares filter so periodic updates don't undo the user's focus
+        const chart = AppState.ui.charts.shares;
+        const original = sharesData.datasets[0].data.slice();
+        const filter = AppState.ui.currentSharesFilter;
+        let applied = original;
+        if (filter) {
+            const idx = filter === 'valid' ? 0 : filter === 'stale' ? 1 : 2;
+                applied = original.map((v, i) => (i === idx ? v : 0));
+        }
+        chart.data.datasets[0].data = applied;
+        chart.update({duration: 600, easing: 'easeOutQuart'});
     } else {
         AppState.ui.charts.shares = new Chart(sharesCtx, {
             type: 'doughnut',
@@ -319,32 +328,38 @@ function createSharesControls(stats) {
         { key: 'invalid', label: 'Invalid', valueIndex: 2 }
     ];
 
+    const activeFilter = AppState.ui.currentSharesFilter;
     types.forEach(t => {
         const btn = document.createElement('button');
         btn.className = 'toggle-btn';
         btn.setAttribute('data-type', t.key);
         btn.innerHTML = `<span class="dot"></span><span>${t.label}</span>`;
+
+        // initialize active state from AppState
+        if (activeFilter === t.key) {
+            btn.classList.add('active');
+        }
+
         btn.addEventListener('click', () => {
-            // toggle active
-            const active = btn.classList.contains('active');
+            const wasActive = (AppState.ui.currentSharesFilter === t.key);
+            // toggle filter in AppState (null => no filter)
+            AppState.ui.currentSharesFilter = wasActive ? null : t.key;
+
+            // Update button classes
             document.querySelectorAll('#sharesControls .toggle-btn').forEach(b => b.classList.remove('active'));
-            if (!active) btn.classList.add('active');
+            if (!wasActive) btn.classList.add('active');
 
             const chart = AppState.ui.charts.shares;
             if (!chart) return;
 
             const original = [stats.sharesValid || 0, stats.sharesStale || 0, stats.sharesInvalid || 0];
-
-            let newData;
-            if (active) {
-                // was active -> reset to original
-                newData = original;
-            } else {
-                // focus on selected: animate to only that slice (keep tiny values to show ring)
-                newData = original.map((v, i) => (i === t.valueIndex ? Math.max(v, 1) : 0));
+            let newData = original;
+            const filterNow = AppState.ui.currentSharesFilter;
+            if (filterNow) {
+                const idx = filterNow === 'valid' ? 0 : filterNow === 'stale' ? 1 : 2;
+                    newData = original.map((v, i) => (i === idx ? v : 0));
             }
 
-            // Update chart data and animate
             chart.data.datasets[0].data = newData;
             chart.update({duration: 700, easing: 'easeOutQuart'});
         });

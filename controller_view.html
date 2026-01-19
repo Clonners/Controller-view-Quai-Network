@@ -41,6 +41,45 @@
       .header-actions-btns { order:2; }
       .card-header .left { order:1; }
     }
+    /* Install banner styles (copied from Mining Dashboard) */
+    /* Ensure install banner never shows on wide/desktop layouts */
+    @media (min-width: 900px) {
+      #installBanner { display: none !important; }
+    }
+
+    /* Controller / Mining unified install banner (centered pill) */
+    #installBanner {
+      display: none;
+      position: fixed;
+      bottom: calc(env(safe-area-inset-bottom, 12px) + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10000;
+      background: linear-gradient(180deg, rgba(28,6,8,0.95), rgba(18,6,8,0.92));
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 28px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      max-width: 640px;
+      width: calc(100% - 36px);
+      box-sizing: border-box;
+      backdrop-filter: blur(6px);
+    }
+    #installBanner img { width: 34px; height: 34px; border-radius:6px; flex: 0 0 auto; }
+    #installBanner .install-info { min-width: 0; flex: 1 1 auto; }
+    #installBanner .install-info .title { font-weight:600; font-size:0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    #installBanner .install-info .subtitle { font-size:0.78rem; opacity:0.92; }
+    #installBanner .install-actions { display:flex; gap:8px; align-items:center; flex: 0 0 auto; }
+    @media (max-width: 480px) {
+      #installBanner { width: calc(100% - 24px); max-width: 420px; padding: 8px 10px; border-radius: 14px; }
+      #installBanner { gap: 8px; }
+      #installBanner .install-info { width: calc(100% - 120px); }
+      #installBanner .install-actions { gap:6px; }
+      #installBanner .install-actions button { padding:6px 10px; font-size:0.82rem; }
+    }
   </style>
 </head>
 <body>
@@ -83,6 +122,8 @@
         </button>
       </div>
     </header>
+
+    
 
     <div class="grid">
       <section class="card" id="chart-card">
@@ -318,6 +359,19 @@
   </div>
 
   <!-- Diagnostic loader: prefer CDN, fallback to local vendor, then load controller_main.js -->
+  <!-- Install banner (moved outside .app so fixed positioning works correctly) -->
+  <div id="installBanner">
+    <img src="quai-logo.png" alt="Quai">
+    <div class="install-info">
+      <div class="title">Install Quai Dashboard</div>
+      <div class="subtitle">Add to your home screen</div>
+    </div>
+    <div class="install-actions">
+      <button id="installBtn" style="background:#ff4250;color:#fff;border-radius:18px;border:none;font-weight:600">INSTALL</button>
+      <button id="installDismiss" style="background:transparent;color:#fff;border-radius:18px;border:1px solid rgba(255,255,255,0.08)">CLOSE</button>
+    </div>
+  </div>
+
   <div id="libStatus" style="position:fixed;right:12px;top:12px;background:rgba(0,0,0,0.6);color:#fff;padding:8px 10px;border-radius:8px;z-index:9999;font-size:0.85rem;box-shadow:0 6px 18px rgba(0,0,0,0.6);">Loading libraries...</div>
   <script>
     (function(){
@@ -362,6 +416,45 @@
         }
       }
       ensure().catch(function(err){ console.error('Loader error', err); setStatus('Loader error — check console', true); });
+    })();
+  </script>
+  <script>
+    (function(){
+      let deferredPrompt = null;
+      const banner = document.getElementById('installBanner');
+      const installBtn = document.getElementById('installBtn');
+      const dismissBtn = document.getElementById('installDismiss');
+
+      function isMobileDevice(){
+        return /Mobi|Android|iPhone|iPad|iPod/.test(navigator.userAgent) || window.matchMedia('(max-width: 900px)').matches;
+      }
+
+      function isAppInstalled(){
+        try{
+          if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return true;
+          if (window.navigator && window.navigator.standalone) return true; // iOS
+        }catch(e){}
+        return false;
+      }
+
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        if (!isMobileDevice() || isAppInstalled()) return;
+        deferredPrompt = e;
+        if (banner) banner.style.display = 'flex';
+      });
+
+      if (installBtn) installBtn.addEventListener('click', async function(){
+        if (!deferredPrompt) return;
+        try{ await deferredPrompt.prompt(); const choice = await deferredPrompt.userChoice; deferredPrompt = null; }catch(e){}
+        if (banner) banner.style.display = 'none';
+      });
+
+      if (dismissBtn) dismissBtn.addEventListener('click', function(){ if (banner) banner.style.display = 'none'; });
+
+      window.addEventListener('appinstalled', function(){ if (banner) banner.style.display = 'none'; deferredPrompt = null; });
+
+      document.addEventListener('DOMContentLoaded', function(){ if (!isMobileDevice() || isAppInstalled()){ if (banner) banner.style.display = 'none'; } });
     })();
   </script>
 </body>
