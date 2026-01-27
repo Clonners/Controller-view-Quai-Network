@@ -4,7 +4,7 @@ const alphaCtrl = 0.001; // controller α for kQuai
 const rpcUrlInput   = document.getElementById("rpc-url") || { value: 'http://181.99.245.152:9001' };
 const windowInput   = document.getElementById("window") || { value: '4000' };
 const chunkInput    = document.getElementById("chunk") || { value: '200' };
-const alphaSelect   = document.getElementById("alpha") || { value: '4000' };
+const alphaSelect   = document.getElementById("alpha") || { value: '0.001' };
 const refreshBtn    = document.getElementById("refresh-btn");
 const autoBtn       = document.getElementById("auto-btn");
 const connDot       = document.getElementById("conn-dot");
@@ -697,7 +697,7 @@ async function fetchWindowData() {
   const chunkSizePrime = chunkSizePrimeRaw || 200;
   chunkInput.value = chunkSizePrime;
 
-  const windowDstar = parseInt(alphaSelect.value, 10);
+  const windowDstar = parseFloat(alphaSelect.value);
 
   try { connDot.classList.remove('red'); connDot.classList.add('fetching'); } catch (e) {}
   setConnStatus('Connecting to RPC', 'starting');
