@@ -6,6 +6,8 @@
     <title>Quai Mining Dashboard</title>
     <script src="vendor/chart.min.js"></script>
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/mining.v2.css">
     <link rel="icon" href="quai-logo.ico" type="image/x-icon">
     <!-- Apple touch icons (vector fallback) -->
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.svg">
@@ -72,11 +74,12 @@
             }
         </style>
 </head>
-<body>
+<body class="ui-v2">
     <div class="container">
         <header>
             <h1>⛏️ Quai Mining Dashboard</h1>
             <div class="header-actions">
+                <button class="btn sidebar-toggle" data-action="toggle-sidebar" aria-label="Open configuration">☰ Config</button>
                 <div class="controller-link">
                     <a href="controller_view.html" class="nav-pill">Controller View</a>
                 </div>
@@ -96,28 +99,33 @@
             </div>
         </div>
 
-        <!-- Configuration Panel -->
-        <div class="config-panel">
-            <h2>⚙️ Server Configuration</h2>
-            <div class="config-grid">
-                <div class="input-group">
-                    <label for="serverHost">Server (domain or URL)</label>
-                    <input type="text" id="serverHost" placeholder="e.g: dpool.bitquai.live or https://host:3336" value="dpool.bitquai.live">
+        <div class="layout">
+            <!-- Sidebar (desktop) / Drawer (mobile) -->
+            <aside class="sidebar">
+                <!-- Configuration Panel (same IDs + handlers; moved for responsive layout) -->
+                <div class="config-panel">
+                    <h2>⚙️ Server Configuration</h2>
+                    <div class="config-grid">
+                        <div class="input-group">
+                            <label for="serverHost">Server (domain or URL)</label>
+                            <input type="text" id="serverHost" placeholder="e.g: dpool.bitquai.live or https://host:3336" value="dpool.bitquai.live">
+                        </div>
+                        <div class="button-group">
+                            <button class="btn-connect" onclick="connectToServer()">Connect</button>
+                            <button class="btn-clear" onclick="clearConfig()">Clear</button>
+                            <button class="btn-diagnostic" onclick="openApiDiagnostic()" title="Check available API endpoints">🔧 API</button>
+                            <button class="btn" data-action="close-sidebar">Close</button>
+                        </div>
+                    </div>
+                    <div id="status" class="status disconnected">
+                        <span class="status-dot"></span>
+                        <span id="statusText">Disconnected</span>
+                    </div>
                 </div>
-                <div class="button-group">
-                    <button class="btn-connect" onclick="connectToServer()">Connect</button>
-                    <button class="btn-clear" onclick="clearConfig()">Clear</button>
-                    <button class="btn-diagnostic" onclick="openApiDiagnostic()" title="Check available API endpoints">🔧 API</button>
-                </div>
-            </div>
-            <div id="status" class="status disconnected">
-                <span class="status-dot"></span>
-                <span id="statusText">Disconnected</span>
-            </div>
-        </div>
+            </aside>
 
-        <!-- Content Area -->
-        <div id="mainContent" class="content">
+            <!-- Content Area -->
+            <main id="mainContent" class="content">
 
             <!-- Algorithm Stats (moved below into the central area) -->
 
@@ -407,6 +415,7 @@
                     </div>
                 </div>
             </div>
+        </main>
         </div>
 
         <!-- Block Search Modal -->
@@ -493,6 +502,7 @@
                 document.addEventListener('DOMContentLoaded', function(){ if (!isMobileDevice() || isAppInstalled()){ if (banner) banner.style.display = 'none'; } });
             })();
         </script>
+        <script src="js/ui.js"></script>
         <script type="module" src="js/main.js"></script>
 </body>
 </html>
