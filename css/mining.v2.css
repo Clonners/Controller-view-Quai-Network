@@ -1,0 +1,42 @@
+/* Mining v2: layout + responsive polish (keeps existing look/colors) */
+.ui-v2 header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Put existing config panel into card styling when v2 */
+.ui-v2 .config-panel{ border-radius: var(--r-lg); }
+
+.ui-v2 .sidebar-toggle{
+  display:none;
+}
+
+/* Hide the in-drawer close button on desktop/tablet */
+.ui-v2 .sidebar .btn[data-action="close-sidebar"]{ display:none; }
+
+@media (max-width: 640px){
+  .ui-v2 .sidebar-toggle{ display:inline-flex; }
+  .ui-v2 .sidebar .btn[data-action="close-sidebar"]{ display:inline-flex !important; }
+}
+
+/* Make charts grid flow naturally on tablet (2 cols when possible) */
+.ui-v2 .charts-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+/* Avoid overflow for long values */
+.ui-v2 .prime-value-lg,
+.ui-v2 .prime-value,
+.ui-v2 .algo-stat value{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  min-width:0;
+}
+
+/* Make header actions wrap nicely */
+.ui-v2 .header-actions{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }

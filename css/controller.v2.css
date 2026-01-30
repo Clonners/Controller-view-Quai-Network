@@ -1,0 +1,9 @@
+/* Controller v2: spacing + responsive polish */
+.ui-v2 .app{ max-width: 1200px; padding: 18px; }
+
+@media (max-width: 640px){
+  .ui-v2 header{ position: sticky; top: 0; z-index: 50; backdrop-filter: blur(8px); }
+}
+
+/* Ensure pills wrap + don't overflow */
+.ui-v2 .actions{ flex-wrap: wrap; }

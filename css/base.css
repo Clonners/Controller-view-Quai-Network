@@ -1,0 +1,139 @@
+/* Base theme + shared components (preserves existing palette) */
+:root{
+  --bg:#0b0b10;
+  --panel:#15151e;
+  --panel2:#1b1b26;
+  --text:#ffffff;
+  --muted:rgba(255,255,255,0.70);
+  --muted2:rgba(255,255,255,0.55);
+  --border:rgba(255,255,255,0.10);
+  --shadow:0 10px 30px rgba(0,0,0,0.55);
+
+  /* Keep soul colors (fallbacks; will be overridden by page CSS tokens if present) */
+  --accent:#ff253a;
+  --accent2:#ff4250;
+
+  --r-sm:12px;
+  --r-md:16px;
+  --r-lg:22px;
+
+  --space-1:6px;
+  --space-2:10px;
+  --space-3:16px;
+  --space-4:24px;
+  --space-5:32px;
+}
+
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  line-height:1.35;
+}
+
+/* Nice defaults */
+a{ color:inherit; }
+button,input{ font:inherit; }
+
+:focus-visible{
+  outline:2px solid color-mix(in srgb, var(--accent) 80%, white);
+  outline-offset:2px;
+}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{ animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; scroll-behavior:auto !important; }
+}
+
+/* Shared components */
+.ui-v2 .card{
+  background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+  border:1px solid var(--border);
+  border-radius:var(--r-lg);
+  box-shadow:var(--shadow);
+}
+
+.ui-v2 .pill{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 14px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,0.08);
+  background:rgba(0,0,0,0.25);
+  backdrop-filter: blur(6px);
+}
+
+.ui-v2 .btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:10px 14px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,0.10);
+  background:rgba(255,255,255,0.04);
+  color:var(--text);
+  cursor:pointer;
+  transition: transform 140ms ease, background 140ms ease, border-color 140ms ease;
+}
+.ui-v2 .btn:hover{ transform: translateY(-1px); border-color: rgba(255,255,255,0.16); background: rgba(255,255,255,0.06); }
+.ui-v2 .btn:active{ transform: translateY(0px) scale(0.99); }
+
+.ui-v2 .btn--primary{
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent2) 92%, white), var(--accent));
+  border-color: rgba(0,0,0,0.25);
+}
+.ui-v2 .btn--primary:hover{ background: linear-gradient(180deg, color-mix(in srgb, var(--accent2) 96%, white), var(--accent)); }
+
+/* Layout helpers */
+.ui-v2 .container{
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 18px;
+}
+
+.ui-v2 .layout{
+  display:grid;
+  grid-template-columns: 340px 1fr;
+  gap: 18px;
+  align-items:start;
+}
+
+@media (max-width: 900px){
+  .ui-v2 .layout{ grid-template-columns: 1fr; }
+}
+
+/* Drawer behavior: activate on small screens */
+@media (max-width: 640px){
+  .ui-v2 .layout{ grid-template-columns: 1fr; }
+
+  .ui-v2 .sidebar{
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100dvh;
+    width: min(92vw, 360px);
+    z-index: 20000;
+    transform: translateX(-110%);
+    transition: transform 200ms ease;
+    padding: 14px;
+  }
+
+  .ui-v2 .sidebar .config-panel{ margin:0; }
+
+  .ui-v2.sidebar-open .sidebar{ transform: translateX(0); }
+
+  .ui-v2 .drawer-overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 19999;
+    opacity: 0;
+    pointer-events:none;
+    transition: opacity 180ms ease;
+  }
+  .ui-v2.sidebar-open .drawer-overlay{ opacity: 1; pointer-events:auto; }
+}
