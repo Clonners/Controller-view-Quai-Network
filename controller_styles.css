@@ -953,3 +953,96 @@ footer a:hover { text-decoration: underline; color: #ff7a3c; }
   background: #12070b;
   color: var(--text);
 }
+
+/* --- FORZAR CHEVRON IGUAL QUE MINING --- */
+.chevron-btn {
+  position: fixed !important;
+  left: 10px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 1100 !important;
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
+  cursor: pointer !important;
+  outline: none !important;
+  opacity: 0.85 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: opacity 0.18s !important;
+}
+.chevron-btn:hover, .chevron-btn:focus {
+  opacity: 1 !important;
+}
+.chevron-icon {
+  width: 32px !important;
+  height: 32px !important;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.18) !important;
+  background: none !important;
+  border-radius: 50% !important;
+  transition: none !important;
+  /* No transform ni animación en hover */
+}
+/* Fondo difuminado para el círculo de la flecha (igual que mining/landing) */
+.chevron-bg {
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  /* Neutral background: remove red gradient/halo for controller view */
+  background: rgba(18,3,8,0.85) !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4) !important;
+  z-index: -1 !important;
+  pointer-events: none !important;
+}
+@media (min-width: 601px) {
+  .chevron-bg {
+    width: 44px !important;
+    height: 44px !important;
+    box-shadow: 0 0 16px 4px rgba(255,66,80,0.13) !important;
+  }
+}
+
+/* Protruding chevron tab (YouTube-like) for controller view */
+.chevron-tab {
+  position: fixed !important;
+  left: 6px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 1100 !important;
+  width: 44px !important;
+  height: 56px !important;
+  border-radius: 28px !important;
+  background: rgba(18,3,8,0.45) !important; /* semitransparente */
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  /* Toned-down shadow to avoid strong halo */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.45) !important;
+  cursor: pointer !important;
+  transition: transform 0.18s, opacity 0.18s !important;
+  backdrop-filter: blur(6px) !important;
+  opacity: 0.92 !important;
+}
+.chevron-tab:hover { transform: translateY(-50%) scale(1.03) !important; opacity: 1 !important; }
+.chevron-tab svg { width: 18px !important; height: 18px !important; }
+.chevron-tab .chevron-arrow { stroke: #fff !important; stroke-width: 2.5 !important; stroke-linecap: round !important; stroke-linejoin: round !important; fill: none !important; }
+.drawer.open ~ .chevron-tab { display: none !important; }
+.drawer.open ~ .chevron-btn .chevron-icon {
+  transform: rotate(180deg) !important;
+  transition: transform 0.33s cubic-bezier(.2,.9,.3,1) !important;
+}
+@media (max-width: 600px) {
+  .chevron-btn { left: 6px !important; top: 50% !important; transform: translateY(-50%) !important; }
+  .chevron-icon { width: 28px !important; height: 28px !important; }
+}
+
+/* Forzar ocultamiento de la flecha cuando el drawer está abierto en controller */
+.drawer.open + .chevron-btn {
+  display: none !important;
+}

@@ -1,4 +1,51 @@
-﻿
+﻿/* Fondo difuminado para el círculo de la flecha, igual que landing */
+.chevron-bg {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(18,3,8,0.85) 60%, rgba(255,66,80,0.13) 100%);
+    box-shadow: 0 0 12px 3px rgba(255,66,80,0.13);
+    z-index: -1;
+    pointer-events: none;
+}
+@media (min-width: 601px) {
+    .chevron-bg {
+        width: 44px;
+        height: 44px;
+        box-shadow: 0 0 16px 4px rgba(255,66,80,0.13);
+    }
+}
+
+/* Protruding chevron tab (YouTube-like) - shared across pages */
+.chevron-tab {
+    position: fixed;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1100;
+    width: 44px;
+    height: 56px;
+    border-radius: 28px;
+    background: rgba(18,3,8,0.45); /* semitransparente */
+    border: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 22px rgba(0,0,0,0.55), inset 0 2px 6px rgba(255,255,255,0.02);
+    cursor: pointer;
+    transition: transform 0.18s, opacity 0.18s;
+    backdrop-filter: blur(6px);
+    opacity: 0.92;
+}
+.chevron-tab:hover { transform: translateY(-50%) scale(1.03); opacity: 1; }
+.chevron-tab svg { width: 18px; height: 18px; }
+.chevron-tab .chevron-arrow { stroke: #fff; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+.drawer.open ~ .chevron-tab { display: none !important; }
+
 :root {
 color-scheme: dark;
 --bg: #050307;
@@ -1687,13 +1734,13 @@ text-decoration: underline;
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 950px) {
 body {
 padding: 16px 10px 24px;
 }
 
 /* Fix connected workers overflow on very small screens */
-@media (max-width: 420px) {
+@media (max-width: 440px) {
     /* Allow horizontal scrolling instead of hiding columns */
     .workers-section .panel-scroll { overflow-x: auto; }
 

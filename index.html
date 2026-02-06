@@ -1,498 +1,157 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quai Mining Dashboard</title>
-    <script src="vendor/chart.min.js"></script>
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="icon" href="quai-logo.ico" type="image/x-icon">
-    <!-- Apple touch icons (vector fallback) -->
-    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.svg">
-    <link rel="apple-touch-icon" sizes="167x167" href="apple-touch-icon.svg">
-    <link rel="apple-touch-icon" sizes="152x152" href="apple-touch-icon.svg">
-    <link rel="apple-touch-icon" sizes="120x120" href="apple-touch-icon.svg">
-    <link rel="apple-touch-icon" sizes="76x76" href="apple-touch-icon.svg">
-    <!-- Provide PNG fallback for some platforms -->
-    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
-    <!-- Web app manifest + mobile meta -->
-    <link rel="manifest" href="site.webmanifest">
-    <meta name="theme-color" content="#2b0211">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <!-- PNG icon fallbacks for Apple/Android -->
-    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
-    <link rel="apple-touch-icon" sizes="167x167" href="icons/icon-167.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="icons/icon-120.png">
-        <style>
-            /* Ensure install banner never shows on wide/desktop layouts */
-            @media (min-width: 900px) {
-                #installBanner { display: none !important; }
-            }
-
-            /* Responsive install banner for mobile devices (controller-view style)
-                 Centered pill at bottom similar to Controller View native-like prompt */
-            #installBanner {
-                display: none; /* shown by JS when appropriate */
-                position: fixed;
-                bottom: calc(env(safe-area-inset-bottom, 12px) + 8px);
-                left: 50%;
-                transform: translateX(-50%);
-                z-index: 10000;
-                background: linear-gradient(180deg, rgba(28,6,8,0.95), rgba(18,6,8,0.92));
-                color: #fff;
-                padding: 10px 14px;
-                border-radius: 28px;
-                box-shadow: 0 8px 28px rgba(0,0,0,0.6);
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                max-width: 640px;
-                width: calc(100% - 36px);
-                box-sizing: border-box;
-                backdrop-filter: blur(6px);
-            }
-
-            #installBanner img { width: 34px; height: 34px; border-radius:6px; flex: 0 0 auto; }
-            #installBanner .install-info { min-width: 0; flex: 1 1 auto; }
-            #installBanner .install-info .title { font-weight:600; font-size:0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-            #installBanner .install-info .subtitle { font-size:0.78rem; opacity:0.92; }
-            #installBanner .install-actions { display:flex; gap:8px; align-items:center; flex: 0 0 auto; }
-
-            /* Small screens: scale down and avoid clipping */
-            @media (max-width: 480px) {
-                #installBanner { width: calc(100% - 24px); max-width: 420px; padding: 8px 10px; border-radius: 14px; }
-                #installBanner { gap: 8px; }
-                #installBanner .install-info { width: calc(100% - 120px); }
-                #installBanner .install-actions { gap:6px; }
-                #installBanner .install-actions button { padding:6px 10px; font-size:0.82rem; }
-            }
-        </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Controller Explanation</title>
+  <link rel="icon" href="quai-logo.ico" type="image/x-icon">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#2b0211">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
+  <link rel="apple-touch-icon" sizes="167x167" href="icons/icon-167.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="icons/icon-120.png">
+  <style>
+    :root{--bg1:#120308;--bg2:#1c0608;--accent:#ff4250}
+    html,body{height:100%;margin:0;font-family:system-ui,Segoe UI,Roboto,Arial;background:radial-gradient(circle at 20% 10%, rgba(255,66,80,0.03), transparent 10%), linear-gradient(180deg, var(--bg2), var(--bg1));color:#fff}
+    .landing{height:100%;display:flex;align-items:center;justify-content:center;position:relative}
+    .brand{position:absolute;top:20px;left:50%;transform:translateX(-50%);display:flex;gap:12px;align-items:center;justify-content:center}
+    .brand img{width:36px;height:36px}
+    .brand strong{font-size:0.95rem;white-space:nowrap;font-weight:600;display:inline-block}
+    .panel{width:340px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03);border-radius:12px;padding:18px;box-shadow:0 10px 40px rgba(0,0,0,0.6)}
+    .panel h2{margin:0 0 10px 0;font-size:1.05rem}
+    .slide-btn{display:block;width:100%;padding:12px 14px;margin:8px 0;border-radius:10px;border:none;background:rgba(0,0,0,0.25);color:#fff;font-weight:600;cursor:pointer;text-decoration:none}
+    .slide-btn.primary{background:linear-gradient(90deg,var(--accent),#ff7a6f);box-shadow:0 8px 24px rgba(255,66,80,0.12)}
+    .drawer{
+      position:fixed;left:-360px;top:0;width:360px;height:100%;
+      background:
+        radial-gradient(circle at 40% 0%, rgba(255,66,80,0.22) 0%, rgba(44,8,18,0.13) 60%, transparent 100%),
+        linear-gradient(180deg, rgba(44,8,18,0.92) 0%, #1c0608 60%, #120308 100%);
+      box-shadow:12px 0 48px 0 rgba(0,0,0,0.38);
+      border-right:1.5px solid rgba(255,255,255,0.04);
+      border-radius:0 18px 18px 0;
+      padding:28px 22px 28px 28px;                    
+      transition:left .33s cubic-bezier(.2,.9,.3,1),background 0.3s;
+      z-index:40;
+      backdrop-filter: blur(8px) saturate(1.2);
+      -webkit-backdrop-filter: blur(8px) saturate(1.2);
+    }
+    .drawer.open{left:0}
+    .drawer h3{margin-top:0}
+    /* Chevron centrado vertical igual que mining */
+    .chevron-btn {
+      position: fixed;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 1100;
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      outline: none;
+      transition: opacity 0.18s;
+      opacity: 0.85;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .chevron-btn:hover, .chevron-btn:focus { opacity: 1; }
+    .chevron-icon {
+      transition: transform 0.33s cubic-bezier(.2,.9,.3,1);
+      box-shadow: 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .drawer.open ~ .chevron-btn .chevron-icon {
+      transform: rotate(180deg);
+    }
+    @media (max-width: 600px) {
+      .chevron-btn { left: 6px; top: 50%; transform: translateY(-50%); }
+      .chevron-icon { width: 28px; height: 28px; }
+      .brand{left:50%;transform:translateX(-50%);top:14px}
+    }
+    .open-btn, .barra-gris, .dashboard-btn { display: none !important; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>⛏️ Quai Mining Dashboard</h1>
-            <div class="header-actions">
-                <div class="controller-link">
-                    <a href="controller_view.html" class="nav-pill">Controller View</a>
-                </div>
-            </div>
-        </header>
-
-        <!-- Install banner (compact pill for mobile like Controller View) -->
-        <div id="installBanner">
-            <img src="quai-logo.png" alt="Quai">
-            <div class="install-info">
-                    <div class="title">Install Quai Dashboard</div>
-                    <div class="subtitle">Add to your home screen</div>
-            </div>
-            <div class="install-actions">
-                <button id="installBtn" style="background:#ff4250;color:#fff;border-radius:18px;border:none;font-weight:600">INSTALL</button>
-                <button id="installDismiss" style="background:transparent;color:#fff;border-radius:18px;border:1px solid rgba(255,255,255,0.08)">CLOSE</button>
-            </div>
-        </div>
-
-        <!-- Configuration Panel -->
-        <div class="config-panel">
-            <h2>⚙️ Server Configuration</h2>
-            <div class="config-grid">
-                <div class="input-group">
-                    <label for="serverHost">Server (domain or URL)</label>
-                    <input type="text" id="serverHost" placeholder="e.g: dpool.bitquai.live or https://host:3336" value="dpool.bitquai.live">
-                </div>
-                <div class="button-group">
-                    <button class="btn-connect" onclick="connectToServer()">Connect</button>
-                    <button class="btn-clear" onclick="clearConfig()">Clear</button>
-                    <button class="btn-diagnostic" onclick="openApiDiagnostic()" title="Check available API endpoints">🔧 API</button>
-                </div>
-            </div>
-            <div id="status" class="status disconnected">
-                <span class="status-dot"></span>
-                <span id="statusText">Disconnected</span>
-            </div>
-        </div>
-
-        <!-- Content Area -->
-        <div id="mainContent" class="content">
-
-            <!-- Algorithm Stats (moved below into the central area) -->
-
-            <!-- Charts -->
-            <div class="charts-section">
-                <!-- Prime Stats & Shares Grid -->
-                <!-- Replaced Performance Chart with Prime Stats as requested -->
-                <div class="charts-grid">
-                    <!-- Prime Stats Container (Now containing Node Stats) -->
-                    <div class="prime-stats-container">
-                        <div class="prime-header-section">
-                            <h3>NODE STATISTICS</h3>
-                            <p>Real-time performance metrics</p>
-                        </div>
-                        <div class="prime-cards-grid">
-                            <!-- Card 1: Node Name (Full Width) -->
-                            <div class="prime-stat-card">
-                                <span class="prime-label">NODE NAME</span>
-                                <div class="prime-value-lg" id="nodeName" style="font-size: 1.6rem;">-</div>
-                                
-                            </div>
-                            
-                            <!-- Card 2: Connected Workers -->
-                            <div class="prime-stat-card">
-                                <span class="prime-label">CONNECTED WORKERS</span>
-                                <div class="prime-value-lg" id="workersConnected">-</div>
-                            </div>
-
-                            <!-- Card 3: Blocks Found -->
-                            <div class="prime-stat-card">
-                                <span class="prime-label">BLOCKS FOUND</span>
-                                <div class="prime-value-lg" id="blocksFound">-</div>
-                                
-                            </div>
-
-                            <!-- Card 4: Uptime -->
-                            <div class="prime-stat-card">
-                                <span class="prime-label">UPTIME</span>
-                                <div class="prime-value-lg" id="uptime" style="font-size: 1.0rem;">-</div>
-                            </div>
-
-                            <!-- Card 5: Valid Shares -->
-                            <div class="prime-stat-card">
-                                <span class="prime-label">VALID SHARES</span>
-                                <div class="prime-value-lg" id="sharesValid">-</div>
-                            </div>
-
-                            <!-- Card 6: Stale Shares (separate) -->
-                            <div class="prime-stat-card">
-                                <span class="prime-label">STALE SHARES</span>
-                                <div class="prime-value-lg" id="sharesStale">-</div>
-                            </div>
-
-                            <!-- Card 7: Invalid Shares (separate) -->
-                            <div class="prime-stat-card">
-                                <span class="prime-label">INVALID SHARES</span>
-                                <div class="prime-value-lg" id="sharesInvalid">-</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Algorithm Stats (inserted into center column) -->
-                    <div class="algo-stats center-algo">
-                        <h2>Algorithm Statistics</h2>
-                        <div class="algo-grid">
-                            <!-- SHA-256 -->
-                            <div class="algo-card">
-                                <h3>SHA-256</h3>
-                                <div class="algo-stat">
-                                    <label>Hashrate:</label>
-                                    <value id="shaHashrate">-</value>
-                                </div>
-                                <div class="algo-stat">
-                                    <label>Workers:</label>
-                                    <value id="shaWorkers">-</value>
-                                </div>
-                            </div>
-                            
-                            <!-- Scrypt -->
-                            <div class="algo-card">
-                                <h3>Scrypt</h3>
-                                <div class="algo-stat">
-                                    <label>Hashrate:</label>
-                                    <value id="scryptHashrate">-</value>
-                                </div>
-                                <div class="algo-stat">
-                                    <label>Workers:</label>
-                                    <value id="scryptWorkers">-</value>
-                                </div>
-                            </div>
-                            
-                            <!-- KawPoW -->
-                            <div class="algo-card">
-                                <h3>KawPoW</h3>
-                                <div class="algo-stat">
-                                    <label>Hashrate:</label>
-                                    <value id="kawpowHashrate">-</value>
-                                </div>
-                                <div class="algo-stat">
-                                    <label>Workers:</label>
-                                    <value id="kawpowWorkers">-</value>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="chart-container">
-                        <div class="chart-header">
-                            <span class="chart-title">Share Distribution</span>
-                        </div>
-                            <div class="chart-canvas-wrapper">
-                            <canvas id="sharesChart"></canvas>
-                            <div id="sharesControls" class="chart-controls" aria-hidden="false"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Workers Table -->
-            <div class="workers-section">
-                <div class="workers-header">
-                    <h2>👷 Connected Workers</h2>
-                    <button class="search-btn" onclick="openSearchModal()" title="Search address">
-                        🔍 Search
-                    </button>
-                </div>
-                <div class="panel-scroll">
-                    <table id="workersTable">
-                    <thead>
-                        <tr>
-                            <th>Address</th>
-                            <th>Worker Name</th>
-                            <th>Algorithm</th>
-                            <th>Hashrate</th>
-                        </tr>
-                    </thead>
-                    <tbody id="workersBody">
-                        <tr>
-                            <td colspan="4" style="text-align: center; color: #999;">Loading...</td>
-                        </tr>
-                    </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Miners List -->
-            <div class="miners-section">
-                <div class="miners-header">
-                    <h2>⛏️ All Miners</h2>
-                    <span class="miners-count" id="minersCount">0 miners</span>
-                </div>
-                <div class="panel-scroll miners-scroll">
-                    <table id="minersTable">
-                    <thead>
-                        <tr>
-                            <th>Address</th>
-                            <th>Hashrate</th>
-                            <th>Workers</th>
-                            <th>Last Seen</th>
-                        </tr>
-                    </thead>
-                    <tbody id="minersBody">
-                        <tr>
-                            <td colspan="4" style="text-align: center; color: #999;">Loading miners...</td>
-                        </tr>
-                    </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Blocks Found -->
-            <div class="blocks-section">
-                <div class="blocks-header">
-                    <h2>🏆 Confirmed Blocks</h2>
-                    <button class="search-btn" onclick="openBlockSearchModal()" title="Search by address">
-                        🔍 Search
-                    </button>
-                </div>
-                <div id="blockFilterIndicator" class="perf-filter-indicator" style="display: none;"></div>
-                <div class="panel-scroll blocks-scroll">
-                    <table class="miners-table blocks-table">
-                        <thead>
-                            <tr>
-                                <th>HEIGHT</th>
-                                <th>HASH</th>
-                                <th>FOUND BY</th>
-                                <th>FOUND AT</th>
-                            </tr>
-                        </thead>
-                        <tbody id="blocksTableBody">
-                            <tr>
-                                <td colspan="4" style="text-align: center; color: #999;">Loading blocks...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-        </div>
-
-
-
-        <!-- Loading/Error State -->
-        <div id="loadingState" class="loading-message">
-            Waiting for connection...
-        </div>
+  <div class="landing">
+    <div class="brand">
+      <img src="quai-logo.png" alt="Controller">
+      <strong>Controller Explanation</strong>
     </div>
-
-
-    <!-- Modals (Moved out of .container) -->
-    <!-- Miner Stats Modal -->
-        <div id="minerModal" class="miner-modal" style="display: none;">
-            <div class="miner-modal-content">
-                <div class="miner-modal-header">
-                    <h2>📈 Miner Statistics</h2>
-                    <button class="modal-close-btn" onclick="closeMinerModal()">&times;</button>
-                </div>
-                <div class="miner-modal-body">
-                    <div class="miner-address-display">
-                        <label>Address:</label>
-                        <code id="modalMinerAddress">-</code>
-                    </div>
-                    <div class="miner-stats-grid">
-                        <div class="miner-stat-card">
-                            <h4>Hashrate</h4>
-                            <div class="miner-stat-value" id="modalMinerHashrate">-</div>
-                        </div>
-                        <div class="miner-stat-card">
-                            <h4>Workers</h4>
-                            <div class="miner-stat-value" id="modalMinerWorkers">-</div>
-                        </div>
-                        <div class="miner-stat-card">
-                            <h4>Valid Shares</h4>
-                            <div class="miner-stat-value" id="modalMinerValidShares">-</div>
-                        </div>
-                        <div class="miner-stat-card">
-                            <h4>Invalid Shares</h4>
-                            <div class="miner-stat-value" id="modalMinerInvalidShares">-</div>
-                        </div>
-                        <div class="miner-stat-card">
-                            <h4>Stale Shares</h4>
-                            <div class="miner-stat-value" id="modalMinerStaleShares">-</div>
-                        </div>
-                        <div class="miner-stat-card">
-                            <h4>Blocks Found</h4>
-                            <div class="miner-stat-value" id="modalMinerBlocks">-</div>
-                        </div>
-                        <div class="miner-stat-card">
-                            <h4>Last Seen</h4>
-                            <div class="miner-stat-value" id="modalMinerLastSeen">-</div>
-                        </div>
-                        <div class="miner-stat-card">
-                            <h4>First Seen</h4>
-                            <div class="miner-stat-value" id="modalMinerFirstSeen">-</div>
-                        </div>
-                        <div class="miner-stat-card luck-card">
-                            <h4>Current Luck</h4>
-                            <div class="miner-stat-value" id="modalMinerLuck">-</div>
-                        </div>
-                    </div>
-                    <div class="miner-workers-section">
-                        <h4>Workers for this Address</h4>
-                        <div id="modalMinerWorkersList" class="miner-workers-list">
-                            <div class="miner-worker-item">Loading...</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Search Modal -->
-        <div id="searchModal" class="search-modal" style="display: none;">
-            <div class="search-modal-content">
-                <div class="search-modal-header">
-                    <h2>🔍 Search Address</h2>
-                    <button class="modal-close-btn" onclick="closeSearchModal()">&times;</button>
-                </div>
-                <div class="search-modal-body">
-                    <div class="search-input-container">
-                        <input type="text" id="searchModalInput" placeholder="Enter wallet address..." oninput="searchAddressInModal()">
-                    </div>
-                    <div class="search-results-container">
-                        <h4>Connected Addresses</h4>
-                        <div id="searchModalResults" class="search-results-list">
-                            <div class="search-result-item no-results">Loading...</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Block Search Modal -->
-        <div id="blockSearchModal" class="search-modal" style="display: none;">
-            <div class="search-modal-content">
-                <div class="search-modal-header">
-                    <h2>🔍 Search Blocks by Address</h2>
-                    <button class="modal-close-btn" onclick="closeBlockSearchModal()">&times;</button>
-                </div>
-                <div class="search-modal-body">
-                    <div class="search-input-container">
-                        <input type="text" id="blockSearchInput" placeholder="Enter wallet address..." oninput="searchBlocksByAddress()">
-                    </div>
-                    <div class="search-results-container">
-                        <h4>Addresses with Blocks Found</h4>
-                        <div id="blockSearchResults" class="search-results-list">
-                            <div class="search-result-item no-results">Loading...</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- API Diagnostic Modal -->
-        <div id="apiDiagnosticModal" class="search-modal" style="display: none;">
-            <div class="search-modal-content diagnostic-modal">
-                <div class="search-modal-header">
-                    <h2>🔧 API Diagnostic Tool</h2>
-                    <button class="modal-close-btn" onclick="closeApiDiagnostic()">&times;</button>
-                </div>
-                <div class="search-modal-body">
-                    <div id="apiDiagnosticResults" class="diagnostic-results">
-                        <div class="diagnostic-loading">Click scan to check available endpoints...</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- WebSocket Status Indicator -->
-        <div id="wsIndicator" class="ws-indicator" style="display: none;">
-            <span class="ws-dot"></span>
-            <span class="ws-text">Live</span>
-        </div>
-
-    <!-- Load Modular JavaScript (ES6 Modules) -->
-        <script>
-            (function(){
-                let deferredPrompt = null;
-                const banner = document.getElementById('installBanner');
-                const installBtn = document.getElementById('installBtn');
-                const dismissBtn = document.getElementById('installDismiss');
-
-                function isMobileDevice(){
-                    return /Mobi|Android|iPhone|iPad|iPod/.test(navigator.userAgent) || window.matchMedia('(max-width: 900px)').matches;
-                }
-
-                function isAppInstalled(){
-                    try{
-                        if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return true;
-                        if (window.navigator && window.navigator.standalone) return true; // iOS
-                    }catch(e){}
-                    return false;
-                }
-
-                window.addEventListener('beforeinstallprompt', (e) => {
-                    e.preventDefault();
-                    // Only show the banner on mobile devices and when the app is not already installed
-                    if (!isMobileDevice() || isAppInstalled()) return;
-                    deferredPrompt = e;
-                    if (banner) banner.style.display = 'flex';
-                });
-
-                if (installBtn) installBtn.addEventListener('click', async function(){
-                    if (!deferredPrompt) return;
-                    try{ await deferredPrompt.prompt(); const choice = await deferredPrompt.userChoice; deferredPrompt = null; }catch(e){}
-                    if (banner) banner.style.display = 'none';
-                });
-
-                if (dismissBtn) dismissBtn.addEventListener('click', function(){ if (banner) banner.style.display = 'none'; });
-
-                window.addEventListener('appinstalled', function(){ if (banner) banner.style.display = 'none'; deferredPrompt = null; });
-
-                // Hide banner on load if installed or desktop
-                document.addEventListener('DOMContentLoaded', function(){ if (!isMobileDevice() || isAppInstalled()){ if (banner) banner.style.display = 'none'; } });
-            })();
-        </script>
-        <script type="module" src="js/main.js"></script>
+    <button class="chevron-tab" id="openDrawer" aria-label="Open menu">
+      <svg class="chevron-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path class="chevron-arrow" d="M8 6l6 6-6 6" />
+      </svg>
+    </button>
+    <div class="drawer" id="drawer">
+      <h3>Choose a dashboard</h3>
+      <p style="opacity:.8;margin:8px 0 16px 0">Quick links to the available dashboards.</p>
+      <a href="index.html" class="slide-btn">Home</a>
+      <a href="mining/" class="slide-btn primary">Mining Dashboard</a>
+      <a href="controller/" class="slide-btn primary">Controller Dashboard</a>
+    </div>
+    <!-- controller panel removed; use left chevron for navigation and page content -->
+    <div class="panel" role="main" aria-labelledby="poem-heading" style="margin-top:8px;">
+      <h2 id="poem-heading">PoEM</h2>
+      <p style="opacity:.9;margin:8px 0 6px 0">PoEM transforms Nakamoto Consensus from asking:</p>
+      <blockquote style="margin:6px 0 10px 0;padding:12px;border-left:3px solid rgba(255,66,80,0.18);background:rgba(255,255,255,0.01);color:#ffdede;">“Did this block meet the minimum requirement?”</blockquote>
+      <p style="opacity:.9;margin:6px 0 6px 0">to asking:</p>
+      <blockquote style="margin:6px 0 0 0;padding:12px;border-left:3px solid rgba(255,66,80,0.18);background:rgba(255,255,255,0.01);color:#ffdede;">“Exactly how much work went into this block?”</blockquote>
+    </div>
+  </div>
+  <script>
+    (function(){
+      const drawer = document.getElementById('drawer');
+      const btn = document.getElementById('openDrawer');
+      function setDrawerOpen(open) {
+        if (!drawer) return;
+        if (open) {
+          drawer.classList.add('open');
+          btn.style.display = 'none';
+        } else {
+          drawer.classList.remove('open');
+          btn.style.display = '';
+        }
+      }
+      if (btn) btn.addEventListener('click', function(e){
+        e.stopPropagation();
+        setDrawerOpen(!drawer.classList.contains('open'));
+      });
+      // close on outside click
+      document.addEventListener('click', function(e){
+        if(!drawer.contains(e.target) && !btn.contains(e.target)) setDrawerOpen(false);
+      });
+      // Touch swipe to open/close (mobile)
+      let touchStartX = 0, touchStartY = 0;
+      const EDGE_START_THRESHOLD = 40; // px from left edge to allow open gesture
+      const SWIPE_OPEN_THRESHOLD = 60; // px horizontal movement required to open
+      const SWIPE_CLOSE_THRESHOLD = -60; // px horizontal movement required to close
+      document.addEventListener('touchstart', function(e){
+        if (!e.touches || e.touches.length !== 1) return;
+        const t = e.touches[0];
+        touchStartX = t.clientX;
+        touchStartY = t.clientY;
+      }, { passive: true });
+      document.addEventListener('touchmove', function(e){
+        if (!e.touches || e.touches.length !== 1) return;
+        const t = e.touches[0];
+        const dx = t.clientX - touchStartX;
+        const dy = t.clientY - touchStartY;
+        if (Math.abs(dy) > 50) return;
+        if (!drawer.classList.contains('open') && touchStartX <= EDGE_START_THRESHOLD && dx > SWIPE_OPEN_THRESHOLD) {
+          setDrawerOpen(true);
+        }
+        if (drawer.classList.contains('open') && dx < SWIPE_CLOSE_THRESHOLD) {
+          setDrawerOpen(false);
+        }
+      }, { passive: true });
+      // defensive: ensure closed on load
+      setDrawerOpen(false);
+    })();
+  </script>
 </body>
 </html>
