@@ -16,14 +16,27 @@
   <link rel="apple-touch-icon" sizes="167x167" href="icons/icon-167.png">
   <link rel="apple-touch-icon" sizes="120x120" href="icons/icon-120.png">
   <style>
-    :root{--bg1:#120308;--bg2:#1c0608;--accent:#ff4250}
-    html,body{height:100%;margin:0;font-family:system-ui,Segoe UI,Roboto,Arial;background:radial-gradient(circle at 20% 10%, rgba(255,66,80,0.03), transparent 10%), linear-gradient(180deg, var(--bg2), var(--bg1));color:#fff}
-    .landing{height:100%;display:flex;align-items:center;justify-content:center;position:relative}
-    .brand{position:absolute;top:20px;left:50%;transform:translateX(-50%);display:flex;gap:12px;align-items:center;justify-content:center}
-    .brand img{width:36px;height:36px}
-    .brand strong{font-size:0.95rem;white-space:nowrap;font-weight:600;display:inline-block}
-    .panel{width:340px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03);border-radius:12px;padding:18px;box-shadow:0 10px 40px rgba(0,0,0,0.6)}
-    .panel h2{margin:0 0 10px 0;font-size:1.05rem}
+    :root{--bg1:#000;--bg2:#000;--accent:#ff4250}
+    html,body{height:100%;margin:0;font-family:system-ui,Segoe UI,Roboto,Arial;background:#000;color:#fff}
+    .landing{min-height:100vh;display:flex;align-items:flex-start;justify-content:flex-start;position:relative;padding-top:86px}
+    .brand{position:absolute;top:18px;left:50%;transform:translateX(-50%);display:flex;gap:12px;align-items:center;justify-content:center;z-index:30}
+    .brand img{width:36px;height:36px;filter:drop-shadow(0 0 20px rgba(255,66,80,0.6))}
+    .brand strong{font-size:0.95rem;white-space:nowrap;font-weight:600;display:inline-block;text-shadow:0 0 12px rgba(255,66,80,0.4)}
+    .panel{max-width:980px;width:calc(100% - 48px);background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03);border-radius:12px;padding:20px 22px;box-shadow:0 10px 40px rgba(0,0,0,0.6);line-height:1.45;margin:12px auto;z-index:20}
+    .panel h1{font-size:1.25rem;margin:0 0 6px 0}
+    .panel h2{font-size:1.02rem;margin:12px 0}
+    .panel h3{margin-top:10px;margin-bottom:6px;font-size:0.98rem}
+    .panel h4{margin:8px 0 4px 0;font-size:0.95rem}
+    .panel p{margin:8px 0;color:rgba(255,255,255,0.92)}
+    .panel ul{margin:8px 0 12px 20px}
+    .panel ol{margin:8px 0 12px 20px}
+    .panel pre.math{background:transparent;border-left:3px solid rgba(255,66,80,0.08);padding:8px 12px;color:#ffdede;border-radius:6px;font-family:monospace;overflow-x:auto}
+    .panel blockquote{margin:8px 0;padding:12px;border-left:3px solid rgba(255,66,80,0.18);background:rgba(255,255,255,0.01);color:#ffdede}
+    .panel .two-col{display:block;gap:18px}
+    .panel .two-col > div{flex:1}
+    .panel hr{border:none;border-top:1px solid rgba(255,255,255,0.08);margin:16px 0}
+    @media (min-width:900px){ .panel .two-col{display:flex} }
+    @media (min-width: 900px) { .panel{width:880px;padding:28px} }
     .slide-btn{display:block;width:100%;padding:12px 14px;margin:8px 0;border-radius:10px;border:none;background:rgba(0,0,0,0.25);color:#fff;font-weight:600;cursor:pointer;text-decoration:none}
     .slide-btn.primary{background:linear-gradient(90deg,var(--accent),#ff7a6f);box-shadow:0 8px 24px rgba(255,66,80,0.12)}
     .drawer{
@@ -42,7 +55,6 @@
     }
     .drawer.open{left:0}
     .drawer h3{margin-top:0}
-    /* Chevron centrado vertical igual que mining */
     .chevron-btn {
       position: fixed;
       left: 10px;
@@ -94,13 +106,273 @@
       <a href="mining/" class="slide-btn primary">Mining Dashboard</a>
       <a href="controller/" class="slide-btn primary">Controller Dashboard</a>
     </div>
-    <!-- controller panel removed; use left chevron for navigation and page content -->
-    <div class="panel" role="main" aria-labelledby="poem-heading" style="margin-top:8px;">
-      <h2 id="poem-heading">PoEM</h2>
-      <p style="opacity:.9;margin:8px 0 6px 0">PoEM transforms Nakamoto Consensus from asking:</p>
-      <blockquote style="margin:6px 0 10px 0;padding:12px;border-left:3px solid rgba(255,66,80,0.18);background:rgba(255,255,255,0.01);color:#ffdede;">“Did this block meet the minimum requirement?”</blockquote>
-      <p style="opacity:.9;margin:6px 0 6px 0">to asking:</p>
-      <blockquote style="margin:6px 0 0 0;padding:12px;border-left:3px solid rgba(255,66,80,0.18);background:rgba(255,255,255,0.01);color:#ffdede;">“Exactly how much work went into this block?”</blockquote>
+    <div class="panel" role="main" aria-labelledby="controller-heading" style="margin-top:8px;">
+      <article class="doc">
+        <header>
+          <h1 id="controller-heading">⚖️ Controller vs Federal Reserve</h1>
+        </header>
+
+        <section>
+          <p>For over a century, monetary stability has worked like this: one group of institutions (central bank + banking system + Treasury) adjusts rates, liquidity, and balance sheets to keep the system running.</p>
+          <p><strong>Quai proposes a different architecture:</strong></p>
+          <ul>
+            <li>✅ The unit of account doesn't depend on trusting an institution — it's energy-proxy</li>
+            <li>✅ Monetary adjustments aren't decided in meetings — they're computed by protocol rules</li>
+            <li>✅ Holding money doesn't automatically mean others use it — intermediation is optional, not mandatory</li>
+          </ul>
+          <p>💡 It doesn't change "who's in charge" — it changes the type of control: <strong>human discretion → verifiable mechanism</strong></p>
+        </section>
+
+        <hr>
+
+        <section>
+          <h2>🏦 Traditional System: Federal Reserve + Treasury</h2>
+
+          <h3>1️⃣ Unit of Account</h3>
+          <p>In fiat, the unit of account is USD. It's not linked to a physical measure (like energy).</p>
+          <p>Stability depends on:</p>
+          <ul>
+            <li>laws</li>
+            <li>reputation</li>
+            <li>political control</li>
+            <li>agreements</li>
+            <li>trust</li>
+          </ul>
+          <p>📌 Money can expand even if real production doesn't grow at the same pace.</p>
+
+          <h3>2️⃣ How the Interest Rate Is Actually Set</h3>
+          <p>The Fed sets a target range for the federal funds rate. But the rate doesn't "appear" by itself — it's enforced with tools like:</p>
+          <ul>
+            <li>🏛️ Buying/selling bonds (open market ops)</li>
+            <li>💰 Interest on bank reserves</li>
+            <li>🔁 Repo + reverse repo</li>
+            <li>🚪 Discount window lending</li>
+          </ul>
+          <p>And it's based on interpretation of:</p>
+          <ul>
+            <li>inflation</li>
+            <li>employment</li>
+            <li>growth</li>
+            <li>future expectations</li>
+          </ul>
+          <p>🧠 Meaning: it's deliberative and subjective — it depends on human judgment.</p>
+
+          <h3>3️⃣ Emission + Balance Sheet (and the Treasury link)</h3>
+          <p>A central bank can:</p>
+          <ul>
+            <li>create reserves</li>
+            <li>expand its balance sheet</li>
+            <li>buy government debt issued by the Treasury</li>
+          </ul>
+          <p>🔗 That connects monetary policy with fiscal financing: currency and debt become deeply intertwined.</p>
+
+          <h3>4️⃣ Structural Secondary Expansion (not optional)</h3>
+          <p>In modern banking:</p>
+          <ul>
+            <li>depositing money usually sends it into the credit circuit</li>
+            <li>fractional reserve banking creates secondary expansion (credit)</li>
+            <li>money doesn't stay "neutral"</li>
+          </ul>
+          <p>⚠️ This isn't something depositors choose — it's part of system design.</p>
+        </section>
+
+        <hr>
+
+        <section>
+          <h2>⚡ Energy Accounting in Quai System</h2>
+
+          <h3>1️⃣ Unit of Account: QI (energy-indexed)</h3>
+          <p>QI tries to represent "energy" inside the protocol, but:</p>
+          <ul>
+            <li>🚫 QI is not stored energy</li>
+            <li>🚫 not a "ticket to withdraw electricity"</li>
+            <li>✅ It's energy-proxy: its monetary growth is bounded by measurable work on the network.</li>
+          </ul>
+          <p>In simple terms:</p>
+          <ul>
+            <li>if the network requires more measurable effort → the system reflects it</li>
+            <li>it's not a number invented by a committee</li>
+          </ul>
+
+          <h3>✅ How QI becomes "an energy unit"</h3>
+          <p>A blockchain can't directly measure joules burned by every miner (that's physical, off-chain). But it can measure one thing extremely well:</p>
+          <p style="font-weight:600;color:#ffdede">🧮 computational work</p>
+          <p>So Quai creates "energy proxy" in two steps:</p>
+          <p><strong>Step A — Measure work objectively (on-chain)</strong></p>
+          <ul>
+            <li>Difficulty + the protocol's work signal (made cleaner by PoEM + workshares) reflect how much provable work is being contributed.</li>
+            <li>✅ This part is observable on-chain.</li>
+          </ul>
+          <p><strong>Step B — Convert work into energy proxy using hardware productivity</strong></p>
+          <ul>
+            <li>Hardware improves over time. Same on-chain "work" can cost fewer joules later.</li>
+            <li>If the protocol didn't adjust for hardware efficiency: ⚠️ QI issuance would drift away from a stable "energy meaning"</li>
+            <li>So Quai System treats the issuance coefficient as dynamic: ✅ it applies a hardware-efficiency adjustment to keep the mapping stable</li>
+          </ul>
+          <p><strong>Key point:</strong> 🎯 it does not need to be perfect.</p>
+          <p><strong>Why?</strong> Because if is slightly off:</p>
+          <ul>
+            <li>QI trades above or below its energy-implied level</li>
+            <li>and arbitrageurs trade the protocol on-chain rate vs the market rate</li>
+            <li>tightening the gap over time</li>
+          </ul>
+          <p>✅ Proxy anchors it / ✅ Market closes the remaining error</p>
+
+          <h3>2️⃣ Key Signal: d (present work/energy)</h3>
+          <p>The Controller reads a "work input" signal: d.</p>
+          <p>It's not raw difficulty — it's normalized/smoothed for stability.</p>
+          <p>🧠 In simple terms: <strong>d = how much work/energy input is coming in right now (measured on-chain)</strong></p>
+
+          <h3>3️⃣ Internal Reference: d* (endogenous baseline)</h3>
+          <p>The protocol also computes a reference baseline: d*.</p>
+          <p>🧠 In simple terms: <strong>d* = what level of work is "normal" according to the network's own history</strong></p>
+          <p>Important:</p>
+          <ul>
+            <li>no committee sets it</li>
+            <li>it's not political</li>
+            <li>it's computed automatically</li>
+          </ul>
+
+          <h3>4️⃣ Two-Layer Money: QI (spending) + QUAI (savings/security)</h3>
+          <p>This is the core of Quai thermo-economics: one asset does not have to do every job. Quai separates money into two layers so each one can specialize.</p>
+          
+          <p><strong>QI (Unit of Account + Medium of Exchange)</strong></p>
+          <ul>
+            <li>The "ruler" for prices, wages, and everyday contracts</li>
+            <li>Issued linearly with energy input</li>
+            <li>Practical for day-to-day accounting and payments</li>
+          </ul>
+          
+          <p><strong>QUAI (Store of Value + Security Accumulation Layer)</strong></p>
+          <ul>
+            <li>The long-duration asset: where long-term expectations, adoption growth, and security growth can concentrate</li>
+            <li>Issued logarithmically with work (decreasing marginal issuance), so security can scale without forcing proportional dilution</li>
+            <li>Acts as the system’s structural scarcity layer, letting QI stay practical while QUAI absorbs volatility and long-run upside</li>
+          </ul>
+          
+          <p>📌 <strong>Why two assets?</strong> Because a single money struggles to be all three at once:</p>
+          <ul>
+            <li>stable for pricing and wages,</li>
+            <li>scarce for long-term saving, and</li>
+            <li>strong enough to fund security as the network grows.</li>
+          </ul>
+          <p>With two layers: QI stays usable, while QUAI carries long-term risk and long-term reward.</p>
+
+          <h3>5️⃣ The Policy Variable: kQUAI</h3>
+          <p>In fiat, the "dial" is rates + balance sheets + operations + communication.</p>
+          <p>In Quai, the main dial is one state variable:</p>
+          <p style="font-weight:600;color:#ffdede">🎛️ kQUAI</p>
+          <p>kQUAI updates automatically based on divergence between:</p>
+          <ul>
+            <li>d (present)</li>
+            <li>d* (reference)</li>
+          </ul>
+          <p>🧠 In simple terms:</p>
+          <ul>
+            <li>if present ≠ baseline → protocol adjusts kQUAI</li>
+            <li>adjusting kQUAI moves the conversion ratio and QUAI emission</li>
+          </ul>
+          <p>✅ <strong>Important clarification:</strong> d*/d is the input. kQUAI is the output (the thing that actually updates).</p>
+        </section>
+
+        <hr>
+
+        <section>
+          <h2>🔒 Custody: Mandatory vs Optional Intermediation</h2>
+          <div class="two-col">
+            <div>
+              <h4>🏦 Fiat (practical reality)</h4>
+              <ul>
+                <li>holding money in banks usually means intermediation by default</li>
+                <li>your balances participate in credit expansion</li>
+                <li>opting out is hard for most people</li>
+              </ul>
+            </div>
+            <div>
+              <h4>⚡ Quai System</h4>
+              <ul>
+                <li>QI can exist as non-programmable UTXO (simple self-custody)</li>
+                <li>no automatic secondary expansion</li>
+                <li>no mandatory intermediation</li>
+                <li>if you want smart contracts, wrap into wQI on EVM voluntarily</li>
+              </ul>
+            </div>
+          </div>
+          <p>✅ Intermediation becomes a choice, not a default.</p>
+        </section>
+
+        <hr>
+
+        <section>
+          <h2>⚖️ Cantillon vs Energy Architecture</h2>
+          <p><strong>💵 Traditional system:</strong></p>
+          <ul>
+            <li>discretionary money creation enters unevenly</li>
+            <li>tends to enter through financial channels first</li>
+            <li>creates redistribution (Cantillon effect)</li>
+          </ul>
+          <p><strong>⚡ Quai System:</strong></p>
+          <ul>
+            <li>issuance by miners + electricity cost = the best diffusion</li>
+            <li>no discretionary debt monetization as the core mechanism</li>
+          </ul>
+        </section>
+
+        <hr>
+
+        <section>
+          <h2>🌍 In a World of Rising Debt</h2>
+          <p>💵 Modern economies have structurally rising debt:</p>
+          <ul>
+            <li>1️⃣ interest rates become politically sensitive</li>
+            <li>2️⃣ liquidity becomes a stabilization tool</li>
+            <li>3️⃣ Treasury–central bank coordination intensifies</li>
+          </ul>
+          <p>The unit of account becomes embedded in the debt system.</p>
+          <p>⚡ An energy-based system operates under different limits:</p>
+          <ul>
+            <li>✅ cannot freely expand supply to absorb external debt</li>
+            <li>✅ cannot intervene via institutional balance sheets</li>
+            <li>✅ cannot redistribute through discretionary issuance</li>
+          </ul>
+          <p>It doesn't remove fiscal discipline. It makes it unavoidable.</p>
+        </section>
+
+        <hr>
+
+        <section>
+          <h2>🔓 Conclusion</h2>
+          <div class="two-col">
+            <div>
+              <h4>💵 Traditional system</h4>
+              <ul>
+                <li>administered unit of account</li>
+                <li>institutionally set interest rate</li>
+                <li>structural intermediation by default</li>
+                <li>expansion via balance sheet</li>
+              </ul>
+            </div>
+            <div>
+              <h4>⚡ Quai system</h4>
+              <ul>
+                <li>energy-indexed unit of account</li>
+                <li>mathematical adjustment via work signals (d) + endogenous reference (d*)</li>
+                <li>optional intermediation (UTXO vs wQI on EVM)</li>
+                <li>emission + conversion anchored to measurable work, with policy dial in kQUAI</li>
+              </ul>
+            </div>
+          </div>
+          <p style="opacity:.95;margin-top:12px"><strong>This is not a cosmetic change.</strong></p>
+          <p style="opacity:.95">It's a structural shift in how monetary policy is defined and executed.</p>
+          <p style="opacity:.95"><strong>One administers money. The other structures it.</strong></p>
+        </section>
+
+        <hr>
+
+        <div style="text-align: center; margin: 28px 0;">
+          <a href="controller/" class="slide-btn primary" style="display: inline-block; width: auto; padding: 14px 32px; font-size: 1.01rem;">✨ Check it now ✨</a>
+        </div>
+      </article>
     </div>
   </div>
   <script>
@@ -121,15 +393,13 @@
         e.stopPropagation();
         setDrawerOpen(!drawer.classList.contains('open'));
       });
-      // close on outside click
       document.addEventListener('click', function(e){
         if(!drawer.contains(e.target) && !btn.contains(e.target)) setDrawerOpen(false);
       });
-      // Touch swipe to open/close (mobile)
       let touchStartX = 0, touchStartY = 0;
-      const EDGE_START_THRESHOLD = 40; // px from left edge to allow open gesture
-      const SWIPE_OPEN_THRESHOLD = 60; // px horizontal movement required to open
-      const SWIPE_CLOSE_THRESHOLD = -60; // px horizontal movement required to close
+      const EDGE_START_THRESHOLD = 40;
+      const SWIPE_OPEN_THRESHOLD = 60;
+      const SWIPE_CLOSE_THRESHOLD = -60;
       document.addEventListener('touchstart', function(e){
         if (!e.touches || e.touches.length !== 1) return;
         const t = e.touches[0];
@@ -149,7 +419,6 @@
           setDrawerOpen(false);
         }
       }, { passive: true });
-      // defensive: ensure closed on load
       setDrawerOpen(false);
     })();
   </script>
