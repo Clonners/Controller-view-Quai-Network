@@ -31,12 +31,14 @@
   <style>
             /* Ensure install banner never shows on wide/desktop layouts */
             @media (min-width: 900px) {
-                #installBanner { display: none !important; }
+                #installBanner {
+                content-visibility: auto; display: none !important; }
             }
 
             /* Responsive install banner for mobile devices (controller-view style)
                  Centered pill at bottom similar to Controller View native-like prompt */
             #installBanner {
+                content-visibility: auto;
                 display: none; /* shown by JS when appropriate */
                 position: fixed;
                 bottom: calc(env(safe-area-inset-bottom, 12px) + 8px);
@@ -65,8 +67,10 @@
 
             /* Small screens: scale down and avoid clipping */
             @media (max-width: 480px) {
-                #installBanner { width: calc(100% - 24px); max-width: 420px; padding: 8px 10px; border-radius: 14px; }
-                #installBanner { gap: 8px; }
+                #installBanner {
+                content-visibility: auto; width: calc(100% - 24px); max-width: 420px; padding: 8px 10px; border-radius: 14px; }
+                #installBanner {
+                content-visibility: auto; gap: 8px; }
                 #installBanner .install-info { width: calc(100% - 120px); }
                 #installBanner .install-actions { gap:6px; }
                 #installBanner .install-actions button { padding:6px 10px; font-size:0.82rem; }
