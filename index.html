@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="preload" as="image" href="assets/brand/bitquai-hero-1920x1080.png">
+<link rel="preload" as="image" href="assets/brand/bitquai-hero-1920x1080.webp" type="image/webp">
 <link rel="stylesheet" href="css/brand.css.min">
 
   <meta charset="UTF-8">
@@ -176,7 +176,7 @@
       inset: 10% -8% 0 36%;
       background:
         linear-gradient(90deg, rgba(5,3,7,.58), rgba(5,3,7,.12), rgba(5,3,7,.72)),
-        url("assets/brand/bitquai-hero-1920x1080.png") center / cover no-repeat;
+        url("assets/brand/bitquai-hero-1920x1080.webp") center / cover no-repeat;
       border-radius: 44px;
       border: 1px solid rgba(255, 37, 58, .18);
       box-shadow: var(--shadow), inset 0 0 80px rgba(255,37,58,.08);
@@ -449,7 +449,7 @@
   <main class="shell">
     <nav class="topnav" aria-label="Primary navigation">
       <a class="brand" href="index.html" aria-label="BitQuai home - Order inside entropy">
-        <img src="assets/brand/bitquai-icon-q-256.png" alt="BitQuai Q mark" decoding="async" loading="lazy">
+        <picture><source src="assets/brand/bitquai-icon-q-256.webp" type="image/webp"><img src="assets/brand/bitquai-icon-q-256.png" alt="BitQuai Q mark" decoding="async" loading="lazy"></picture>
         <span class="brand-text">
           <strong>BitQuai</strong>
           <span>Order inside entropy</span>
@@ -479,7 +479,10 @@
       </div>
 
       <aside class="hero-card" aria-label="BitQuai brand preview">
-        <img src="assets/brand/bitquai-og-1200x630.png" alt="BitQuai Open Graph banner" fetchpriority="high" loading="eager">
+        <picture>
+          <source srcset="assets/brand/bitquai-og-600x315.webp 600w, assets/brand/bitquai-og-1200x630.webp 1200w, assets/brand/bitquai-og-1920x1008.webp 1920w" type="image/webp">
+          <img src="assets/brand/bitquai-og-1200x630.png" alt="BitQuai Open Graph banner" fetchpriority="high" loading="eager" decoding="async">
+        </picture>
         <div class="caption">
           <span>BitQuai Final Brand Pack</span>
           <span>Burgundy / terminal / testnet</span>
