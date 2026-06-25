@@ -18,7 +18,7 @@ Push all 4 pages to 95%+ Performance and 95%+ Accessibility.
 |---|---|---|---|---|
 | P3.1 | Optimize hero image (WebP, srcset) | Index | done | ✅ |
 | P3.2 | Fix install button contrast WCAG AA | Mining | done | ✅ |
-| P3.3 | Fix donate pill contrast | Controller | pending |  |
+| P3.3 | Fix donate pill contrast | Controller | done | ✅ |
 | P3.4 | Fix touch targets | Controller | pending |  |
 | P3.5 | Inline critical CSS for LCP | Controller | pending |  |
 | P3.6 | Preconnect to external origins | All | pending |  |
@@ -33,7 +33,7 @@ Push all 4 pages to 95%+ Performance and 95%+ Accessibility.
 
 ## Next Task
 
-P3.3 - Fix donate pill contrast
+P3.4 - Fix touch targets
 
 ## Commits
 
@@ -48,5 +48,7 @@ P3.3 - Fix donate pill contrast
 - `ca75309` P3.1: hero image WebP + srcset (599KB→32KB OG, 1.4MB→64KB hero BG)
 - `b8de2f7` P3.2: install button contrast WCAG AA (#ff253a → #cc1e32)
 
-Total commits: 10
+- `b6b1268` P3.3: donate pill contrast WCAG AA (heart, address)
+
+Total commits: 11
 Total commits this session: 1
