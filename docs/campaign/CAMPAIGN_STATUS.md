@@ -24,7 +24,7 @@ Push all 4 pages to 95%+ Performance and 95%+ Accessibility.
 | P3.6 | Preconnect to external origins | All | done | ✅ |
 | P3.7 | decoding=async on all images | All | done | ✅ |
 | P3.8 | loading=lazy on below-fold images | All | done | ✅ |
-| P3.9 | QDEX mobile responsive | QDEX | pending |  |
+| P3.9 | QDEX mobile responsive | QDEX | done | ✅ |
 | P3.10 | Controller mobile verify | Controller | pending |  |
 | P3.11 | Lighthouse audit final | All | pending |  |
 | P3.12 | Build script (npm run build) | All | pending |  |
@@ -33,7 +33,7 @@ Push all 4 pages to 95%+ Performance and 95%+ Accessibility.
 
 ## Next Task
 
-P3.9 - QDEX mobile responsive
+P3.10 - Controller mobile verify
 
 ## Commits
 
@@ -55,6 +55,7 @@ P3.9 - QDEX mobile responsive
 
 - `e71930e` P3.7: decoding=async on all images (qdex, mining/index, controller/index)
 - `28e0028` P3.8: fix loading=lazy on above-fold images (nav logos → eager)
+- `190d14e` P3.9: QDEX mobile responsive — nav bar class-based CSS, 3 breakpoints, table scroll wrappers, touch targets
 
-Total commits: 16
-Total commits this session: 5
+Total commits: 17
+Total commits this session: 6
