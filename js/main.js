@@ -662,15 +662,13 @@ function init() {
         }
     });
     
-    // Auto-connect if saved config exists or host field contains a value
+    // Auto-connect only for a user-saved configuration.
+    // The public page ships with a default host in the input as a convenience,
+    // but auto-connecting to it makes GitHub Pages look broken when the API is
+    // unavailable/CORS-blocked. Keep first paint clean; users can press CONNECT.
     let shouldAutoConnect = false;
-    if (hostEl) {
-        const hv = (hostEl.value || '').trim();
-        if (hv) shouldAutoConnect = true;
-    } else {
-        if (config.host) shouldAutoConnect = true;
-        else if (config.ip && config.port) shouldAutoConnect = true;
-    }
+    if (config.host) shouldAutoConnect = true;
+    else if (config.ip && config.port) shouldAutoConnect = true;
 
     // Respect previously saved proxy preference if present; otherwise keep current detection/default
     try {

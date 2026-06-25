@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <link rel="preload" as="image" href="assets/brand/bitquai-hero-1920x1080.webp" type="image/webp">
-<link rel="stylesheet" href="css/brand.css.min">
+<link rel="stylesheet" href="css/brand.min.css">
 
   <meta charset="UTF-8">
   <!-- P3.6: Preconnect to external origins -->
@@ -544,8 +544,10 @@
     </footer>
   </main>
 
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
-  }
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
+  </script>
 </body>
 </html>

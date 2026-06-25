@@ -11,8 +11,8 @@
   <link rel="dns-prefetch" href="https://prime.bitquai.live">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BitQuai Controller Dashboard</title>
-  <link rel="preload" as="style" href="controller_styles.css.min">
-  <link rel="stylesheet" href="controller_styles.css.min" media="print" onload="this.media='screen'">
+  <link rel="stylesheet" href="css/brand.min.css">
+  <link rel="stylesheet" href="controller_styles.min.css">
   <meta name="description" content="BitQuai — Mining, controller analytics, and QDEX terminal exchange UI.">
   <meta name="theme-color" content="#ff253a">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -51,7 +51,7 @@
     .donate-pill{border:1px solid rgba(248,250,252,.12);background:radial-gradient(circle at top left,rgba(255,37,58,.18),rgba(15,5,10,.96));color:var(--muted);box-shadow:0 10px 24px rgba(255,37,58,.35)}
     .donate-label,.github-label{font-weight:500;color:#e5e7eb}
     .donate-heart{font-size:.85rem;color:#ff9db3}
-    .donate-address{font-family:ui-monospace,monospace;font-size:.68rem;color:#d1d5db}
+    .donate-address{font-family:ui-monospace,monospace;font-size:.68rem;color:#d1d5db;display:inline-block;max-width:12.5rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom}
     .github-pill{border:1px solid rgba(148,163,184,.5);background:rgba(8,10,15,.95);color:var(--muted);text-decoration:none;box-shadow:0 8px 18px rgba(15,23,42,.45)}
     .grid{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(0,1.3fr);gap:18px}
     .card{background:radial-gradient(circle at top left,#1a060b 0,#060106 55%);border-radius:var(--card-radius);border:1px solid rgba(56,12,24,.9);box-shadow:var(--shadow-soft);padding:16px 16px 14px;position:relative;overflow:hidden}
@@ -128,8 +128,7 @@
     #installBanner .install-actions{display:flex;gap:8px;align-items:center;flex:0 0 auto}
     @media(max-width:480px){#installBanner{width:calc(100% - 24px);max-width:420px;padding:8px 10px;border-radius:14px;gap:8px}#installBanner .install-info{width:calc(100% - 120px)}#installBanner .install-actions{gap:6px}#installBanner .install-actions button{padding:6px 10px;font-size:.82rem}}
   </style>
-  <!-- Brand CSS loaded non-blocking (already inlined above for LCP) -->
-  <link rel="stylesheet" href="css/brand.css" media="print" onload="this.media='screen'">
+  <!-- Full page styles loaded above with a valid text/css MIME type. -->
 </head>
 <body>
   <main class="app">
@@ -168,7 +167,7 @@
           <span class="github-label">GitHub</span>
         </a>
 
-        <button id="donation-pill" class="donate-pill" type="button">
+        <button id="donation-pill" class="donate-pill" type="button" title="Donate address: 0x0042843bC5C3fcAFda51d2c6BB17d47370567C9a">
           <span class="donate-heart">♥</span>
           <span class="donate-label">Donate</span>
           <span class="donate-address">0x0042843bC5C3fcAFda51d2c6BB17d47370567C9a</span>
@@ -426,7 +425,6 @@
     </div>
   </div>
 
-  <div id="libStatus" style="position:fixed;right:12px;top:12px;background:rgba(0,0,0,0.6);color:#fff;padding:8px 10px;border-radius:8px;z-index:9999;font-size:0.85rem;box-shadow:0 6px 18px rgba(0,0,0,0.6);">Loading libraries...</div>
   <!-- P2: Native deferred script loading -->
   <script src="vendor/decimal.min.js" defer></script>
   <script src="vendor/chart.min.js" defer></script>
@@ -471,8 +469,10 @@
     })();
   </script>
 
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
-  }
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
+  </script>
 </body>
 </html>

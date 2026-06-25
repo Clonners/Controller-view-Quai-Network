@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="stylesheet" href="css/brand.css">
+<link rel="stylesheet" href="css/brand.min.css">
 
   <meta charset="UTF-8">
   <!-- P3.6: Preconnect to external origins -->
@@ -13,7 +13,7 @@
   <link rel="dns-prefetch" href="https://prime.bitquai.live">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BitQuai Mining Dashboard</title>
-  <link rel="stylesheet" href="css/styles.css.min">
+  <link rel="stylesheet" href="css/styles.min.css">
   <meta name="description" content="BitQuai — Mining, controller analytics, and QDEX terminal exchange UI.">
   <meta name="theme-color" content="#ff253a">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -336,7 +336,7 @@
 
         <!-- Loading/Error State -->
         <div id="loadingState" class="loading-message">
-            Waiting for connection...
+            Ready to connect. Press CONNECT to load mining telemetry.
         </div>
     </div>
 
@@ -512,8 +512,10 @@
         <script src="vendor/chart.min.js" defer></script>
         <script type="module" src="js/main.js"></script>
 
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
-  }
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
+  </script>
 </body>
 </html>

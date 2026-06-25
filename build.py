@@ -69,7 +69,9 @@ def build_css() -> list:
             print(f"  ⚠ CSS not found: {rel_path}")
             continue
 
-        min_path = ROOT / (rel_path + ".min")
+        rel = Path(rel_path)
+        min_rel_path = rel.with_name(f"{rel.stem}.min{rel.suffix}")
+        min_path = ROOT / min_rel_path
         original = src.read_text(encoding="utf-8")
         minified = minify_css(original)
         min_path.write_text(minified, encoding="utf-8")
@@ -302,13 +304,15 @@ def build_dist() -> str:
             if not item.name.endswith('.min'):
                 shutil.copy2(item, DIST / item.name)
 
-    # Also copy .min CSS files
+    # Also copy minified CSS files (.min.css keeps a valid text/css MIME type)
     for css_file in CSS_FILES:
-        min_src = ROOT / (css_file + ".min")
+        rel = Path(css_file)
+        min_rel = rel.with_name(f"{rel.stem}.min{rel.suffix}")
+        min_src = ROOT / min_rel
         if min_src.exists():
-            dest_dir = DIST / os.path.dirname(css_file)
-            dest_dir.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(min_src, dest_dir / (os.path.basename(css_file) + ".min"))
+            dest = DIST / min_rel
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(min_src, dest)
 
     # Report
     total = sum(f.stat().st_size for f in DIST.rglob('*') if f.is_file()) / 1024

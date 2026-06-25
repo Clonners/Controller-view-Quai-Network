@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-<link rel="stylesheet" href="css/brand.css.min">
+<link rel="stylesheet" href="css/brand.min.css">
 
   <meta charset="utf-8" />
   <!-- P3.6: Preconnect to external origins -->
@@ -1939,10 +1939,11 @@ input { font: inherit; }
 
   init();
   </script>
-
+</main>
+<script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   }
-</main>
+</script>
 </body>
 </html>
