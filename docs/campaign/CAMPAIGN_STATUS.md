@@ -20,7 +20,7 @@ Push all 4 pages to 95%+ Performance and 95%+ Accessibility.
 | P3.2 | Fix install button contrast WCAG AA | Mining | done | ✅ |
 | P3.3 | Fix donate pill contrast | Controller | done | ✅ |
 | P3.4 | Fix touch targets | Controller | done | ✅ |
-| P3.5 | Inline critical CSS for LCP | Controller | pending |  |
+| P3.5 | Inline critical CSS for LCP | Controller | done | ✅ |
 | P3.6 | Preconnect to external origins | All | pending |  |
 | P3.7 | decoding=async on all images | All | pending |  |
 | P3.8 | loading=lazy on below-fold images | All | pending |  |
@@ -33,7 +33,7 @@ Push all 4 pages to 95%+ Performance and 95%+ Accessibility.
 
 ## Next Task
 
-P3.5 - Inline critical CSS for LCP
+P3.6 - Preconnect to external origins
 
 ## Commits
 
@@ -50,6 +50,7 @@ P3.5 - Inline critical CSS for LCP
 
 - `b6b1268` P3.3: donate pill contrast WCAG AA (heart, address)
 - `973d9cd` P3.4: touch targets WCAG 2.5.5 (44px min on touch devices)
+- `69ef28e` P3.5: inline critical CSS for LCP on Controller page
 
-Total commits: 12
-Total commits this session: 2
+Total commits: 13
+Total commits this session: 3
