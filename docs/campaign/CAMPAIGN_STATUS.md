@@ -22,7 +22,7 @@ Push all 4 pages to 95%+ Performance and 95%+ Accessibility.
 | P3.4 | Fix touch targets | Controller | done | ✅ |
 | P3.5 | Inline critical CSS for LCP | Controller | done | ✅ |
 | P3.6 | Preconnect to external origins | All | done | ✅ |
-| P3.7 | decoding=async on all images | All | pending |  |
+| P3.7 | decoding=async on all images | All | done | ✅ |
 | P3.8 | loading=lazy on below-fold images | All | pending |  |
 | P3.9 | QDEX mobile responsive | QDEX | pending |  |
 | P3.10 | Controller mobile verify | Controller | pending |  |
@@ -33,7 +33,7 @@ Push all 4 pages to 95%+ Performance and 95%+ Accessibility.
 
 ## Next Task
 
-P3.7 - Fix decoding=async on all images
+P3.8 - Fix loading=lazy on below-fold images
 
 ## Commits
 
@@ -53,5 +53,7 @@ P3.7 - Fix decoding=async on all images
 - `69ef28e` P3.5: inline critical CSS for LCP on Controller page
 - `ddf926c` P3.6: preconnect to external origins (bitquai.live, github.com)
 
-Total commits: 14
+- `e71930e` P3.7: decoding=async on all images (qdex, mining/index, controller/index)
+
+Total commits: 15
 Total commits this session: 4
