@@ -1,0 +1,16 @@
+# Build artifacts
+dist/
+*.min
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/

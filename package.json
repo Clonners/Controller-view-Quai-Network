@@ -1,0 +1,16 @@
+{
+  "name": "bitquai-controller-view",
+  "version": "1.0.0",
+  "description": "BitQuai Controller-View frontend - mining pool dashboard",
+  "private": true,
+  "scripts": {
+    "build": "python3 build.py",
+    "build:css": "python3 build.py --css",
+    "build:validate": "python3 build.py --validate",
+    "build:links": "python3 build.py --links",
+    "build:dist": "python3 build.py --dist",
+    "serve": "python3 -m http.server 8080"
+  },
+  "keywords": ["bitquai", "mining", "controller", "dashboard"],
+  "license": "MIT"
+}
