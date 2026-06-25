@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="stylesheet" href="css/brand.css">
-
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BitQuai Controller Dashboard</title>
+  <link rel="preload" as="style" href="controller_styles.css.min">
   <link rel="stylesheet" href="controller_styles.css.min" media="print" onload="this.media='screen'">
   <meta name="description" content="BitQuai — Mining, controller analytics, and QDEX terminal exchange UI.">
   <meta name="theme-color" content="#ff253a">
@@ -28,61 +27,102 @@
   <meta name="twitter:title" content="BitQuai Controller Dashboard">
   <meta name="twitter:description" content="Order inside entropy.">
   <meta name="twitter:image" content="https://bitquai.live/assets/brand/bitquai-og-1200x630.png">
+  <!-- P3.5: Critical CSS inlined for LCP — renders header/h1 + first card above the fold -->
   <style>
-    /* Responsive tweaks for the header controls */
-    .card-header.flex-between { display:flex; align-items:center; gap:12px; justify-content:space-between; flex-wrap:wrap; }
-    .card-header .left { display:flex; gap:12px; align-items:center; min-width:0; flex:1 1 auto; }
-    .rpc-input { flex:1 1 240px; min-width:0; max-width:100%; padding:8px 12px; border-radius:18px; border:1px solid rgba(255,255,255,0.08); background:transparent; color:inherit; }
-    .header-actions-btns { display:flex; gap:8px; align-items:center; white-space:nowrap; }
-    .pill { margin-left:auto; display:flex; gap:8px; align-items:center; }
-    .nav-pill { padding:6px 10px; border-radius:8px; background:rgba(255,37,58,0.08); color:inherit; text-decoration:none; border:1px solid rgba(255,37,58,0.08); }
-    @media (max-width:600px) {
-      .rpc-input { flex-basis:140px; }
-      .card-header.flex-between { align-items:flex-start; }
-      .pill { order:3; }
-      .header-actions-btns { order:2; }
-      .card-header .left { order:1; }
-    }
-    /* Install banner styles (copied from Mining Dashboard) */
-    /* Ensure install banner never shows on wide/desktop layouts */
-    @media (min-width: 900px) {
-      #installBanner { display: none !important; }
-    }
-
-    /* Controller / Mining unified install banner (centered pill) */
-    #installBanner {
-      display: none;
-      position: fixed;
-      bottom: calc(env(safe-area-inset-bottom, 12px) + 8px);
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 10000;
-      background: linear-gradient(180deg, rgba(28,6,8,0.95), rgba(18,6,8,0.92));
-      color: #fff;
-      padding: 10px 14px;
-      border-radius: 28px;
-      box-shadow: 0 8px 28px rgba(0,0,0,0.6);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      max-width: 640px;
-      width: calc(100% - 36px);
-      box-sizing: border-box;
-      backdrop-filter: blur(6px);
-    }
-    #installBanner img { width: 34px; height: 34px; border-radius:6px; flex: 0 0 auto; }
-    #installBanner .install-info { min-width: 0; flex: 1 1 auto; }
-    #installBanner .install-info .title { font-weight:600; font-size:0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    #installBanner .install-info .subtitle { font-size:0.78rem; opacity:0.92; }
-    #installBanner .install-actions { display:flex; gap:8px; align-items:center; flex: 0 0 auto; }
-    @media (max-width: 480px) {
-      #installBanner { width: calc(100% - 24px); max-width: 420px; padding: 8px 10px; border-radius: 14px; }
-      #installBanner { gap: 8px; }
-      #installBanner .install-info { width: calc(100% - 120px); }
-      #installBanner .install-actions { gap:6px; }
-      #installBanner .install-actions button { padding:6px 10px; font-size:0.82rem; }
-    }
+    /* Critical CSS — above-the-fold only */
+    :root{--bg:#050307;--text:#e5e7eb;--muted:#9ca3af;--accent:#ff253a;--success:#4ade80;--danger:#ff4b4b;--card-radius:16px;--shadow-soft:0 18px 45px rgba(0,0,0,0.7);--font:system-ui,-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{margin:0;font-family:var(--font);background:radial-gradient(circle at top,#2b0005 0,var(--bg) 40%,#020005 80%);color:var(--text);min-height:100vh;padding:24px;display:flex;justify-content:center;overflow-x:hidden}
+    .app{width:100%;max-width:1200px}
+    header{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;margin-bottom:20px}
+    .logo{width:36px;height:36px;border-radius:999px;flex-shrink:0;box-shadow:0 0 0 2px rgba(255,37,58,0.4)}
+    .header-main{display:flex;flex-direction:column;gap:2px;min-width:0}
+    header h1{font-size:1.4rem;margin:0;letter-spacing:.03em;display:flex;align-items:center;gap:8px}
+    .header-actions{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .nav-pill{padding:6px 10px;border-radius:8px;background:rgba(255,37,58,.08);color:var(--text);text-decoration:none;border:1px solid rgba(255,37,58,.08);font-weight:600;display:inline-flex;align-items:center;gap:6px;font-size:.78rem}
+    .github-pill,.donate-pill{padding:6px 12px;border-radius:999px;font-size:.72rem;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;cursor:pointer}
+    .donate-pill{border:1px solid rgba(248,250,252,.12);background:radial-gradient(circle at top left,rgba(255,37,58,.18),rgba(15,5,10,.96));color:var(--muted);box-shadow:0 10px 24px rgba(255,37,58,.35)}
+    .donate-label,.github-label{font-weight:500;color:#e5e7eb}
+    .donate-heart{font-size:.85rem;color:#ff9db3}
+    .donate-address{font-family:ui-monospace,monospace;font-size:.68rem;color:#d1d5db}
+    .github-pill{border:1px solid rgba(148,163,184,.5);background:rgba(8,10,15,.95);color:var(--muted);text-decoration:none;box-shadow:0 8px 18px rgba(15,23,42,.45)}
+    .grid{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(0,1.3fr);gap:18px}
+    .card{background:radial-gradient(circle at top left,#1a060b 0,#060106 55%);border-radius:var(--card-radius);border:1px solid rgba(56,12,24,.9);box-shadow:var(--shadow-soft);padding:16px 16px 14px;position:relative;overflow:hidden}
+    .card::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at top right,rgba(255,37,58,.18),transparent 55%);opacity:.9;pointer-events:none}
+    .card-header{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:10px}
+    .card-title{font-size:.9rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#e5e7eb}
+    .card-subtitle{font-size:.75rem;color:var(--muted)}
+    .card-header.flex-between{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
+    .card-header .left{display:flex;gap:12px;align-items:center;min-width:0;flex:1 1 auto}
+    .rpc-input{flex:1 1 240px;min-width:0;max-width:100%;padding:8px 12px;border-radius:18px;border:1px solid rgba(255,255,255,.08);background:transparent;color:inherit}
+    .header-actions-btns{display:flex;gap:8px;align-items:center;white-space:nowrap}
+    .pill{margin-left:auto;display:flex;gap:8px;align-items:center}
+    .pill{border-radius:999px;padding:4px 9px;font-size:.7rem;border:1px solid rgba(75,85,99,.7);color:var(--muted);display:inline-flex;align-items:center;gap:6px;background:rgba(7,3,7,.95)}
+    .pill-dot{width:6px;height:6px;border-radius:999px;background:var(--success)}
+    @keyframes pulseDot{0%{transform:scale(1);opacity:.9}50%{transform:scale(1.4);opacity:.4}100%{transform:scale(1);opacity:.9}}
+    .pill-dot{animation:pulseDot 1.8s ease-out infinite}
+    input[type="text"],input[type="number"],select{background:rgba(10,2,9,.95);border-radius:999px;border:1px solid rgba(148,27,49,.8);padding:6px 10px;color:var(--text);font-size:.78rem;outline:none;min-width:0}
+    input[type="text"]{width:260px;max-width:100%}
+    input[type="number"]{width:82px}
+    select{padding-right:26px}
+    input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 1px rgba(255,37,58,.32);background:rgba(10,2,10,1)}
+    button{border-radius:999px;border:none;padding:7px 14px;font-size:.8rem;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#ff253a,#ff7a3c);color:#050308;box-shadow:0 10px 24px rgba(255,37,58,.6);white-space:nowrap}
+    button.secondary{background:transparent;color:var(--muted);border:1px solid rgba(75,85,99,.8);box-shadow:none}
+    #conversion-card{grid-column:2;grid-row:1}
+    .chart-wrapper{position:relative;min-height:300px;width:100%}
+    canvas{position:relative;z-index:1;width:100%!important;max-height:360px}
+    .legend{position:relative;z-index:1;margin-top:6px;font-size:.72rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    .legend-item{display:inline-flex;align-items:center;gap:6px;padding:3px 8px;border-radius:999px;background:rgba(8,2,8,.98);border:1px solid rgba(51,16,22,.95)}
+    .legend-swatch{width:10px;height:3px;border-radius:999px;background:var(--accent)}
+    .legend-swatch.alt{background:#ff6b81}
+    .legend-swatch.delta{background:#ffb347}
+    .status-bar{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px;font-size:.72rem;color:var(--muted);border-top:1px solid rgba(51,16,22,.9);padding-top:8px}
+    .status-dot{width:8px;height:8px;border-radius:50%;background:var(--success);display:inline-block}
+    .status-bar-right{display:flex;gap:8px;flex-wrap:wrap}
+    .status-tag{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;background:rgba(8,2,8,.98);border:1px solid rgba(51,16,22,.9)}
+    .status-dot-mini{width:5px;height:5px;border-radius:50%;background:var(--success);display:inline-block}
+    .metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+    .metric-card{background:rgba(6,1,6,.7);border-radius:12px;border:1px solid rgba(56,12,24,.7);padding:12px}
+    .metric-title{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+    .metric-main{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+    .metric-value{font-size:1.6rem;font-weight:700;color:#e5e7eb}
+    .metric-unit{font-size:.8rem;color:var(--muted)}
+    .metric-badge{font-size:.65rem;padding:2px 6px;border-radius:999px;background:rgba(255,37,58,.15);color:var(--accent)}
+    .metric-footer{display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:.72rem;color:var(--muted);flex-wrap:wrap;gap:4px}
+    .metric-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;background:rgba(7,3,7,.95);border:1px solid rgba(75,85,99,.7)}
+    .dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+    .metric-title-exrate{display:flex;flex-direction:column;gap:2px}
+    .metric-title-exrate-sub{font-size:.65rem;color:var(--muted)}
+    .metric-main-exrate{display:flex;align-items:baseline;gap:6px}
+    .metric-prefix{font-size:.85rem;color:var(--muted)}
+    .conversion-container{display:flex;flex-direction:column;gap:12px;position:relative;z-index:1}
+    .conversion-input-group{display:flex;flex-direction:column;gap:4px}
+    .conversion-input-group label{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+    .conversion-input{background:rgba(10,2,9,.95);border-radius:999px;border:1px solid rgba(148,27,49,.8);padding:8px 14px;color:var(--text);font-size:.85rem;outline:none;width:100%}
+    .conversion-direction{display:flex;align-items:center;justify-content:center;gap:8px}
+    .swap-btn{background:rgba(255,37,58,.15);border:1px solid rgba(255,37,58,.3);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--accent)}
+    .direction-labels{display:flex;align-items:center;gap:6px;font-weight:600;font-size:.9rem}
+    .direction-labels .arrow{color:var(--accent)}
+    .conversion-result{text-align:center;padding:12px;border-radius:12px;background:rgba(6,1,6,.5);border:1px solid rgba(56,12,24,.7)}
+    .result-label{font-size:.75rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
+    .result-value{font-size:1.6rem;font-weight:700;color:#e5e7eb}
+    .result-details{font-size:.72rem;color:var(--muted);margin-top:4px}
+    .calc-btn{background:linear-gradient(135deg,#ff253a,#ff7a3c);border:none;border-radius:999px;padding:10px;font-size:.85rem;font-weight:600;cursor:pointer;color:#050308;box-shadow:0 10px 24px rgba(255,37,58,.6)}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    @media(max-width:600px){.rpc-input{flex-basis:140px}.card-header.flex-between{align-items:flex-start}.pill{order:3}.header-actions-btns{order:2}.card-header .left{order:1}}
+    @media(max-width:900px){body{padding:16px 10px 24px}header{align-items:flex-start}.grid{grid-template-columns:minmax(0,1fr)}#chart-card{width:100%;min-height:420px}.header-actions{margin-left:0}.github-pill,.donate-pill{width:100%;justify-content:center}#conversion-card{grid-column:1;grid-row:2}}
+    /* Install banner — non-critical, kept here for completeness */
+    @media(min-width:900px){#installBanner{display:none!important}}
+    #installBanner{display:none;position:fixed;bottom:calc(env(safe-area-inset-bottom,12px)+8px);left:50%;transform:translateX(-50%);z-index:10000;background:linear-gradient(180deg,rgba(28,6,8,.95),rgba(18,6,8,.92));color:#fff;padding:10px 14px;border-radius:28px;box-shadow:0 8px 28px rgba(0,0,0,.6);display:flex;align-items:center;gap:12px;max-width:640px;width:calc(100% - 36px);box-sizing:border-box;backdrop-filter:blur(6px)}
+    #installBanner img{width:34px;height:34px;border-radius:6px;flex:0 0 auto}
+    #installBanner .install-info{min-width:0;flex:1 1 auto}
+    #installBanner .install-info .title{font-weight:600;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    #installBanner .install-info .subtitle{font-size:.78rem;opacity:.92}
+    #installBanner .install-actions{display:flex;gap:8px;align-items:center;flex:0 0 auto}
+    @media(max-width:480px){#installBanner{width:calc(100% - 24px);max-width:420px;padding:8px 10px;border-radius:14px;gap:8px}#installBanner .install-info{width:calc(100% - 120px)}#installBanner .install-actions{gap:6px}#installBanner .install-actions button{padding:6px 10px;font-size:.82rem}}
   </style>
+  <!-- Brand CSS loaded non-blocking (already inlined above for LCP) -->
+  <link rel="stylesheet" href="css/brand.css" media="print" onload="this.media='screen'">
 </head>
 <body>
   <main class="app">
