@@ -27,13 +27,13 @@ Push all 4 pages to 95%+ Performance and 95%+ Accessibility.
 | P3.9 | QDEX mobile responsive | QDEX | done | ✅ |
 | P3.10 | Controller mobile verify | Controller | done | ✅ |
 | P3.11 | Lighthouse audit final | All | done | ✅ |
-| P3.12 | Build script (npm run build) | All | pending |  |
+| P3.12 | Build script (npm run build) | All | done | ✅ |
 | P3.13 | HTML validation + link checker | All | pending |  |
 | P3.14 | dns-prefetch for RPC endpoints | All | pending |  |
 
 ## Next Task
 
-P3.12 - Build script (npm run build)
+P3.13 - HTML validation + link checker
 
 ## Commits
 
@@ -59,5 +59,7 @@ P3.12 - Build script (npm run build)
 - `b9da19f` P3.10: Controller mobile verify — fix form labels (aria-label), add nav landmark, section aria-labels
 - `6f7cedb` P3.11: Lighthouse audit final — fix QDEX contrast (text-muted), CLS containment, nav image dimensions
 
-Total commits: 19
-Total commits this session: 8
+- `3f95d8c` P3.12: Build script (npm run build) — CSS minifier, HTML validator, link checker, dist builder
+
+Total commits: 20
+Total commits this session: 9
