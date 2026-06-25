@@ -6,7 +6,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BitQuai Controller Dashboard</title>
-  <link rel="stylesheet" href="controller_styles.css" media="print" onload="this.media='screen'">
+  <link rel="stylesheet" href="controller_styles.css.min" media="print" onload="this.media='screen'">
   <meta name="description" content="BitQuai — Mining, controller analytics, and QDEX terminal exchange UI.">
   <meta name="theme-color" content="#ff253a">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -378,51 +378,10 @@
   </div>
 
   <div id="libStatus" style="position:fixed;right:12px;top:12px;background:rgba(0,0,0,0.6);color:#fff;padding:8px 10px;border-radius:8px;z-index:9999;font-size:0.85rem;box-shadow:0 6px 18px rgba(0,0,0,0.6);">Loading libraries...</div>
-  <script>
-    (function(){
-      function el(text){ return document.getElementById(text); }
-      function setStatus(msg, warn){
-        try{ const b = el('libStatus'); if(b) b.textContent = msg; if(warn) console.warn(msg); else console.info(msg); } catch(e){}
-      }
-      function loadScript(src){
-        return new Promise(function(resolve, reject){
-          var s = document.createElement('script');
-          s.src = src;
-          // Load the app entry as an ES module so module files with `export`/`import` parse correctly
-          if (/main\.js$/.test(src)) {
-            s.type = 'module';
-          }
-          s.async = false;
-          s.onload = function(){ setStatus('Loaded: ' + src); resolve(); };
-          s.onerror = function(err){ setStatus('Failed to load: ' + src, true); reject(new Error('Failed to load ' + src)); };
-          document.head.appendChild(s);
-        });
-      }
-      async function ensure() {
-        try {
-          setStatus('Loading Decimal from vendor...');
-          await loadScript('vendor/decimal.min.js');
-          setStatus('Decimal loaded');
-          setStatus('Loading Chart.js from vendor...');
-          await loadScript('vendor/chart.min.js');
-          setStatus('Chart.js loaded');
-        } catch (e) {
-          setStatus('Failed to load vendor libraries', true);
-          console.error('Vendor library load failed', e);
-        }
-        try {
-          setStatus('Loading main.js');
-          await loadScript('main.js');
-          setStatus('');
-          try { const b = el('libStatus'); if (b) b.style.display = 'none'; } catch(e) {}
-        } catch (e) {
-          console.error('Failed to load controller_main.js', e);
-          setStatus('Failed to load controller_main.js — check console', true);
-        }
-      }
-      ensure().catch(function(err){ console.error('Loader error', err); setStatus('Loader error — check console', true); });
-    })();
-  </script>
+  <!-- P2: Native deferred script loading -->
+  <script src="vendor/decimal.min.js" defer></script>
+  <script src="vendor/chart.min.js" defer></script>
+  <script src="main.js" defer></script>
   <script>
     (function(){
       let deferredPrompt = null;
