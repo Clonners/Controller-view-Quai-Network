@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<link rel="preload" as="image" href="assets/brand/bitquai-hero-1920x1080.png">
 <link rel="stylesheet" href="css/brand.css">
 
   <meta charset="UTF-8">
@@ -448,7 +449,7 @@
   <main class="shell">
     <nav class="topnav" aria-label="Primary navigation">
       <a class="brand" href="index.html" aria-label="BitQuai home - Order inside entropy">
-        <img src="assets/brand/bitquai-icon-q-256.png" alt="BitQuai Q mark">
+        <img src="assets/brand/bitquai-icon-q-256.png" alt="BitQuai Q mark" decoding="async" loading="lazy">
         <span class="brand-text">
           <strong>BitQuai</strong>
           <span>Order inside entropy</span>
@@ -478,7 +479,7 @@
       </div>
 
       <aside class="hero-card" aria-label="BitQuai brand preview">
-        <img src="assets/brand/bitquai-og-1200x630.png" alt="BitQuai Open Graph banner">
+        <img src="assets/brand/bitquai-og-1200x630.png" alt="BitQuai Open Graph banner" fetchpriority="high" loading="eager">
         <div class="caption">
           <span>BitQuai Final Brand Pack</span>
           <span>Burgundy / terminal / testnet</span>

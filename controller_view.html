@@ -6,7 +6,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BitQuai Controller Dashboard</title>
-  <link rel="stylesheet" href="controller_styles.css">
+  <link rel="stylesheet" href="controller_styles.css" media="print" onload="this.media='screen'">
   <meta name="description" content="BitQuai — Mining, controller analytics, and QDEX terminal exchange UI.">
   <meta name="theme-color" content="#ff253a">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -87,7 +87,7 @@
 <body>
   <main class="app">
     <header>
-      <img src="assets/brand/bitquai-icon-q-256.png" alt="BitQuai logo" class="logo" />
+      <img src="assets/brand/bitquai-icon-q-256.png" alt="BitQuai logo" class="logo" fetchpriority="low" decoding="async" loading="lazy" width="36" height="36" />
       <div class="header-main">
         <h1>
           BitQuai Controller Dashboard
@@ -366,7 +366,7 @@
   <!-- Diagnostic loader: prefer CDN, fallback to local vendor, then load controller_main.js -->
   <!-- Install banner (moved outside .app so fixed positioning works correctly) -->
   <div id="installBanner">
-    <img src="assets/brand/bitquai-icon-q-256.png" alt="BitQuai">
+    <img src="assets/brand/bitquai-icon-q-256.png" alt="BitQuai" fetchpriority="low" decoding="async" loading="lazy" width="34" height="34">
     <div class="install-info">
       <div class="title">Install BitQuai Dashboard</div>
       <div class="subtitle">Add to your home screen</div>

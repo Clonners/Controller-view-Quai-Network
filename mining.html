@@ -6,8 +6,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BitQuai Mining Dashboard</title>
-  <script src="vendor/chart.min.js"></script>
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/styles.css" media="print" onload="this.media='screen'">
   <meta name="description" content="BitQuai — Mining, controller analytics, and QDEX terminal exchange UI.">
   <meta name="theme-color" content="#ff253a">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -89,7 +88,7 @@
 
         <!-- Install banner (compact pill for mobile like Controller View) -->
         <div id="installBanner">
-            <img src="assets/brand/bitquai-icon-q-256.png" alt="BitQuai">
+            <img src="assets/brand/bitquai-icon-q-256.png" alt="BitQuai" fetchpriority="low" decoding="async" loading="lazy" width="34" height="34">
             <div class="install-info">
                     <div class="title">Install BitQuai Dashboard</div>
                     <div class="subtitle">Add to your home screen</div>
@@ -499,6 +498,7 @@
                 document.addEventListener('DOMContentLoaded', function(){ if (!isMobileDevice() || isAppInstalled()){ if (banner) banner.style.display = 'none'; } });
             })();
         </script>
+        <script src="vendor/chart.min.js" defer></script>
         <script type="module" src="js/main.js"></script>
 
   if ('serviceWorker' in navigator) {
