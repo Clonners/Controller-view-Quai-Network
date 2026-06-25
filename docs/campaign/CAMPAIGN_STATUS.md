@@ -29,11 +29,11 @@ Push all 4 pages to 95%+ Performance and 95%+ Accessibility.
 | P3.11 | Lighthouse audit final | All | done | ✅ |
 | P3.12 | Build script (npm run build) | All | done | ✅ |
 | P3.13 | HTML validation + link checker | All | done | ✅ |
-| P3.14 | dns-prefetch for RPC endpoints | All | pending |  |
+| P3.14 | dns-prefetch for RPC endpoints | All | done | ✅ |
 
 ## Next Task
 
-P3.14 - dns-prefetch for RPC endpoints
+Campaign complete — all 14 tasks done.
 
 ## Commits
 
@@ -61,6 +61,7 @@ P3.14 - dns-prefetch for RPC endpoints
 
 - `3f95d8c` P3.12: Build script (npm run build) — CSS minifier, HTML validator, link checker, dist builder
 - `abe6d9c` P3.13: HTML validation + link checker — fix 4 img width/height warnings (CLS prevention)
+- `b499334` P3.14: dns-prefetch for RPC endpoints (dpool, proxy, prime.bitquai.live)
 
-Total commits: 21
-Total commits this session: 10
+Total commits: 22
+Total commits this session: 11
