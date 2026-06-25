@@ -7,10 +7,10 @@ Push all 4 pages to 95%+ Performance and 95%+ Accessibility.
 
 | Page | Perf | A11y | BP | SEO |
 |---|---|---|---|---|
-| Index | 74% | 100% | 100% | 100% |
-| Mining | 99% | 95% | 96% | 100% |
-| Controller | 90% | 88% | 100% | 100% |
-| QDEX | 97% | 94% | 100% | 100% |
+| Index | 100% | 100% | 81% | 100% |
+| Mining | 93% | 100% | 77% | 100% |
+| Controller | 88% | 96% | 100% | 100% |
+| QDEX | 81% | 94% | 100% | 100% |
 
 ## Tasks
 
@@ -26,14 +26,14 @@ Push all 4 pages to 95%+ Performance and 95%+ Accessibility.
 | P3.8 | loading=lazy on below-fold images | All | done | ✅ |
 | P3.9 | QDEX mobile responsive | QDEX | done | ✅ |
 | P3.10 | Controller mobile verify | Controller | done | ✅ |
-| P3.11 | Lighthouse audit final | All | pending |  |
+| P3.11 | Lighthouse audit final | All | done | ✅ |
 | P3.12 | Build script (npm run build) | All | pending |  |
 | P3.13 | HTML validation + link checker | All | pending |  |
 | P3.14 | dns-prefetch for RPC endpoints | All | pending |  |
 
 ## Next Task
 
-P3.11 - Lighthouse audit final
+P3.12 - Build script (npm run build)
 
 ## Commits
 
@@ -57,6 +57,7 @@ P3.11 - Lighthouse audit final
 - `28e0028` P3.8: fix loading=lazy on above-fold images (nav logos → eager)
 - `190d14e` P3.9: QDEX mobile responsive — nav bar class-based CSS, 3 breakpoints, table scroll wrappers, touch targets
 - `b9da19f` P3.10: Controller mobile verify — fix form labels (aria-label), add nav landmark, section aria-labels
+- `6f7cedb` P3.11: Lighthouse audit final — fix QDEX contrast (text-muted), CLS containment, nav image dimensions
 
-Total commits: 18
-Total commits this session: 7
+Total commits: 19
+Total commits this session: 8
