@@ -3,10 +3,28 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="icon" href="favicon.ico" type="image/x-icon">
-  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
   <title>BitQuai QDEX</title>
+  <meta name="description" content="BitQuai QDEX — terminal-style non-custodial exchange UI for Quai.">
+  <meta name="theme-color" content="#ff253a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="icon" href="icons/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="icons/favicon-48x48.png">
+  <link rel="icon" type="image/png" sizes="64x64" href="icons/favicon-64x64.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon-180x180.png">
+  <link rel="manifest" href="site.webmanifest">
+  <meta property="og:title" content="BitQuai QDEX">
+  <meta property="og:description" content="Order inside entropy.">
+  <meta property="og:image" content="https://bitquai.live/assets/brand/bitquai-og-1200x630.png">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://bitquai.live/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="BitQuai QDEX">
+  <meta name="twitter:description" content="Order inside entropy.">
+  <meta name="twitter:image" content="https://bitquai.live/assets/brand/bitquai-og-1200x630.png">
   <style>
 /* ═══════════════════════════════════════════════════
    QDEX — Terminal Exchange UI
@@ -475,7 +493,7 @@ input { font: inherit; }
   
 <nav class="bitquai-nav" style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:var(--surface);border-bottom:1px solid var(--border);">
   <div style="display:flex;align-items:center;gap:10px;">
-    <img src="quai-logo.png" alt="BitQuai" style="height:22px;width:auto;" />
+    <img src="assets/brand/bitquai-logo-nav.png" alt="BitQuai" style="height:22px;width:auto;" />
     <span style="font-weight:700;color:var(--accent);font-size:14px;">BitQuai</span>
   </div>
   <div style="display:flex;gap:6px;">
@@ -707,6 +725,10 @@ input { font: inherit; }
      ═══════════════════════════════════════════════ */
 
   const API = '';
+  const STATIC_DEMO = location.hostname === 'bitquai.live' || location.hostname.endsWith('github.io');
+  let tvChart = null;
+  let tvSeries = null;
+
 
   // ── State ──────────────────────────────────────
   const state = {
@@ -751,8 +773,11 @@ input { font: inherit; }
 
   // ── Fetch ──────────────────────────────────────
   async function api(path) {
+    if (STATIC_DEMO) return null;
     try {
       const r = await fetch(`${API}${path}`);
+      const type = r.headers.get('content-type') || '';
+      if (!r.ok || !type.includes('application/json')) return null;
       return await r.json();
     } catch(e) {
       console.warn('API fetch failed:', path, e);
@@ -774,24 +799,24 @@ input { font: inherit; }
 
     tvChart = LightweightCharts.createChart(container, {
       layout: {
-        background: { type: 'solid', color: '#111114' },
-        textColor: '#71717a',
+        background: { type: 'solid', color: '#12070b' },
+        textColor: '#9ca3af',
       },
       grid: {
-        vertLines: { color: 'rgba(39,39,42,.5)' },
-        horzLines: { color: 'rgba(39,39,42,.5)' },
+        vertLines: { color: 'rgba(48,18,25,.55)' },
+        horzLines: { color: 'rgba(48,18,25,.55)' },
       },
       crosshair: {
         mode: LightweightCharts.CrosshairMode.Normal,
-        vertLine: { color: 'rgba(0,255,102,.3)', labelBackgroundColor: '#10b981' },
-        horzLine: { color: 'rgba(0,255,102,.3)', labelBackgroundColor: '#10b981' },
+        vertLine: { color: 'rgba(255,37,58,.35)', labelBackgroundColor: '#ff253a' },
+        horzLine: { color: 'rgba(255,37,58,.35)', labelBackgroundColor: '#ff253a' },
       },
       rightPriceScale: {
-        borderColor: '#27272a',
+        borderColor: '#301219',
         scaleMargins: { top: 0.1, bottom: 0.1 },
       },
       timeScale: {
-        borderColor: '#27272a',
+        borderColor: '#301219',
         timeVisible: true,
         rightOffset: 12,
       },
@@ -800,11 +825,11 @@ input { font: inherit; }
     });
 
     tvSeries = tvChart.addSeries(LightweightCharts.CandlestickSeries, {
-      upColor: '#10b981',
-      downColor: '#ef4444',
+      upColor: '#4ade80',
+      downColor: '#ff4b4b',
       borderVisible: false,
-      wickUpColor: '#10b981',
-      wickDownColor: '#ef4444',
+      wickUpColor: '#4ade80',
+      wickDownColor: '#ff4b4b',
     });
 
     // Resize observer
@@ -855,6 +880,68 @@ input { font: inherit; }
   }
 
   // ── Mock Kline Generator ──────────────────────
+
+  // ── Static Demo Data for GitHub Pages ───────────
+  const DEMO_MARKETS = Object.freeze([
+    { id: 'WQUAI-WQI', base: 'WQUAI', quote: 'WQI', status: 'demo' },
+    { id: 'WQUAI-USDT', base: 'WQUAI', quote: 'USDT', status: 'demo' },
+    { id: 'WQI-USDT', base: 'WQI', quote: 'USDT', status: 'demo' },
+  ]);
+
+  function demoMid(marketId=state.market) {
+    return {
+      'WQUAI-WQI': 1.7425,
+      'WQUAI-USDT': 0.0834,
+      'WQI-USDT': 0.0479,
+    }[marketId] || 1;
+  }
+
+  function generateMockTickers() {
+    const out = {};
+    for (const m of DEMO_MARKETS) {
+      const mid = demoMid(m.id);
+      const drift = (Math.sin(Date.now() / 90000 + mid) * 0.006);
+      const last = mid * (1 + drift);
+      out[m.id] = {
+        marketId: m.id,
+        lastPrice: last.toFixed(6),
+        bestBid: (last * 0.9985).toFixed(6),
+        bestAsk: (last * 1.0015).toFixed(6),
+        change24h: (drift * 100).toFixed(2),
+        volume24h: (42000 + Math.abs(drift) * 900000).toFixed(2),
+      };
+    }
+    return out;
+  }
+
+  function generateMockOrderbook(marketId=state.market) {
+    const mid = demoMid(marketId) * (1 + Math.sin(Date.now() / 70000) * 0.004);
+    const bids = [];
+    const asks = [];
+    for (let i = 0; i < 14; i++) {
+      const step = mid * 0.0012 * (i + 1);
+      const amount = (90 + (14 - i) * 18 + Math.random() * 65).toFixed(2);
+      bids.push({ price: (mid - step).toFixed(6), amount });
+      asks.push({ price: (mid + step).toFixed(6), amount: (Number(amount) * (0.88 + Math.random() * 0.28)).toFixed(2) });
+    }
+    return { bids, asks };
+  }
+
+  function generateMockTrades(marketId=state.market, count=18) {
+    const mid = demoMid(marketId);
+    const now = Date.now();
+    return Array.from({ length: count }, (_, i) => {
+      const side = i % 3 === 0 ? 'sell' : 'buy';
+      const price = mid * (1 + (Math.random() - 0.5) * 0.01);
+      return {
+        timestamp: now - i * 22000,
+        price: price.toFixed(6),
+        amount: (25 + Math.random() * 460).toFixed(2),
+        side,
+      };
+    });
+  }
+
   function generateMockKlines(count=100) {
     const now = Math.floor(Date.now() / 1000);
     const intervalMs = {
@@ -923,14 +1010,19 @@ input { font: inherit; }
       $('#tickerLast').className = 'val green';
       $('#tickerVol').textContent = fmtAmt(t.volume24h);
       $('#tickerVol').className = 'val';
+      $('#tickerChange').textContent = `${Number(t.change24h || 0).toFixed(2)}%`;
+      $('#tickerChange').className = Number(t.change24h || 0) >= 0 ? 'val green' : 'val red';
+      $('#tickerBid').textContent = fmt(t.bestBid);
+      $('#tickerBid').className = 'val green';
+      $('#tickerAsk').textContent = fmt(t.bestAsk);
+      $('#tickerAsk').className = 'val red';
     } else {
-      $('#tickerLast').textContent = '—';
-      $('#tickerLast').className = 'val dim';
-      $('#tickerVol').textContent = '—';
-      $('#tickerVol').className = 'val dim';
+      for (const id of ['tickerLast', 'tickerVol', 'tickerChange', 'tickerBid', 'tickerAsk']) {
+        const el = $('#' + id);
+        el.textContent = '—';
+        el.className = 'val dim';
+      }
     }
-    if (t?.bestBid) $('#tickerBid').textContent = fmt(t.bestBid);
-    if (t?.bestAsk) $('#tickerAsk').textContent = fmt(t.bestAsk);
 
     // Update units
     $('#priceUnit').textContent = m.quote;
@@ -958,12 +1050,14 @@ input { font: inherit; }
       </tr>`;
     }
 
-    // Spread
+    // Spread — best ask is the lowest ask, best bid is the highest bid.
     if (asks.length && bids.length) {
-      const spread = (Number(bids[0].price) - Number(asks[asks.length-1].price)).toFixed(6);
+      const bestAsk = Number(asks[0].price);
+      const bestBid = Number(bids[0].price);
+      const spread = Math.max(0, bestAsk - bestBid).toFixed(6);
       tbody.innerHTML += `<tr class="spread"><td colspan="3">Spread: ${spread} ${state.markets.find(m=>m.id===state.market)?.quote}</td></tr>`;
     } else {
-      tbody.innerHTML += `<tr class="spread"><td colspan="3">Empty orderbook</td></tr>`;
+      tbody.innerHTML += `<tr class="spread"><td colspan="3">No order book data</td></tr>`;
     }
 
     // Bids
@@ -1022,36 +1116,46 @@ input { font: inherit; }
   // ── Data Loading ───────────────────────────────
   async function loadMarkets() {
     const data = await api('/v1/markets');
-    if (data?.markets) {
-      state.markets = data.markets;
-      renderMarkets();
-    }
+    state.markets = (data?.markets && data.markets.length) ? data.markets : [...DEMO_MARKETS];
+    renderMarkets();
+    renderTicker();
   }
 
   async function loadTickers() {
     const data = await api('/v1/tickers');
-    if (data?.tickers) {
-      for (const t of data.tickers) {
-        state.tickers[t.marketId] = t;
-      }
-      renderTicker();
+    state.tickers = {};
+    if (data?.tickers && data.tickers.length) {
+      for (const t of data.tickers) state.tickers[t.marketId] = t;
+    } else {
+      state.tickers = generateMockTickers();
     }
+    renderTicker();
   }
 
   async function loadOrderbook() {
     const data = await api(`/v1/orderbook/${state.market}`);
-    if (data) {
+    if (data && ((data.bids && data.bids.length) || (data.asks && data.asks.length))) {
       state.orderbook = { bids: data.bids || [], asks: data.asks || [] };
-      renderOrderbook();
+    } else {
+      state.orderbook = generateMockOrderbook(state.market);
     }
+    if (state.orderbook.bids.length && state.orderbook.asks.length) {
+      const current = state.tickers[state.market] || { marketId: state.market, lastPrice: demoMid(state.market), volume24h: '0', change24h: '0' };
+      state.tickers[state.market] = {
+        ...current,
+        bestBid: state.orderbook.bids[0].price,
+        bestAsk: state.orderbook.asks[0].price,
+        lastPrice: current.lastPrice || ((Number(state.orderbook.bids[0].price) + Number(state.orderbook.asks[0].price)) / 2).toFixed(6),
+      };
+      renderTicker();
+    }
+    renderOrderbook();
   }
 
   async function loadTrades() {
     const data = await api(`/v1/trades/${state.market}`);
-    if (data?.trades) {
-      state.trades = data.trades;
-      renderTrades();
-    }
+    state.trades = (data?.trades && data.trades.length) ? data.trades : generateMockTrades(state.market);
+    renderTrades();
   }
 
   async function loadAccount() {
@@ -1214,7 +1318,8 @@ input { font: inherit; }
   // ── Init ───────────────────────────────────────
   async function init() {
     logActivity('BitQuai QDEX terminal loaded', 'info');
-    logActivity('Mock mode — no real transactions', 'warn');
+    logActivity(STATIC_DEMO ? 'Static demo mode — GitHub Pages has no /v1 API backend' : 'API mode — live endpoints enabled', STATIC_DEMO ? 'warn' : 'success');
+    logActivity('No real transactions are sent from this demo UI', 'warn');
 
     await loadMarkets();
     await refresh();

@@ -1,7 +1,7 @@
 {
   "name": "BitQuai",
   "short_name": "BitQuai",
-  "description": "BitQuai Dashboard \u2014 Mining, Controller, DEX",
+  "description": "BitQuai — Mining, controller analytics, and QDEX terminal exchange UI.",
   "icons": [
     {
       "src": "icons/android-chrome-192x192.png",
@@ -15,7 +15,7 @@
     }
   ],
   "theme_color": "#ff253a",
-  "background_color": "#0a0a0c",
+  "background_color": "#050307",
   "display": "standalone",
   "start_url": "/",
   "scope": "/"
