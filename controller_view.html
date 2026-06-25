@@ -137,9 +137,11 @@
         </h1>
       </div>
       <div class="header-actions">
-        <a href="index.html" class="nav-pill">Home</a>
-        <a href="mining.html" class="nav-pill">Mining</a>
-        <a href="qdex.html" class="nav-pill">QDEX</a>
+        <nav aria-label="Main navigation">
+          <a href="index.html" class="nav-pill">Home</a>
+          <a href="mining.html" class="nav-pill">Mining</a>
+          <a href="qdex.html" class="nav-pill">QDEX</a>
+        </nav>
         <a
           href="https://github.com/Clonners/Controller-view-Quai-Network"
           target="_blank"
@@ -173,10 +175,10 @@
     
 
     <div class="grid">
-      <section class="card" id="chart-card">
+      <section class="card" id="chart-card" aria-label="DD* Star chart">
         <div class="card-header flex-between">
           <div class="left">
-            <input class="rpc-input" type="text" id="rpc-url" placeholder="RPC endpoint (prime)" value="https://prime.bitquai.live" spellcheck="false" />
+            <input class="rpc-input" type="text" id="rpc-url" placeholder="RPC endpoint (prime)" value="https://prime.bitquai.live" spellcheck="false" aria-label="RPC endpoint URL" />
             <div class="header-actions-btns">
               <button id="refresh-btn"><span>Refresh</span></button>
               <button id="auto-btn" class="secondary">Auto (10s)</button>
@@ -230,7 +232,7 @@
         </div>
       </section>
 
-      <section class="card">
+      <section class="card" aria-label="Current state Prime metrics">
         <div class="card-header">
           <div>
             <div class="card-title">Current state (Prime)</div>
@@ -315,7 +317,7 @@
         
       </section>
 
-      <section class="card">
+      <section class="card" aria-label="Conversion and discounts">
         <div class="card-header">
           <div>
             <div class="card-title">Conversion & Discounts</div>
@@ -351,7 +353,7 @@
             <div class="metric-title">Cubic Discount (preview)</div>
             <div class="metric-main">
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <input id="cubic-amount" class="conversion-input" placeholder="Amount" style="width:120px" />
+                <input id="cubic-amount" class="conversion-input" placeholder="Amount" style="width:120px" aria-label="Conversion amount" />
                 <label for="cubic-isqi" class="sr-only">Currency unit</label>
                 <select id="cubic-isqi" style="padding:6px;border-radius:6px">
                   <option value="true">Qi</option>
@@ -378,7 +380,7 @@
           </div>
           
           <div class="conversion-direction">
-            <button id="swap-direction-btn" class="swap-btn" title="Swap direction">
+            <button id="swap-direction-btn" class="swap-btn" title="Swap direction" aria-label="Swap conversion direction">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M7 16V4M7 4L3 8M7 4L11 8M17 8V20M17 20L21 16M17 20L13 16"/>
               </svg>
