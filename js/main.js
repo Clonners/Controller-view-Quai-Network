@@ -494,64 +494,10 @@ async function updateDashboard() {
     }
 }
 
-/* ------------------
-   View Drawer / Multi-view helpers
-   ------------------ */
-function toggleViewDrawer() {
-    const drawer = document.getElementById('sideDrawer');
-    if (!drawer) createSideDrawer();
-    const d = document.getElementById('sideDrawer');
-    if (d.classList.contains('open')) d.classList.remove('open');
-    else d.classList.add('open');
-}
-
-function createSideDrawer() {
-    if (document.getElementById('sideDrawer')) return;
-    const drawer = document.createElement('div');
-    drawer.id = 'sideDrawer';
-    drawer.className = 'side-drawer';
-    drawer.innerHTML = `
-        <h4>Views</h4>
-        <div class="view-list">
-            <button onclick="showMainView()">Solo Mining Dashboard</button>
-            <button onclick="switchToView('controller')">Controller View</button>
-        </div>
-    `;
-    document.body.appendChild(drawer);
-}
-
-function switchToView(name) {
-    const drawer = document.getElementById('sideDrawer');
-    if (drawer) drawer.classList.remove('open');
-    if (name === 'controller') {
-        // show iframe with controller view (path relative to repo)
-        const alt = document.getElementById('altContent');
-        const main = document.getElementById('mainContent');
-        const iframe = document.getElementById('secondaryView');
-        iframe.src = './controller_view.html';
-        document.getElementById('altTitle').textContent = 'Controller View';
-        main.style.display = 'none';
-        alt.style.display = 'block';
-    }
-}
-
-function showMainView() {
-    const alt = document.getElementById('altContent');
-    const main = document.getElementById('mainContent');
-    const drawer = document.getElementById('sideDrawer');
-    if (drawer) drawer.classList.remove('open');
-    const iframe = document.getElementById('secondaryView');
-    if (iframe) iframe.src = '';
-    alt.style.display = 'none';
-    main.style.display = 'block';
-}
-
-// expose to global for inline handlers
-try {
-    window.toggleViewDrawer = toggleViewDrawer;
-    window.switchToView = switchToView;
-    window.showMainView = showMainView;
-} catch (e) {}
+/* View switching removed per user request.
+   Functions `toggleViewDrawer`, `createSideDrawer`, `switchToView` and `showMainView`
+   were intentionally removed to disable in-page navigation between Mining and Controller views.
+*/
 
 /**
  * Update pool statistics display
