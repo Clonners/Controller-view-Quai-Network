@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>404 — Page Not Found | BitQuai</title>
+  <link rel="stylesheet" href="css/brand.css">
+  <style>
+    .error-page {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+      padding: 24px;
+      animation: fadeUp 0.5s ease-out both;
+    }
+    .error-code {
+      font-size: 6rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--accent), #ff7a3c);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 16px;
+    }
+    .error-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .error-desc {
+      color: var(--muted);
+      max-width: 400px;
+      margin-bottom: 32px;
+      line-height: 1.5;
+    }
+    .error-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .error-actions a {
+      padding: 10px 20px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+    .error-actions a:hover {
+      transform: translateY(-1px);
+    }
+    .error-actions a.primary {
+      background: linear-gradient(135deg, var(--accent), #ff7a3c);
+      color: #050308;
+      box-shadow: 0 10px 24px rgba(255, 37, 58, 0.6);
+    }
+    .error-actions a.secondary {
+      background: rgba(7, 3, 7, 0.95);
+      color: var(--muted);
+      border: 1px solid rgba(75, 85, 99, 0.8);
+    }
+    .error-actions a.secondary:hover {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+    @media (max-width: 600px) {
+      .error-code { font-size: 4rem; }
+      .error-title { font-size: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="error-page">
+    <div class="error-code">404</div>
+    <h1 class="error-title">Page Not Found</h1>
+    <p class="error-desc">The page you're looking for doesn't exist or has been moved. Head back to BitQuai.</p>
+    <div class="error-actions">
+      <a href="/" class="primary">Go Home</a>
+      <a href="/qdex.html" class="secondary">QDEX Trading</a>
+      <a href="/mining.html" class="secondary">Mining Dashboard</a>
+    </div>
+  </div>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
+  </script>
+</body>
+</html>
