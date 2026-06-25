@@ -15,30 +15,37 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:        #09090b;
-  --surface:   #111114;
-  --surface-2: #18181c;
-  --surface-3: #1e1e22;
-  --border:    #27272a;
-  --border-hi: #3f3f46;
+  /* BitQuai burgundy — unificado con Mining/Controller */
+  --bg:        #050307;
+  --surface:   #12070b;
+  --surface-2: #0a0509;
+  --surface-3: #1a0e15;
+  --border:    #301219;
+  --border-hi: #4a1c2a;
+  --accent:    #ff253a;
+  --accent-soft: rgba(255, 37, 58, 0.18);
 
-  --text:      #fafafa;
-  --text-dim:  #71717a;
-  --text-muted:#52525b;
+  --text:      #e5e7eb;
+  --text-dim:  #9ca3af;
+  --text-muted:#6b7280;
 
-  --green:     #10b981;
-  --green-bg:  rgba(16,185,129,.10);
-  --red:       #ef4444;
-  --red-bg:    rgba(239,68,68,.10);
+  --green:     #4ade80;
+  --green-bg:  rgba(74,222,128,.10);
+  --red:       #ff4b4b;
+  --red-bg:    rgba(255,75,75,.10);
   --yellow:    #f59e0b;
   --yellow-bg: rgba(245,158,11,.10);
-  --blue:      #3b82f6;
-  --blue-bg:   rgba(59,130,246,.10);
+  --blue:      #60a5fa;
+  --blue-bg:   rgba(96,165,250,.10);
 
   --mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'SF Mono', 'CaskaydiaCove Nerd Font', ui-monospace, Consolas, monospace;
 }
 
-html { background: var(--bg); color: var(--text); font: 13px/1.5 var(--mono); }
+html {
+  background: radial-gradient(circle at top, #2b0005 0, #050307 40%, #020005 80%);
+  color: var(--text);
+  font: 13px/1.5 var(--mono);
+}
 body { min-height: 100vh; display: flex; flex-direction: column; }
 a { color: var(--blue); text-decoration: none; }
 a:hover { text-decoration: underline; }
@@ -57,7 +64,7 @@ input { font: inherit; }
 }
 .topbar-brand {
   font-weight: 800; font-size: 15px; letter-spacing: .08em;
-  color: var(--green); margin-right: 8px;
+  color: var(--accent); margin-right: 8px;
 }
 .topbar-brand span { color: var(--text-dim); font-weight: 400; }
 
@@ -69,7 +76,7 @@ input { font: inherit; }
   transition: color .15s, border-color .15s;
 }
 .topbar-tab:hover { color: var(--text); }
-.topbar-tab.active { color: var(--text); border-bottom-color: var(--green); }
+.topbar-tab.active { color: var(--text); border-bottom-color: var(--accent); }
 
 .topbar-spacer { flex: 1; }
 
@@ -175,7 +182,7 @@ input { font: inherit; }
   border-left: 2px solid transparent;
 }
 .market-item:hover { background: var(--surface-2); }
-.market-item.active { background: var(--surface-3); border-left-color: var(--green); }
+.market-item.active { background: var(--surface-3); border-left-color: var(--accent); }
 .market-item .pair { font-weight: 600; }
 .market-item .status-badge {
   font-size: 10px; padding: 1px 5px; border-radius: 3px;
@@ -323,7 +330,7 @@ input { font: inherit; }
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 1px; background: var(--border);
-  min-height: 200px;
+  min-height: 150px;
 }
 .bottom-panel { background: var(--surface); }
 
@@ -340,7 +347,7 @@ input { font: inherit; }
   transition: color .15s, border-color .15s;
 }
 .tab-item:hover { color: var(--text-dim); }
-.tab-item.active { color: var(--text); border-bottom-color: var(--green); }
+.tab-item.active { color: var(--text); border-bottom-color: var(--accent); }
 
 .tab-content { flex: 1; overflow-y: auto; }
 .tab-pane { display: none; }
@@ -466,18 +473,17 @@ input { font: inherit; }
 <body>
 
   
-<!-- BitQuai Navigation -->
-<div class="bitquai-nav" style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:var(--surface);border-bottom:1px solid var(--border);">
-  <div style="display:flex;align-items:center;gap:12px;">
-    <img src="quai-logo.png" alt="BitQuai" style="width:28px;height:28px;border-radius:4px;" />
-    <span style="font-weight:600;color:var(--text);">BitQuai</span>
+<nav class="bitquai-nav" style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:var(--surface);border-bottom:1px solid var(--border);">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <img src="quai-logo.png" alt="BitQuai" style="height:22px;width:auto;" />
+    <span style="font-weight:700;color:var(--accent);font-size:14px;">BitQuai</span>
   </div>
   <div style="display:flex;gap:6px;">
-    <a href="index.html" class="nav-pill" style="padding:6px 10px;border-radius:8px;background:rgba(255,37,58,0.08);color:var(--text-dim);text-decoration:none;border:1px solid rgba(255,37,58,0.08);">Mining Dashboard</a>
-    <a href="controller_view.html" class="nav-pill" style="padding:6px 10px;border-radius:8px;background:rgba(255,37,58,0.08);color:var(--text-dim);text-decoration:none;border:1px solid rgba(255,37,58,0.08);">Controller</a>
-    <span class="nav-pill" style="padding:6px 10px;border-radius:8px;background:rgba(16,185,129,0.10);color:var(--green);text-decoration:none;border:1px solid rgba(16,185,129,0.20);font-weight:600;">QDEX</span>
+    <a href="index.html" style="padding:5px 10px;border-radius:6px;background:var(--accent-soft);color:var(--text-dim);text-decoration:none;border:1px solid rgba(255,37,58,0.08);font-size:12px;">Mining</a>
+    <a href="controller_view.html" style="padding:5px 10px;border-radius:6px;background:var(--accent-soft);color:var(--text-dim);text-decoration:none;border:1px solid rgba(255,37,58,0.08);font-size:12px;">Controller</a>
+    <span style="padding:5px 10px;border-radius:6px;background:var(--accent-soft);color:var(--accent);text-decoration:none;border:1px solid rgba(255,37,58,0.20);font-weight:600;font-size:12px;">QDEX</span>
   </div>
-</div>
+</nav>
 
 <!-- Top Bar -->
   <header class="topbar">
