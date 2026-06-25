@@ -1,0 +1,1223 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
+  <title>BitQuai QDEX</title>
+  <style>
+/* ═══════════════════════════════════════════════════
+   QDEX — Terminal Exchange UI
+   ═══════════════════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #09090b;
+  --surface:   #111114;
+  --surface-2: #18181c;
+  --surface-3: #1e1e22;
+  --border:    #27272a;
+  --border-hi: #3f3f46;
+
+  --text:      #fafafa;
+  --text-dim:  #71717a;
+  --text-muted:#52525b;
+
+  --green:     #10b981;
+  --green-bg:  rgba(16,185,129,.10);
+  --red:       #ef4444;
+  --red-bg:    rgba(239,68,68,.10);
+  --yellow:    #f59e0b;
+  --yellow-bg: rgba(245,158,11,.10);
+  --blue:      #3b82f6;
+  --blue-bg:   rgba(59,130,246,.10);
+
+  --mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'SF Mono', 'CaskaydiaCove Nerd Font', ui-monospace, Consolas, monospace;
+}
+
+html { background: var(--bg); color: var(--text); font: 13px/1.5 var(--mono); }
+body { min-height: 100vh; display: flex; flex-direction: column; }
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button { font: inherit; cursor: pointer; }
+input { font: inherit; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ── Top Bar ──────────────────────────────────── */
+.topbar {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; gap: 12px;
+  padding: 0 16px; height: 44px;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+}
+.topbar-brand {
+  font-weight: 800; font-size: 15px; letter-spacing: .08em;
+  color: var(--green); margin-right: 8px;
+}
+.topbar-brand span { color: var(--text-dim); font-weight: 400; }
+
+.topbar-tabs { display: flex; gap: 2px; height: 100%; align-items: stretch; }
+.topbar-tab {
+  padding: 0 14px; display: flex; align-items: center;
+  font-size: 12px; color: var(--text-dim);
+  background: none; border: none; border-bottom: 2px solid transparent;
+  transition: color .15s, border-color .15s;
+}
+.topbar-tab:hover { color: var(--text); }
+.topbar-tab.active { color: var(--text); border-bottom-color: var(--green); }
+
+.topbar-spacer { flex: 1; }
+
+.topbar-status {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11px; color: var(--text-muted);
+}
+.status-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+}
+.status-dot.mock { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); }
+
+.topbar-wallet {
+  padding: 4px 10px; border-radius: 6px;
+  font-size: 11px; color: var(--text-dim);
+  border: 1px solid var(--border); background: var(--surface-2);
+  cursor: pointer;
+}
+.topbar-wallet:hover { border-color: var(--border-hi); }
+
+/* ── Ticker Strip ─────────────────────────────── */
+.ticker-strip {
+  display: flex; align-items: center; gap: 20px;
+  padding: 6px 16px; height: 36px;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  font-size: 11px;
+}
+.ticker-pair {
+  font-weight: 700; font-size: 14px; color: var(--text);
+  letter-spacing: .03em;
+}
+.ticker-stat { display: flex; flex-direction: column; line-height: 1.2; }
+.ticker-stat label { color: var(--text-muted); font-size: 10px; text-transform: uppercase; letter-spacing: .06em; }
+.ticker-stat .val { font-weight: 600; }
+.ticker-stat .val.green { color: var(--green); }
+.ticker-stat .val.red { color: var(--red); }
+.ticker-stat .val.dim { color: var(--text-dim); }
+
+/* ── Main Grid ────────────────────────────────── */
+.main {
+  flex: 1; display: grid;
+  grid-template-columns: 200px 1fr 300px;
+  grid-template-rows: auto 1fr auto;
+  gap: 1px; background: var(--border);
+}
+
+/* ── Panels ───────────────────────────────────── */
+.panel {
+  background: var(--surface);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 12px; font-size: 11px; font-weight: 600;
+  color: var(--text-dim); text-transform: uppercase; letter-spacing: .06em;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.panel-header .count {
+  font-weight: 400; color: var(--text-muted);
+}
+.panel-body {
+  flex: 1; overflow-y: auto;
+}
+
+/* ── Chart ────────────────────────────────────── */
+.chart-row {
+  grid-column: 2; background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: none; flex-direction: column;
+  flex-shrink: 0;
+}
+.chart-row.visible { display: flex; }
+.chart-container {
+  width: 100%; height: 280px; position: relative;
+}
+.chart-container .tv-chart { width: 100%; height: 100%; }
+.chart-intervals {
+  display: flex; gap: 2px; padding: 4px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.interval-btn {
+  padding: 3px 8px; font-size: 10px;
+  color: var(--text-muted); background: none;
+  border: 1px solid transparent; border-radius: 3px;
+  text-transform: uppercase; letter-spacing: .04em;
+}
+.interval-btn:hover { color: var(--text-dim); }
+.interval-btn.active {
+  color: var(--text); background: var(--surface-3);
+  border-color: var(--border);
+}
+
+/* ── Markets List ─────────────────────────────── */
+.markets-list { }
+.market-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 7px 12px; cursor: pointer;
+  font-size: 12px; transition: background .1s;
+  border-left: 2px solid transparent;
+}
+.market-item:hover { background: var(--surface-2); }
+.market-item.active { background: var(--surface-3); border-left-color: var(--green); }
+.market-item .pair { font-weight: 600; }
+.market-item .status-badge {
+  font-size: 10px; padding: 1px 5px; border-radius: 3px;
+  background: var(--yellow-bg); color: var(--yellow);
+}
+
+/* ── Orderbook ────────────────────────────────── */
+.ob-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.ob-table th {
+  position: sticky; top: 0; z-index: 1;
+  padding: 5px 12px; text-align: right;
+  font-size: 10px; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: .06em;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+}
+.ob-table th:first-child { text-align: left; }
+.ob-table td {
+  padding: 2px 12px; text-align: right;
+  font-variant-numeric: tabular-nums;
+  position: relative;
+}
+.ob-table td:first-child { text-align: left; }
+.ob-table tr.ask td { color: var(--red); }
+.ob-table tr.bid td { color: var(--green); }
+.ob-table tr.spread td {
+  padding: 6px 12px; text-align: center;
+  color: var(--text-muted); font-size: 11px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.ob-depth-bar {
+  position: absolute; right: 0; top: 0; bottom: 0;
+  opacity: .08; pointer-events: none;
+}
+.ob-depth-bar.ask { background: var(--red); }
+.ob-depth-bar.bid { background: var(--green); }
+
+/* ── Trade History ────────────────────────────── */
+.trades-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.trades-table th {
+  position: sticky; top: 0; z-index: 1;
+  padding: 5px 12px; text-align: right;
+  font-size: 10px; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: .06em;
+  background: var(--surface);
+}
+.trades-table th:first-child { text-align: left; }
+.trades-table td {
+  padding: 2px 12px; text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.trades-table td:first-child { text-align: left; }
+.trade-side.buy { color: var(--green); }
+.trade-side.sell { color: var(--red); }
+
+/* ── Trade Form ───────────────────────────────── */
+.trade-form-panel { padding: 12px; }
+
+.side-tabs { display: flex; gap: 4px; margin-bottom: 12px; }
+.side-tab {
+  flex: 1; padding: 8px; text-align: center;
+  font-size: 12px; font-weight: 700; text-transform: uppercase;
+  border-radius: 6px; border: 1px solid var(--border);
+  background: none; transition: all .15s;
+}
+.side-tab.buy { color: var(--text-dim); }
+.side-tab.buy.active { color: #fff; background: var(--green); border-color: var(--green); }
+.side-tab.sell { color: var(--text-dim); }
+.side-tab.sell.active { color: #fff; background: var(--red); border-color: var(--red); }
+
+.order-type-tabs { display: flex; gap: 2px; margin-bottom: 12px; }
+.order-type-tab {
+  padding: 4px 10px; font-size: 11px;
+  color: var(--text-muted); background: none; border: none;
+  border-radius: 4px;
+}
+.order-type-tab.active { color: var(--text); background: var(--surface-3); }
+
+.form-group { margin-bottom: 10px; }
+.form-group label {
+  display: block; font-size: 10px; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: .06em;
+  margin-bottom: 4px;
+}
+.input-row {
+  display: flex; align-items: center;
+  border: 1px solid var(--border); border-radius: 6px;
+  background: var(--surface-2); overflow: hidden;
+  transition: border-color .15s;
+}
+.input-row:focus-within { border-color: var(--border-hi); }
+.input-row input {
+  flex: 1; padding: 8px 10px;
+  background: none; border: none; color: var(--text);
+  font-size: 13px; outline: none;
+}
+.input-row input::placeholder { color: var(--text-muted); }
+.input-row .unit {
+  padding: 0 10px; font-size: 11px; color: var(--text-muted);
+  white-space: nowrap;
+}
+.input-row .step-btn {
+  width: 28px; height: 100%; display: flex; align-items: center; justify-content: center;
+  background: none; border: none; color: var(--text-muted);
+  font-size: 14px; cursor: pointer;
+}
+.input-row .step-btn:hover { color: var(--text); background: var(--surface-3); }
+
+.slider-row { display: flex; gap: 4px; margin-bottom: 12px; }
+.pct-btn {
+  flex: 1; padding: 5px; font-size: 11px;
+  color: var(--text-muted); background: var(--surface-2);
+  border: 1px solid var(--border); border-radius: 4px;
+}
+.pct-btn:hover { color: var(--text); border-color: var(--border-hi); }
+
+.form-total {
+  display: flex; justify-content: space-between;
+  padding: 8px 0; font-size: 12px;
+  color: var(--text-dim); border-top: 1px solid var(--border);
+  margin-top: 4px; margin-bottom: 12px;
+}
+.form-total .amount { color: var(--text); font-weight: 600; }
+
+.submit-btn {
+  width: 100%; padding: 10px;
+  font-size: 13px; font-weight: 700; text-transform: uppercase;
+  border: none; border-radius: 6px;
+  transition: opacity .15s;
+}
+.submit-btn.buy { background: var(--green); color: #fff; }
+.submit-btn.sell { background: var(--red); color: #fff; }
+.submit-btn:hover { opacity: .85; }
+.submit-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+.form-balance {
+  text-align: right; font-size: 11px; color: var(--text-muted);
+  margin-top: 8px;
+}
+.form-balance span { color: var(--text-dim); }
+
+/* ── Bottom Panels (Account, Orders) ──────────── */
+.bottom-panels { grid-column: 1 / -1; }
+.bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1px; background: var(--border);
+  min-height: 200px;
+}
+.bottom-panel { background: var(--surface); }
+
+.tab-bar {
+  display: flex; gap: 0;
+  padding: 0 12px; border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.tab-item {
+  padding: 8px 14px; font-size: 11px; font-weight: 600;
+  color: var(--text-muted); background: none; border: none;
+  border-bottom: 2px solid transparent;
+  text-transform: uppercase; letter-spacing: .05em;
+  transition: color .15s, border-color .15s;
+}
+.tab-item:hover { color: var(--text-dim); }
+.tab-item.active { color: var(--text); border-bottom-color: var(--green); }
+
+.tab-content { flex: 1; overflow-y: auto; }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+.orders-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.orders-table th {
+  position: sticky; top: 0;
+  padding: 5px 12px; text-align: left;
+  font-size: 10px; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: .06em;
+  background: var(--surface);
+}
+.orders-table td {
+  padding: 5px 12px;
+  font-variant-numeric: tabular-nums;
+  border-top: 1px solid var(--border);
+}
+.cancel-btn {
+  padding: 2px 8px; font-size: 10px;
+  color: var(--text-muted); background: var(--surface-2);
+  border: 1px solid var(--border); border-radius: 3px;
+}
+.cancel-btn:hover { color: var(--red); border-color: var(--red); }
+
+/* ── Balances ─────────────────────────────────── */
+.balance-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 7px 12px; border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.balance-row:last-child { border-bottom: none; }
+.balance-token { font-weight: 600; }
+.balance-amount { font-variant-numeric: tabular-nums; }
+.balance-available { color: var(--green); }
+.balance-locked { color: var(--yellow); font-size: 11px; }
+
+/* ── Empty State ──────────────────────────────── */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 40px 20px; color: var(--text-muted); font-size: 12px;
+  text-align: center;
+}
+.empty-state .icon { font-size: 28px; margin-bottom: 8px; opacity: .3; }
+.empty-state p { margin-top: 4px; }
+
+/* ── Log / Activity ───────────────────────────── */
+.log-entry {
+  padding: 4px 12px; font-size: 11px; color: var(--text-muted);
+  border-bottom: 1px solid rgba(39,39,42,.5);
+}
+.log-entry .time { color: var(--text-muted); margin-right: 8px; }
+.log-entry.info { color: var(--blue); }
+.log-entry.success { color: var(--green); }
+.log-entry.warn { color: var(--yellow); }
+.log-entry.error { color: var(--red); }
+
+/* ── Responsive ───────────────────────────────── */
+@media (max-width: 1024px) {
+  .main {
+    grid-template-columns: 1fr 280px;
+    grid-template-rows: auto auto auto;
+  }
+  .markets-col { display: none; }
+  .chart-row { grid-column: 1; }
+}
+
+@media (max-width: 768px) {
+  html { font-size: 12px; }
+
+  .topbar { padding: 0 10px; gap: 6px; height: 40px; }
+  .topbar-brand { font-size: 13px; }
+  .topbar-tab { padding: 0 8px; font-size: 11px; }
+  .topbar-status span { display: none; }
+
+  .ticker-strip {
+    flex-wrap: wrap; gap: 8px; padding: 6px 10px; height: auto;
+  }
+  .ticker-pair { font-size: 12px; width: 100%; }
+  .ticker-stat { flex: 1; min-width: 60px; }
+
+  .main {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+  }
+  .chart-row { grid-column: 1; }
+  .chart-container { height: 220px; }
+
+  .bottom-grid {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .side-tab { padding: 6px; font-size: 11px; }
+  .submit-btn { padding: 8px; font-size: 12px; }
+
+  .ob-table, .trades-table, .orders-table { font-size: 11px; }
+  .ob-table th, .ob-table td { padding: 2px 8px; }
+}
+
+@media (max-width: 480px) {
+  .topbar-tabs { gap: 0; }
+  .topbar-tab { padding: 0 6px; font-size: 10px; }
+
+  .ticker-strip { gap: 6px; padding: 4px 8px; }
+  .ticker-stat label { font-size: 9px; }
+  .ticker-stat .val { font-size: 11px; }
+
+  .chart-container { height: 180px; }
+  .chart-intervals { padding: 2px 8px; }
+  .interval-btn { padding: 2px 6px; font-size: 9px; }
+
+  .form-group { margin-bottom: 8px; }
+  .input-row input { padding: 6px 8px; font-size: 12px; }
+  .slider-row { gap: 3px; }
+  .pct-btn { padding: 4px; font-size: 10px; }
+
+  .balance-row { padding: 5px 8px; font-size: 11px; }
+  .log-entry { padding: 3px 8px; font-size: 10px; }
+}
+  </style>
+</head>
+<body>
+
+  
+<!-- BitQuai Navigation -->
+<div class="bitquai-nav" style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:var(--surface);border-bottom:1px solid var(--border);">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <img src="quai-logo.png" alt="BitQuai" style="width:28px;height:28px;border-radius:4px;" />
+    <span style="font-weight:600;color:var(--text);">BitQuai</span>
+  </div>
+  <div style="display:flex;gap:6px;">
+    <a href="index.html" class="nav-pill" style="padding:6px 10px;border-radius:8px;background:rgba(255,37,58,0.08);color:var(--text-dim);text-decoration:none;border:1px solid rgba(255,37,58,0.08);">Mining Dashboard</a>
+    <a href="controller_view.html" class="nav-pill" style="padding:6px 10px;border-radius:8px;background:rgba(255,37,58,0.08);color:var(--text-dim);text-decoration:none;border:1px solid rgba(255,37,58,0.08);">Controller</a>
+    <span class="nav-pill" style="padding:6px 10px;border-radius:8px;background:rgba(16,185,129,0.10);color:var(--green);text-decoration:none;border:1px solid rgba(16,185,129,0.20);font-weight:600;">QDEX</span>
+  </div>
+</div>
+
+<!-- Top Bar -->
+  <header class="topbar">
+    <div class="topbar-brand">QDEX <span>terminal</span></div>
+    <nav class="topbar-tabs">
+      <button class="topbar-tab active" data-view="trade">Trade</button>
+      <button class="topbar-tab" data-view="portfolio">Portfolio</button>
+      <button class="topbar-tab" data-view="markets">Markets</button>
+    </nav>
+    <div class="topbar-spacer"></div>
+    <div class="topbar-status">
+      <div class="status-dot mock" title="Mock mode — no real transactions"></div>
+      <span>TESTNET</span>
+    </div>
+    <button class="topbar-wallet" id="walletBtn">Connect Wallet</button>
+  </header>
+
+  <!-- Ticker Strip -->
+  <div class="ticker-strip" id="tickerStrip">
+    <div class="ticker-pair" id="tickerPair">WQUAI / WQI</div>
+    <div class="ticker-stat">
+      <label>Last</label>
+      <span class="val dim" id="tickerLast">—</span>
+    </div>
+    <div class="ticker-stat">
+      <label>24h Change</label>
+      <span class="val dim" id="tickerChange">—</span>
+    </div>
+    <div class="ticker-stat">
+      <label>24h Volume</label>
+      <span class="val dim" id="tickerVol">—</span>
+    </div>
+    <div class="ticker-stat">
+      <label>Best Bid</label>
+      <span class="val dim" id="tickerBid">—</span>
+    </div>
+    <div class="ticker-stat">
+      <label>Best Ask</label>
+      <span class="val dim" id="tickerAsk">—</span>
+    </div>
+    <span style="flex:1"></span>
+    <button class="interval-btn chart-toggle" id="chartToggle" title="Show chart">📊</button>
+  </div>
+
+  <!-- Main Grid -->
+  <div class="main">
+
+    <!-- Left: Markets -->
+    <div class="panel markets-col">
+      <div class="panel-header">Markets</div>
+      <div class="panel-body markets-list" id="marketsList"></div>
+    </div>
+
+    <!-- Chart Row (center only) -->
+    <div class="chart-row" id="chartRow">
+      <div class="chart-intervals" id="chartIntervals">
+        <button class="interval-btn" data-interval="1m">1m</button>
+        <button class="interval-btn active" data-interval="5m">5m</button>
+        <button class="interval-btn" data-interval="15m">15m</button>
+        <button class="interval-btn" data-interval="1h">1H</button>
+        <button class="interval-btn" data-interval="4h">4H</button>
+        <button class="interval-btn" data-interval="1d">1D</button>
+      </div>
+      <div class="chart-container">
+        <div class="tv-chart" id="tvChart"></div>
+      </div>
+    </div>
+
+    <!-- Center: Orderbook + Trades -->
+    <div class="panel">
+      <div class="tab-bar">
+        <button class="tab-item active" data-tab="orderbook">Order Book</button>
+        <button class="tab-item" data-tab="trades">Trade History</button>
+      </div>
+      <div class="tab-content">
+        <div class="tab-pane active" id="pane-orderbook">
+          <table class="ob-table" id="obTable">
+            <thead><tr><th>Price</th><th>Amount</th><th>Total</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="tab-pane" id="pane-trades">
+          <table class="trades-table" id="tradesTable">
+            <thead><tr><th>Time</th><th>Price</th><th>Amount</th><th>Side</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Trade Form -->
+    <div class="panel">
+      <div class="panel-header">Order</div>
+      <div class="panel-body">
+        <div class="trade-form-panel">
+          <div class="side-tabs">
+            <button class="side-tab buy active" data-side="buy">Buy</button>
+            <button class="side-tab sell" data-side="sell">Sell</button>
+          </div>
+
+          <div class="order-type-tabs">
+            <button class="order-type-tab active" data-type="limit">Limit</button>
+            <button class="order-type-tab" data-type="market">Market</button>
+          </div>
+
+          <div class="form-group" id="priceGroup">
+            <label>Price</label>
+            <div class="input-row">
+              <button class="step-btn" id="priceDown">−</button>
+              <input type="text" id="priceInput" placeholder="0.00" />
+              <span class="unit" id="priceUnit">WQI</span>
+              <button class="step-btn" id="priceUp">+</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Amount</label>
+            <div class="input-row">
+              <button class="step-btn" id="amtDown">−</button>
+              <input type="text" id="amtInput" placeholder="0.00" />
+              <span class="unit" id="amtUnit">WQUAI</span>
+              <button class="step-btn" id="amtUp">+</button>
+            </div>
+          </div>
+
+          <div class="slider-row">
+            <button class="pct-btn" data-pct="25">25%</button>
+            <button class="pct-btn" data-pct="50">50%</button>
+            <button class="pct-btn" data-pct="75">75%</button>
+            <button class="pct-btn" data-pct="100">100%</button>
+          </div>
+
+          <div class="form-total">
+            <span>Total</span>
+            <span class="amount" id="orderTotal">—</span>
+          </div>
+
+          <button class="submit-btn buy" id="submitBtn" disabled>
+            Connect Wallet to Trade
+          </button>
+
+          <div class="form-balance">
+            Available: <span id="formBalance">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Panels -->
+    <div class="bottom-panels">
+      <div class="bottom-grid">
+
+        <!-- Orders -->
+        <div class="bottom-panel">
+          <div class="tab-bar">
+            <button class="tab-item active" data-btab="open-orders">Open Orders</button>
+            <button class="tab-item" data-btab="order-history">Order History</button>
+          </div>
+          <div class="tab-content">
+            <div class="tab-pane active" id="pane-open-orders">
+              <div class="empty-state" id="noOrders">
+                <div class="icon">📋</div>
+                <p>No open orders</p>
+              </div>
+              <table class="orders-table" id="ordersTable" style="display:none">
+                <thead><tr><th>Pair</th><th>Side</th><th>Price</th><th>Amount</th><th>Filled</th><th></th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div class="tab-pane" id="pane-order-history">
+              <div class="empty-state">
+                <div class="icon">📜</div>
+                <p>No order history yet</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Trades / Fills -->
+        <div class="bottom-panel">
+          <div class="tab-bar">
+            <button class="tab-item active" data-btab="fills">Trade Fills</button>
+            <button class="tab-item" data-btab="activity">Activity</button>
+          </div>
+          <div class="tab-content">
+            <div class="tab-pane active" id="pane-fills">
+              <div class="empty-state">
+                <div class="icon">💱</div>
+                <p>No fills yet</p>
+              </div>
+            </div>
+            <div class="tab-pane" id="pane-activity">
+              <div id="activityLog"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Balances -->
+        <div class="bottom-panel">
+          <div class="panel-header">Balances</div>
+          <div class="panel-body" id="balancesList">
+            <div class="empty-state">
+              <div class="icon">🔐</div>
+              <p>Connect wallet to view balances</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TradingView Lightweight Charts -->
+  <script src="vendor/lightweight-charts.cjs"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     QDEX — Terminal Exchange UI
+     Lightweight vanilla JS, no frameworks
+     ═══════════════════════════════════════════════ */
+
+  const API = '';
+
+  // ── State ──────────────────────────────────────
+  const state = {
+    market: 'WQUAI-WQI',
+    side: 'buy',
+    orderType: 'limit',
+    interval: '5m',
+    wallet: null,
+    markets: [],
+    tickers: {},
+    orderbook: { bids: [], asks: [] },
+    trades: [],
+    orders: [],
+    fills: [],
+    balances: [],
+    klines: [],
+  };
+
+  // ── Helpers ────────────────────────────────────
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => document.querySelectorAll(s);
+
+  function fmt(n, d=4) {
+    if (n == null || n === '') return '—';
+    const num = Number(n);
+    if (isNaN(num)) return String(n);
+    if (num === 0) return '0';
+    if (Math.abs(num) < 0.0001) return num.toExponential(2);
+    return num.toFixed(d);
+  }
+
+  function fmtAmt(n) { return fmt(n, 2); }
+
+  function logActivity(msg, type='info') {
+    const time = new Date().toLocaleTimeString();
+    const entry = document.createElement('div');
+    entry.className = `log-entry ${type}`;
+    entry.innerHTML = `<span class="time">${time}</span>${msg}`;
+    const log = $('#activityLog');
+    log.prepend(entry);
+  }
+
+  // ── Fetch ──────────────────────────────────────
+  async function api(path) {
+    try {
+      const r = await fetch(`${API}${path}`);
+      return await r.json();
+    } catch(e) {
+      console.warn('API fetch failed:', path, e);
+      return null;
+    }
+  }
+
+  // ── Chart Toggle ──────────────────────────────
+  let chartVisible = false;
+  let chartInitialized = false;
+
+  function initChartLazy() {
+    if (chartInitialized) return;
+    const container = $('#tvChart');
+    if (!container || typeof LightweightCharts === 'undefined') {
+      console.warn('Lightweight Charts not available');
+      return;
+    }
+
+    tvChart = LightweightCharts.createChart(container, {
+      layout: {
+        background: { type: 'solid', color: '#111114' },
+        textColor: '#71717a',
+      },
+      grid: {
+        vertLines: { color: 'rgba(39,39,42,.5)' },
+        horzLines: { color: 'rgba(39,39,42,.5)' },
+      },
+      crosshair: {
+        mode: LightweightCharts.CrosshairMode.Normal,
+        vertLine: { color: 'rgba(0,255,102,.3)', labelBackgroundColor: '#10b981' },
+        horzLine: { color: 'rgba(0,255,102,.3)', labelBackgroundColor: '#10b981' },
+      },
+      rightPriceScale: {
+        borderColor: '#27272a',
+        scaleMargins: { top: 0.1, bottom: 0.1 },
+      },
+      timeScale: {
+        borderColor: '#27272a',
+        timeVisible: true,
+        rightOffset: 12,
+      },
+      handleScroll: true,
+      handleScale: true,
+    });
+
+    tvSeries = tvChart.addSeries(LightweightCharts.CandlestickSeries, {
+      upColor: '#10b981',
+      downColor: '#ef4444',
+      borderVisible: false,
+      wickUpColor: '#10b981',
+      wickDownColor: '#ef4444',
+    });
+
+    // Resize observer
+    const ro = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        if (width > 0 && height > 0) {
+          tvChart.applyOptions({ width, height });
+        }
+      }
+    });
+    ro.observe(container);
+
+    chartInitialized = true;
+  }
+
+  function toggleChart() {
+    chartVisible = !chartVisible;
+    const row = $('#chartRow');
+    row.classList.toggle('visible', chartVisible);
+    const btn = $('#chartToggle');
+    if (btn) {
+      btn.textContent = chartVisible ? '✕' : '📊';
+      btn.title = chartVisible ? 'Hide chart' : 'Show chart';
+    }
+    // Initialize chart when first shown
+    if (chartVisible) {
+      initChartLazy();
+      updateChart();
+    }
+  }
+
+  // Attach toggle handler immediately (script runs after DOM)
+  $('#chartToggle').onclick = toggleChart;
+
+  async function loadKlines() {
+    const data = await api(`/v1/klines/${state.market}?interval=${state.interval}`);
+    if (data?.klines && data.klines.length > 0) {
+      state.klines = data.klines;
+    } else {
+      // Generate mock klines for demo
+      state.klines = generateMockKlines(100);
+    }
+    // Only update chart if visible
+    if (chartVisible) {
+      updateChart();
+    }
+  }
+
+  // ── Mock Kline Generator ──────────────────────
+  function generateMockKlines(count=100) {
+    const now = Math.floor(Date.now() / 1000);
+    const intervalMs = {
+      '1m': 60, '5m': 300, '15m': 900, '1h': 3600, '4h': 14400, '1d': 86400,
+    }[state.interval] || 300;
+
+    let price = 0.001234;
+    const klines = [];
+    for (let i = count; i >= 0; i--) {
+      const time = now - i * intervalMs;
+      const open = price;
+      const change = (Math.random() - 0.48) * 0.0001;
+      const close = open + change;
+      const high = Math.max(open, close) + Math.random() * 0.00005;
+      const low = Math.min(open, close) - Math.random() * 0.00005;
+      klines.push({ time, open: open.toFixed(6), high: high.toFixed(6), low: low.toFixed(6), close: close.toFixed(6) });
+      price = close;
+    }
+    return klines;
+  }
+
+  function updateChart() {
+    if (!tvSeries || !state.klines.length) return;
+
+    const candles = state.klines.map(k => {
+      // Mock klines already have time in seconds (Unix timestamp)
+      const time = typeof k.time === 'number' && k.time > 1e10
+        ? Math.floor(k.time / 1000)  // API returns ms
+        : k.time;                    // Mock returns seconds
+      return {
+        time,
+        open: parseFloat(k.open),
+        high: parseFloat(k.high),
+        low: parseFloat(k.low),
+        close: parseFloat(k.close),
+      };
+    });
+
+    tvSeries.setData(candles);
+    tvChart.timeScale().fitContent();
+  }
+
+  // ── Render Functions ───────────────────────────
+
+  function renderMarkets() {
+    const list = $('#marketsList');
+    list.innerHTML = '';
+    for (const m of state.markets) {
+      const el = document.createElement('div');
+      el.className = `market-item${m.id === state.market ? ' active' : ''}`;
+      const pair = `${m.base}/${m.quote}`;
+      el.innerHTML = `<span class="pair">${pair}</span><span class="status-badge">${m.status}</span>`;
+      el.onclick = () => switchMarket(m.id);
+      list.appendChild(el);
+    }
+  }
+
+  function renderTicker() {
+    const m = state.markets.find(x => x.id === state.market);
+    if (!m) return;
+    $('#tickerPair').textContent = `${m.base} / ${m.quote}`;
+
+    const t = state.tickers[state.market];
+    if (t && t.lastPrice) {
+      $('#tickerLast').textContent = fmt(t.lastPrice);
+      $('#tickerLast').className = 'val green';
+      $('#tickerVol').textContent = fmtAmt(t.volume24h);
+      $('#tickerVol').className = 'val';
+    } else {
+      $('#tickerLast').textContent = '—';
+      $('#tickerLast').className = 'val dim';
+      $('#tickerVol').textContent = '—';
+      $('#tickerVol').className = 'val dim';
+    }
+    if (t?.bestBid) $('#tickerBid').textContent = fmt(t.bestBid);
+    if (t?.bestAsk) $('#tickerAsk').textContent = fmt(t.bestAsk);
+
+    // Update units
+    $('#priceUnit').textContent = m.quote;
+    $('#amtUnit').textContent = m.base;
+  }
+
+  function renderOrderbook() {
+    const tbody = $('#obTable tbody');
+    tbody.innerHTML = '';
+
+    const { bids, asks } = state.orderbook;
+    const maxVol = Math.max(
+      ...asks.map(a => Number(a.amount) || 0),
+      ...bids.map(b => Number(b.amount) || 0),
+      1
+    );
+
+    // Asks (reversed to show highest first)
+    for (const a of [...asks].reverse().slice(-10)) {
+      const pct = (Number(a.amount) / maxVol * 100).toFixed(0);
+      tbody.innerHTML += `<tr class="ask">
+        <td>${fmt(a.price)}<div class="ob-depth-bar ask" style="width:${pct}%"></div></td>
+        <td>${fmtAmt(a.amount)}</td>
+        <td>${fmtAmt((a.price * a.amount).toFixed(4))}</td>
+      </tr>`;
+    }
+
+    // Spread
+    if (asks.length && bids.length) {
+      const spread = (Number(bids[0].price) - Number(asks[asks.length-1].price)).toFixed(6);
+      tbody.innerHTML += `<tr class="spread"><td colspan="3">Spread: ${spread} ${state.markets.find(m=>m.id===state.market)?.quote}</td></tr>`;
+    } else {
+      tbody.innerHTML += `<tr class="spread"><td colspan="3">Empty orderbook</td></tr>`;
+    }
+
+    // Bids
+    for (const b of bids.slice(0, 10)) {
+      const pct = (Number(b.amount) / maxVol * 100).toFixed(0);
+      tbody.innerHTML += `<tr class="bid">
+        <td>${fmt(b.price)}<div class="ob-depth-bar bid" style="width:${pct}%"></div></td>
+        <td>${fmtAmt(b.amount)}</td>
+        <td>${fmtAmt((b.price * b.amount).toFixed(4))}</td>
+      </tr>`;
+    }
+  }
+
+  function renderTrades() {
+    const tbody = $('#tradesTable tbody');
+    if (!state.trades.length) {
+      tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px;">No trades yet</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = '';
+    for (const t of state.trades.slice(0, 30)) {
+      const time = new Date(t.timestamp || Date.now()).toLocaleTimeString();
+      tbody.innerHTML += `<tr>
+        <td>${time}</td>
+        <td>${fmt(t.price)}</td>
+        <td>${fmtAmt(t.amount)}</td>
+        <td class="trade-side ${t.side}">${t.side.toUpperCase()}</td>
+      </tr>`;
+    }
+  }
+
+  function renderBalances() {
+    const list = $('#balancesList');
+    if (!state.wallet || !state.balances.length) {
+      list.innerHTML = `<div class="empty-state"><div class="icon">🔐</div><p>Connect wallet to view balances</p></div>`;
+      return;
+    }
+    list.innerHTML = '';
+    for (const b of state.balances) {
+      list.innerHTML += `<div class="balance-row">
+        <span class="balance-token">${b.token}</span>
+        <span class="balance-amount balance-available">${fmt(b.available || '0', 4)}</span>
+        ${b.locked ? `<span class="balance-locked">locked: ${fmt(b.locked, 4)}</span>` : ''}
+      </div>`;
+    }
+  }
+
+  // ── Market Switch ──────────────────────────────
+  async function switchMarket(id) {
+    state.market = id;
+    renderMarkets();
+    renderTicker();
+    await Promise.all([loadOrderbook(), loadKlines()]);
+  }
+
+  // ── Data Loading ───────────────────────────────
+  async function loadMarkets() {
+    const data = await api('/v1/markets');
+    if (data?.markets) {
+      state.markets = data.markets;
+      renderMarkets();
+    }
+  }
+
+  async function loadTickers() {
+    const data = await api('/v1/tickers');
+    if (data?.tickers) {
+      for (const t of data.tickers) {
+        state.tickers[t.marketId] = t;
+      }
+      renderTicker();
+    }
+  }
+
+  async function loadOrderbook() {
+    const data = await api(`/v1/orderbook/${state.market}`);
+    if (data) {
+      state.orderbook = { bids: data.bids || [], asks: data.asks || [] };
+      renderOrderbook();
+    }
+  }
+
+  async function loadTrades() {
+    const data = await api(`/v1/trades/${state.market}`);
+    if (data?.trades) {
+      state.trades = data.trades;
+      renderTrades();
+    }
+  }
+
+  async function loadAccount() {
+    if (!state.wallet) return;
+    const data = await api('/v1/account');
+    if (data?.balances?.balances) {
+      state.balances = data.balances.balances;
+      renderBalances();
+    }
+  }
+
+  // ── Refresh Loop ───────────────────────────────
+  async function refresh() {
+    await Promise.all([loadTickers(), loadOrderbook(), loadTrades(), loadKlines()]);
+    if (state.wallet) await loadAccount();
+  }
+
+  // ── Event Bindings ─────────────────────────────
+
+  // Top tabs
+  $$('.topbar-tab').forEach(btn => {
+    btn.onclick = () => {
+      $$('.topbar-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    };
+  });
+
+  // Panel tabs
+  $$('.tab-bar .tab-item').forEach(btn => {
+    btn.onclick = () => {
+      const bar = btn.parentElement;
+      bar.querySelectorAll('.tab-item').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const content = bar.parentElement.querySelector('.tab-content');
+      const tab = btn.dataset.tab || btn.dataset.btab;
+      if (tab) {
+        content.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        const pane = $(`#pane-${tab}`);
+        if (pane) pane.classList.add('active');
+      }
+    };
+  });
+
+  // Side tabs (buy/sell)
+  $$('.side-tab').forEach(btn => {
+    btn.onclick = () => {
+      $$('.side-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.side = btn.dataset.side;
+      const submit = $('#submitBtn');
+      submit.className = `submit-btn ${state.side}`;
+    };
+  });
+
+  // Order type tabs
+  $$('.order-type-tab').forEach(btn => {
+    btn.onclick = () => {
+      $$('.order-type-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.orderType = btn.dataset.type;
+      $('#priceGroup').style.display = state.orderType === 'market' ? 'none' : '';
+    };
+  });
+
+  // Chart interval buttons
+  $$('.interval-btn').forEach(btn => {
+    btn.onclick = async () => {
+      $$('.interval-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.interval = btn.dataset.interval;
+      await loadKlines();
+    };
+  });
+
+  // Price step buttons
+  $('#priceDown').onclick = () => {
+    const inp = $('#priceInput');
+    inp.value = Math.max(0, Number(inp.value || 0) - 0.001).toFixed(4);
+    calcTotal();
+  };
+  $('#priceUp').onclick = () => {
+    const inp = $('#priceInput');
+    inp.value = (Number(inp.value || 0) + 0.001).toFixed(4);
+    calcTotal();
+  };
+
+  // Amount step buttons
+  $('#amtDown').onclick = () => {
+    const inp = $('#amtInput');
+    inp.value = Math.max(0, Number(inp.value || 0) - 0.1).toFixed(4);
+    calcTotal();
+  };
+  $('#amtUp').onclick = () => {
+    const inp = $('#amtInput');
+    inp.value = (Number(inp.value || 0) + 0.1).toFixed(4);
+    calcTotal();
+  };
+
+  // Percentage buttons
+  $$('.pct-btn').forEach(btn => {
+    btn.onclick = () => {
+      const pct = Number(btn.dataset.pct) / 100;
+      const mockBal = 1000;
+      $('#amtInput').value = (mockBal * pct).toFixed(2);
+      calcTotal();
+    };
+  });
+
+  // Input changes
+  $('#priceInput').oninput = calcTotal;
+  $('#amtInput').oninput = calcTotal;
+
+  function calcTotal() {
+    const price = Number($('#priceInput').value || 0);
+    const amt = Number($('#amtInput').value || 0);
+    const total = (price * amt).toFixed(4);
+    const m = state.markets.find(x => x.id === state.market);
+    $('#orderTotal').textContent = `${fmt(total)} ${m?.quote || ''}`;
+
+    const btn = $('#submitBtn');
+    if (price > 0 && amt > 0) {
+      btn.disabled = !state.wallet;
+      btn.textContent = state.wallet ? `Place ${state.side} order` : 'Connect Wallet to Trade';
+    } else {
+      btn.disabled = true;
+      btn.textContent = state.wallet ? `Enter price & amount` : 'Connect Wallet to Trade';
+    }
+  }
+
+  // Submit button
+  $('#submitBtn').onclick = async () => {
+    if (!state.wallet) return;
+    logActivity(`Placed ${state.side} order: ${$('#amtInput').value} @ ${$('#priceInput').value}`, 'success');
+  };
+
+  // Wallet button
+  $('#walletBtn').onclick = () => {
+    if (!state.wallet) {
+      state.wallet = '0x' + Math.random().toString(16).slice(2, 10) + '...';
+      $('#walletBtn').textContent = state.wallet;
+      logActivity('Wallet connected (mock)', 'success');
+
+      state.balances = [
+        { token: 'WQUAI', available: '1,250.00', locked: '0' },
+        { token: 'WQI', available: '8,432.50', locked: '0' },
+        { token: 'USDT', available: '5,000.00', locked: '0' },
+      ];
+      renderBalances();
+      calcTotal();
+    } else {
+      state.wallet = null;
+      $('#walletBtn').textContent = 'Connect Wallet';
+      state.balances = [];
+      renderBalances();
+      calcTotal();
+      logActivity('Wallet disconnected', 'warn');
+    }
+  };
+
+  // ── Init ───────────────────────────────────────
+  async function init() {
+    logActivity('BitQuai QDEX terminal loaded', 'info');
+    logActivity('Mock mode — no real transactions', 'warn');
+
+    await loadMarkets();
+    await refresh();
+
+    // Refresh every 2s
+    setInterval(refresh, 2000);
+  }
+
+  init();
+  </script>
+</body>
+</html>

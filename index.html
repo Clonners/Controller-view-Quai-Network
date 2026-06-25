@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quai Mining Dashboard</title>
+    <title>BitQuai Mining Dashboard</title>
     <script src="vendor/chart.min.js"></script>
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="icon" href="quai-logo.ico" type="image/x-icon">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <!-- Apple touch icons (vector fallback) -->
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.svg">
     <link rel="apple-touch-icon" sizes="167x167" href="apple-touch-icon.svg">
@@ -14,8 +14,8 @@
     <link rel="apple-touch-icon" sizes="120x120" href="apple-touch-icon.svg">
     <link rel="apple-touch-icon" sizes="76x76" href="apple-touch-icon.svg">
     <!-- Provide PNG fallback for some platforms -->
-    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
     <!-- Web app manifest + mobile meta -->
     <link rel="manifest" href="site.webmanifest">
     <meta name="theme-color" content="#2b0211">
@@ -23,10 +23,10 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <!-- PNG icon fallbacks for Apple/Android -->
-    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
-    <link rel="apple-touch-icon" sizes="167x167" href="icons/icon-167.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="icons/icon-120.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon-180x180.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="icons/apple-touch-icon-180x180.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="icons/apple-touch-icon-180x180.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="icons/apple-touch-icon-180x180.png">
         <style>
             /* Ensure install banner never shows on wide/desktop layouts */
             @media (min-width: 900px) {
@@ -75,19 +75,20 @@
 <body>
     <div class="container">
         <header>
-            <h1>⛏️ Quai Mining Dashboard</h1>
+            <h1>⛏️ BitQuai Mining Dashboard</h1>
             <div class="header-actions">
                 <div class="controller-link">
-                    <a href="controller_view.html" class="nav-pill">Controller View</a>
+                    <a href="controller_view.html" class="nav-pill">Controller</a>
+                    <a href="qdex.html" class="nav-pill">QDEX</a>
                 </div>
             </div>
         </header>
 
         <!-- Install banner (compact pill for mobile like Controller View) -->
         <div id="installBanner">
-            <img src="quai-logo.png" alt="Quai">
+            <img src="quai-logo.png" alt="BitQuai">
             <div class="install-info">
-                    <div class="title">Install Quai Dashboard</div>
+                    <div class="title">Install BitQuai Dashboard</div>
                     <div class="subtitle">Add to your home screen</div>
             </div>
             <div class="install-actions">
