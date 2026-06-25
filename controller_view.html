@@ -85,7 +85,7 @@
   </style>
 </head>
 <body>
-  <div class="app">
+  <main class="app">
     <header>
       <img src="assets/brand/bitquai-icon-q-256.png" alt="BitQuai logo" class="logo" />
       <div class="header-main">
@@ -309,6 +309,7 @@
             <div class="metric-main">
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
                 <input id="cubic-amount" class="conversion-input" placeholder="Amount" style="width:120px" />
+                <label for="cubic-isqi" class="sr-only">Currency unit</label>
                 <select id="cubic-isqi" style="padding:6px;border-radius:6px">
                   <option value="true">Qi</option>
                   <option value="false">Quai</option>
@@ -325,7 +326,7 @@
 
       <section class="card" id="conversion-card">
         <div class="card-header">
-          <h3 class="card-title">Conversion Calculator</h3>
+          <h2 class="card-title">Conversion Calculator</h2>
         </div>
         <div class="conversion-container">
           <div class="conversion-input-group">
@@ -360,7 +361,7 @@
     <footer>
       
     </footer>
-  </div>
+  </main>
 
   <!-- Diagnostic loader: prefer CDN, fallback to local vendor, then load controller_main.js -->
   <!-- Install banner (moved outside .app so fixed positioning works correctly) -->
@@ -371,7 +372,7 @@
       <div class="subtitle">Add to your home screen</div>
     </div>
     <div class="install-actions">
-      <button id="installBtn" style="background:#ff4250;color:#fff;border-radius:18px;border:none;font-weight:600">INSTALL</button>
+      <button id="installBtn" style="background:#ff253a;color:#fff;border-radius:18px;border:none;font-weight:600">INSTALL</button>
       <button id="installDismiss" style="background:transparent;color:#fff;border-radius:18px;border:1px solid rgba(255,255,255,0.08)">CLOSE</button>
     </div>
   </div>
