@@ -165,7 +165,7 @@ input { font: inherit; }
   font-weight: 400; color: var(--text-muted);
 }
 .panel-body {
-  flex: 1; overflow-y: auto;
+  flex: 1; overflow-y: auto; overflow-x: auto;
 }
 
 /* ── Chart ────────────────────────────────────── */
@@ -215,7 +215,7 @@ input { font: inherit; }
 }
 
 /* ── Orderbook ────────────────────────────────── */
-.ob-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.ob-table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 280px; }
 .ob-table th {
   position: sticky; top: 0; z-index: 1;
   padding: 5px 12px; text-align: right;
@@ -246,7 +246,7 @@ input { font: inherit; }
 .ob-depth-bar.bid { background: var(--green); }
 
 /* ── Trade History ────────────────────────────── */
-.trades-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.trades-table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 320px; }
 .trades-table th {
   position: sticky; top: 0; z-index: 1;
   padding: 5px 12px; text-align: right;
@@ -378,7 +378,7 @@ input { font: inherit; }
 .tab-pane { display: none; }
 .tab-pane.active { display: block; }
 
-.orders-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.orders-table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 400px; }
 .orders-table th {
   position: sticky; top: 0;
   padding: 5px 12px; text-align: left;
@@ -540,7 +540,7 @@ input { font: inherit; }
   outline: none;
 }
 .market-search:focus { border-color: var(--border-hi); }
-.market-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.market-table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 580px; }
 .market-table th {
   padding: 9px 12px;
   color: var(--text-muted);
@@ -581,6 +581,53 @@ input { font: inherit; }
 .mini-order-row:last-child { border-bottom: 0; }
 .mini-order-row.header { color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; font-size: 10px; }
 
+/* ── Nav Bar (moved from inline styles) ────────── */
+.bitquai-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.bitquai-nav-logo {
+  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+}
+.bitquai-nav-logo img { height: 22px; width: auto; }
+.bitquai-nav-logo span {
+  font-weight: 700; color: var(--accent); font-size: 14px;
+  white-space: nowrap;
+}
+.bitquai-nav-links {
+  display: flex; gap: 6px; flex-wrap: wrap;
+}
+.bitquai-nav-link {
+  padding: 5px 10px; border-radius: 6px;
+  background: var(--accent-soft);
+  color: var(--text-dim);
+  text-decoration: none;
+  border: 1px solid rgba(255,37,58,0.08);
+  font-size: 12px; white-space: nowrap;
+  min-height: 33px; display: flex; align-items: center;
+}
+.bitquai-nav-link.active {
+  color: var(--accent);
+  border-color: rgba(255,37,58,0.20);
+  font-weight: 600;
+}
+.bitquai-nav-link:hover {
+  border-color: var(--border-hi);
+}
+
+/* ── Table scroll wrappers ─────────────────────── */
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* ── Wallet button truncation ──────────────────── */
+.topbar-wallet {
+  max-width: 140px; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* ── Responsive ───────────────────────────────── */
 @media (max-width: 1024px) {
   .main {
@@ -595,6 +642,12 @@ input { font: inherit; }
 
 @media (max-width: 768px) {
   html { font-size: 12px; }
+
+  /* Nav bar — compact on tablet */
+  .bitquai-nav { padding: 6px 10px; gap: 6px; }
+  .bitquai-nav-logo span { font-size: 13px; }
+  .bitquai-nav-link { padding: 4px 8px; font-size: 11px; min-height: 30px; }
+
   .mode-strip { padding: 6px 10px; gap: 6px; }
   .view-page { padding: 10px; }
   .view-page-header { align-items: flex-start; flex-direction: column; }
@@ -605,6 +658,7 @@ input { font: inherit; }
   .topbar-brand { font-size: 13px; }
   .topbar-tab { padding: 0 8px; font-size: 11px; }
   .topbar-status span { display: none; }
+  .topbar-wallet { max-width: 100px; }
 
   .ticker-strip {
     flex-wrap: wrap; gap: 8px; padding: 6px 10px; height: auto;
@@ -627,45 +681,71 @@ input { font: inherit; }
   .side-tab { padding: 6px; font-size: 11px; }
   .submit-btn { padding: 8px; font-size: 12px; }
 
-  .ob-table, .trades-table, .orders-table { font-size: 11px; }
+  .ob-table, .trades-table, .orders-table, .market-table { font-size: 11px; }
   .ob-table th, .ob-table td { padding: 2px 8px; }
+  .market-table th, .market-table td { padding: 6px 8px; font-size: 11px; }
 }
 
 @media (max-width: 480px) {
-  .topbar-tabs { gap: 0; }
-  .topbar-tab { padding: 0 6px; font-size: 10px; }
+  /* Nav bar — stack vertically on narrow screens */
+  .bitquai-nav {
+    flex-direction: column; align-items: stretch; padding: 6px 8px; gap: 6px;
+  }
+  .bitquai-nav-logo { justify-content: center; }
+  .bitquai-nav-links { justify-content: center; }
+  .bitquai-nav-link { flex: 1; justify-content: center; text-align: center; font-size: 11px; padding: 6px 4px; min-height: 36px; }
 
-  .ticker-strip { gap: 6px; padding: 4px 8px; }
-  .ticker-stat label { font-size: 9px; }
-  .ticker-stat .val { font-size: 11px; }
+  .topbar { padding: 0 8px; gap: 4px; height: 38px; }
+  .topbar-tabs { gap: 0; flex: 1; justify-content: center; }
+  .topbar-tab { padding: 0 5px; font-size: 10px; }
+  .topbar-brand { font-size: 12px; margin-right: 4px; }
+  .topbar-wallet { max-width: 80px; padding: 3px 6px; font-size: 10px; }
 
-  .chart-container { height: 180px; }
-  .chart-intervals { padding: 2px 8px; }
-  .interval-btn { padding: 2px 6px; font-size: 9px; }
+  .mode-strip { padding: 4px 8px; gap: 4px; font-size: 10px; }
+  .mode-pill { padding: 3px 6px; font-size: 9px; }
+  #apiState { display: none; }
+
+  .ticker-strip { gap: 4px; padding: 4px 8px; flex-wrap: wrap; }
+  .ticker-pair { font-size: 11px; }
+  .ticker-stat { min-width: 50px; flex: 1; }
+  .ticker-stat label { font-size: 8px; }
+  .ticker-stat .val { font-size: 10px; }
+
+  .chart-container { height: 160px; }
+  .chart-intervals { padding: 2px 6px; gap: 1px; }
+  .interval-btn { padding: 4px 6px; font-size: 10px; min-height: 32px; min-width: 32px; }
 
   .form-group { margin-bottom: 8px; }
-  .input-row input { padding: 6px 8px; font-size: 12px; }
+  .input-row input { padding: 6px 8px; font-size: 13px; }
+  .input-row .step-btn { min-width: 36px; min-height: 36px; }
   .slider-row { gap: 3px; }
-  .pct-btn { padding: 4px; font-size: 10px; }
+  .pct-btn { padding: 6px 2px; font-size: 10px; min-height: 32px; }
 
   .balance-row { padding: 5px 8px; font-size: 11px; }
   .log-entry { padding: 3px 8px; font-size: 10px; }
+
+  .tab-item { padding: 6px 8px; font-size: 10px; }
+  .view-page { padding: 8px; }
+  .view-page h2 { font-size: 18px; }
+
+  .market-table th, .market-table td { padding: 5px 6px; font-size: 10px; }
+  .orders-table th, .orders-table td { padding: 4px 6px; font-size: 10px; }
 }
   </style>
 </head>
 <body>
 
   
-<nav class="bitquai-nav" style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:var(--surface);border-bottom:1px solid var(--border);">
-  <div style="display:flex;align-items:center;gap:10px;">
-    <img src="assets/brand/bitquai-logo-nav.png" alt="BitQuai" style="height:22px;width:auto;" decoding="async" loading="eager" />
-    <span style="font-weight:700;color:var(--accent);font-size:14px;">BitQuai</span>
+<nav class="bitquai-nav">
+  <div class="bitquai-nav-logo">
+    <img src="assets/brand/bitquai-logo-nav.png" alt="BitQuai" decoding="async" loading="eager" />
+    <span>BitQuai</span>
   </div>
-  <div style="display:flex;gap:6px;">
-    <a href="index.html" style="padding:5px 10px;border-radius:6px;background:var(--accent-soft);color:var(--text-dim);text-decoration:none;border:1px solid rgba(255,37,58,0.08);font-size:12px;">Home</a>
-    <a href="mining.html" style="padding:5px 10px;border-radius:6px;background:var(--accent-soft);color:var(--text-dim);text-decoration:none;border:1px solid rgba(255,37,58,0.08);font-size:12px;">Mining</a>
-    <a href="controller_view.html" style="padding:5px 10px;border-radius:6px;background:var(--accent-soft);color:var(--text-dim);text-decoration:none;border:1px solid rgba(255,37,58,0.08);font-size:12px;">Controller</a>
-    <span style="padding:5px 10px;border-radius:6px;background:var(--accent-soft);color:var(--accent);text-decoration:none;border:1px solid rgba(255,37,58,0.20);font-weight:600;font-size:12px;">QDEX</span>
+  <div class="bitquai-nav-links">
+    <a href="index.html" class="bitquai-nav-link">Home</a>
+    <a href="mining.html" class="bitquai-nav-link">Mining</a>
+    <a href="controller_view.html" class="bitquai-nav-link">Controller</a>
+    <span class="bitquai-nav-link active">QDEX</span>
   </div>
 </nav>
 
@@ -950,10 +1030,12 @@ input { font: inherit; }
         <span class="status-badge" id="marketsModeBadge">static demo</span>
       </div>
       <div class="panel-body">
+        <div class="table-scroll">
         <table class="market-table" id="marketsOverviewTable">
           <thead><tr><th>Pair</th><th>Last</th><th>24h</th><th>Bid</th><th>Ask</th><th>Volume</th><th>Status</th></tr></thead>
           <tbody></tbody>
         </table>
+        </div>
       </div>
     </div>
   </section>
