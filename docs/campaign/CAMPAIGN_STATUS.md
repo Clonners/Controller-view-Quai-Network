@@ -28,12 +28,12 @@ Push all 4 pages to 95%+ Performance and 95%+ Accessibility.
 | P3.10 | Controller mobile verify | Controller | done | ✅ |
 | P3.11 | Lighthouse audit final | All | done | ✅ |
 | P3.12 | Build script (npm run build) | All | done | ✅ |
-| P3.13 | HTML validation + link checker | All | pending |  |
+| P3.13 | HTML validation + link checker | All | done | ✅ |
 | P3.14 | dns-prefetch for RPC endpoints | All | pending |  |
 
 ## Next Task
 
-P3.13 - HTML validation + link checker
+P3.14 - dns-prefetch for RPC endpoints
 
 ## Commits
 
@@ -60,6 +60,7 @@ P3.13 - HTML validation + link checker
 - `6f7cedb` P3.11: Lighthouse audit final — fix QDEX contrast (text-muted), CLS containment, nav image dimensions
 
 - `3f95d8c` P3.12: Build script (npm run build) — CSS minifier, HTML validator, link checker, dist builder
+- `abe6d9c` P3.13: HTML validation + link checker — fix 4 img width/height warnings (CLS prevention)
 
-Total commits: 20
-Total commits this session: 9
+Total commits: 21
+Total commits this session: 10
