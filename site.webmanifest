@@ -14,6 +14,26 @@
       "type": "image/png"
     }
   ],
+  "shortcuts": [
+    {
+      "name": "Mining Dashboard",
+      "short_name": "Mining",
+      "url": "/mining.html",
+      "icons": [{ "src": "icons/android-chrome-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Controller",
+      "short_name": "Controller",
+      "url": "/controller_view.html",
+      "icons": [{ "src": "icons/android-chrome-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "QDEX Terminal",
+      "short_name": "QDEX",
+      "url": "/qdex.html",
+      "icons": [{ "src": "icons/android-chrome-192x192.png", "sizes": "192x192" }]
+    }
+  ],
   "theme_color": "#ff253a",
   "background_color": "#050307",
   "display": "standalone",

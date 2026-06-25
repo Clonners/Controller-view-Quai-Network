@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BitQuai Mining Dashboard</title>
+  <script src="vendor/chart.min.js"></script>
+  <link rel="stylesheet" href="css/styles.css">
+  <meta name="description" content="BitQuai — Mining, controller analytics, and QDEX terminal exchange UI.">
+  <meta name="theme-color" content="#ff253a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="icon" href="icons/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="icons/favicon-48x48.png">
+  <link rel="icon" type="image/png" sizes="64x64" href="icons/favicon-64x64.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon-180x180.png">
+  <link rel="manifest" href="site.webmanifest">
+  <meta property="og:title" content="BitQuai Mining Dashboard">
+  <meta property="og:description" content="Order inside entropy.">
+  <meta property="og:image" content="https://bitquai.live/assets/brand/bitquai-og-1200x630.png">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://bitquai.live/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="BitQuai Mining Dashboard">
+  <meta name="twitter:description" content="Order inside entropy.">
+  <meta name="twitter:image" content="https://bitquai.live/assets/brand/bitquai-og-1200x630.png">
+  <style>
+            /* Ensure install banner never shows on wide/desktop layouts */
+            @media (min-width: 900px) {
+                #installBanner { display: none !important; }
+            }
+
+            /* Responsive install banner for mobile devices (controller-view style)
+                 Centered pill at bottom similar to Controller View native-like prompt */
+            #installBanner {
+                display: none; /* shown by JS when appropriate */
+                position: fixed;
+                bottom: calc(env(safe-area-inset-bottom, 12px) + 8px);
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 10000;
+                background: linear-gradient(180deg, rgba(28,6,8,0.95), rgba(18,6,8,0.92));
+                color: #fff;
+                padding: 10px 14px;
+                border-radius: 28px;
+                box-shadow: 0 8px 28px rgba(0,0,0,0.6);
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                max-width: 640px;
+                width: calc(100% - 36px);
+                box-sizing: border-box;
+                backdrop-filter: blur(6px);
+            }
+
+            #installBanner img { width: 34px; height: 34px; border-radius:6px; flex: 0 0 auto; }
+            #installBanner .install-info { min-width: 0; flex: 1 1 auto; }
+            #installBanner .install-info .title { font-weight:600; font-size:0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+            #installBanner .install-info .subtitle { font-size:0.78rem; opacity:0.92; }
+            #installBanner .install-actions { display:flex; gap:8px; align-items:center; flex: 0 0 auto; }
+
+            /* Small screens: scale down and avoid clipping */
+            @media (max-width: 480px) {
+                #installBanner { width: calc(100% - 24px); max-width: 420px; padding: 8px 10px; border-radius: 14px; }
+                #installBanner { gap: 8px; }
+                #installBanner .install-info { width: calc(100% - 120px); }
+                #installBanner .install-actions { gap:6px; }
+                #installBanner .install-actions button { padding:6px 10px; font-size:0.82rem; }
+            }
+        </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⛏️ BitQuai Mining Dashboard</h1>
+            <div class="header-actions">
+                <div class="controller-link">
+                    <a href="index.html" class="nav-pill">Home</a>
+                    <a href="controller_view.html" class="nav-pill">Controller</a>
+                    <a href="qdex.html" class="nav-pill">QDEX</a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Install banner (compact pill for mobile like Controller View) -->
+        <div id="installBanner">
+            <img src="assets/brand/bitquai-icon-q-256.png" alt="BitQuai">
+            <div class="install-info">
+                    <div class="title">Install BitQuai Dashboard</div>
+                    <div class="subtitle">Add to your home screen</div>
+            </div>
+            <div class="install-actions">
+                <button id="installBtn" style="background:#ff4250;color:#fff;border-radius:18px;border:none;font-weight:600">INSTALL</button>
+                <button id="installDismiss" style="background:transparent;color:#fff;border-radius:18px;border:1px solid rgba(255,255,255,0.08)">CLOSE</button>
+            </div>
+        </div>
+
+        <!-- Configuration Panel -->
+        <div class="config-panel">
+            <h2>⚙️ Server Configuration</h2>
+            <div class="config-grid">
+                <div class="input-group">
+                    <label for="serverHost">Server (domain or URL)</label>
+                    <input type="text" id="serverHost" placeholder="e.g: dpool.bitquai.live or https://host:3336" value="dpool.bitquai.live">
+                </div>
+                <div class="button-group">
+                    <button class="btn-connect" onclick="connectToServer()">Connect</button>
+                    <button class="btn-clear" onclick="clearConfig()">Clear</button>
+                    <button class="btn-diagnostic" onclick="openApiDiagnostic()" title="Check available API endpoints">🔧 API</button>
+                </div>
+            </div>
+            <div id="status" class="status disconnected">
+                <span class="status-dot"></span>
+                <span id="statusText">Disconnected</span>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div id="mainContent" class="content">
+
+            <!-- Algorithm Stats (moved below into the central area) -->
+
+            <!-- Charts -->
+            <div class="charts-section">
+                <!-- Prime Stats & Shares Grid -->
+                <!-- Replaced Performance Chart with Prime Stats as requested -->
+                <div class="charts-grid">
+                    <!-- Prime Stats Container (Now containing Node Stats) -->
+                    <div class="prime-stats-container">
+                        <div class="prime-header-section">
+                            <h3>NODE STATISTICS</h3>
+                            <p>Real-time performance metrics</p>
+                        </div>
+                        <div class="prime-cards-grid">
+                            <!-- Card 1: Node Name (Full Width) -->
+                            <div class="prime-stat-card">
+                                <span class="prime-label">NODE NAME</span>
+                                <div class="prime-value-lg" id="nodeName" style="font-size: 1.6rem;">-</div>
+                                
+                            </div>
+                            
+                            <!-- Card 2: Connected Workers -->
+                            <div class="prime-stat-card">
+                                <span class="prime-label">CONNECTED WORKERS</span>
+                                <div class="prime-value-lg" id="workersConnected">-</div>
+                            </div>
+
+                            <!-- Card 3: Blocks Found -->
+                            <div class="prime-stat-card">
+                                <span class="prime-label">BLOCKS FOUND</span>
+                                <div class="prime-value-lg" id="blocksFound">-</div>
+                                
+                            </div>
+
+                            <!-- Card 4: Uptime -->
+                            <div class="prime-stat-card">
+                                <span class="prime-label">UPTIME</span>
+                                <div class="prime-value-lg" id="uptime" style="font-size: 1.0rem;">-</div>
+                            </div>
+
+                            <!-- Card 5: Valid Shares -->
+                            <div class="prime-stat-card">
+                                <span class="prime-label">VALID SHARES</span>
+                                <div class="prime-value-lg" id="sharesValid">-</div>
+                            </div>
+
+                            <!-- Card 6: Stale Shares (separate) -->
+                            <div class="prime-stat-card">
+                                <span class="prime-label">STALE SHARES</span>
+                                <div class="prime-value-lg" id="sharesStale">-</div>
+                            </div>
+
+                            <!-- Card 7: Invalid Shares (separate) -->
+                            <div class="prime-stat-card">
+                                <span class="prime-label">INVALID SHARES</span>
+                                <div class="prime-value-lg" id="sharesInvalid">-</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Algorithm Stats (inserted into center column) -->
+                    <div class="algo-stats center-algo">
+                        <h2>Algorithm Statistics</h2>
+                        <div class="algo-grid">
+                            <!-- SHA-256 -->
+                            <div class="algo-card">
+                                <h3>SHA-256</h3>
+                                <div class="algo-stat">
+                                    <label>Hashrate:</label>
+                                    <value id="shaHashrate">-</value>
+                                </div>
+                                <div class="algo-stat">
+                                    <label>Workers:</label>
+                                    <value id="shaWorkers">-</value>
+                                </div>
+                            </div>
+                            
+                            <!-- Scrypt -->
+                            <div class="algo-card">
+                                <h3>Scrypt</h3>
+                                <div class="algo-stat">
+                                    <label>Hashrate:</label>
+                                    <value id="scryptHashrate">-</value>
+                                </div>
+                                <div class="algo-stat">
+                                    <label>Workers:</label>
+                                    <value id="scryptWorkers">-</value>
+                                </div>
+                            </div>
+                            
+                            <!-- KawPoW -->
+                            <div class="algo-card">
+                                <h3>KawPoW</h3>
+                                <div class="algo-stat">
+                                    <label>Hashrate:</label>
+                                    <value id="kawpowHashrate">-</value>
+                                </div>
+                                <div class="algo-stat">
+                                    <label>Workers:</label>
+                                    <value id="kawpowWorkers">-</value>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <span class="chart-title">Share Distribution</span>
+                        </div>
+                            <div class="chart-canvas-wrapper">
+                            <canvas id="sharesChart"></canvas>
+                            <div id="sharesControls" class="chart-controls" aria-hidden="false"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workers Table -->
+            <div class="workers-section">
+                <div class="workers-header">
+                    <h2>👷 Connected Workers</h2>
+                    <button class="search-btn" onclick="openSearchModal()" title="Search address">
+                        🔍 Search
+                    </button>
+                </div>
+                <div class="panel-scroll">
+                    <table id="workersTable">
+                    <thead>
+                        <tr>
+                            <th>Address</th>
+                            <th>Worker Name</th>
+                            <th>Algorithm</th>
+                            <th>Hashrate</th>
+                        </tr>
+                    </thead>
+                    <tbody id="workersBody">
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: #999;">Loading...</td>
+                        </tr>
+                    </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Miners List -->
+            <div class="miners-section">
+                <div class="miners-header">
+                    <h2>⛏️ All Miners</h2>
+                    <span class="miners-count" id="minersCount">0 miners</span>
+                </div>
+                <div class="panel-scroll miners-scroll">
+                    <table id="minersTable">
+                    <thead>
+                        <tr>
+                            <th>Address</th>
+                            <th>Hashrate</th>
+                            <th>Workers</th>
+                            <th>Last Seen</th>
+                        </tr>
+                    </thead>
+                    <tbody id="minersBody">
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: #999;">Loading miners...</td>
+                        </tr>
+                    </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Blocks Found -->
+            <div class="blocks-section">
+                <div class="blocks-header">
+                    <h2>🏆 Confirmed Blocks</h2>
+                    <button class="search-btn" onclick="openBlockSearchModal()" title="Search by address">
+                        🔍 Search
+                    </button>
+                </div>
+                <div id="blockFilterIndicator" class="perf-filter-indicator" style="display: none;"></div>
+                <div class="panel-scroll blocks-scroll">
+                    <table class="miners-table blocks-table">
+                        <thead>
+                            <tr>
+                                <th>HEIGHT</th>
+                                <th>HASH</th>
+                                <th>FOUND BY</th>
+                                <th>FOUND AT</th>
+                            </tr>
+                        </thead>
+                        <tbody id="blocksTableBody">
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: #999;">Loading blocks...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+
+
+        <!-- Loading/Error State -->
+        <div id="loadingState" class="loading-message">
+            Waiting for connection...
+        </div>
+    </div>
+
+
+    <!-- Modals (Moved out of .container) -->
+    <!-- Miner Stats Modal -->
+        <div id="minerModal" class="miner-modal" style="display: none;">
+            <div class="miner-modal-content">
+                <div class="miner-modal-header">
+                    <h2>📈 Miner Statistics</h2>
+                    <button class="modal-close-btn" onclick="closeMinerModal()">&times;</button>
+                </div>
+                <div class="miner-modal-body">
+                    <div class="miner-address-display">
+                        <label>Address:</label>
+                        <code id="modalMinerAddress">-</code>
+                    </div>
+                    <div class="miner-stats-grid">
+                        <div class="miner-stat-card">
+                            <h4>Hashrate</h4>
+                            <div class="miner-stat-value" id="modalMinerHashrate">-</div>
+                        </div>
+                        <div class="miner-stat-card">
+                            <h4>Workers</h4>
+                            <div class="miner-stat-value" id="modalMinerWorkers">-</div>
+                        </div>
+                        <div class="miner-stat-card">
+                            <h4>Valid Shares</h4>
+                            <div class="miner-stat-value" id="modalMinerValidShares">-</div>
+                        </div>
+                        <div class="miner-stat-card">
+                            <h4>Invalid Shares</h4>
+                            <div class="miner-stat-value" id="modalMinerInvalidShares">-</div>
+                        </div>
+                        <div class="miner-stat-card">
+                            <h4>Stale Shares</h4>
+                            <div class="miner-stat-value" id="modalMinerStaleShares">-</div>
+                        </div>
+                        <div class="miner-stat-card">
+                            <h4>Blocks Found</h4>
+                            <div class="miner-stat-value" id="modalMinerBlocks">-</div>
+                        </div>
+                        <div class="miner-stat-card">
+                            <h4>Last Seen</h4>
+                            <div class="miner-stat-value" id="modalMinerLastSeen">-</div>
+                        </div>
+                        <div class="miner-stat-card">
+                            <h4>First Seen</h4>
+                            <div class="miner-stat-value" id="modalMinerFirstSeen">-</div>
+                        </div>
+                        <div class="miner-stat-card luck-card">
+                            <h4>Current Luck</h4>
+                            <div class="miner-stat-value" id="modalMinerLuck">-</div>
+                        </div>
+                    </div>
+                    <div class="miner-workers-section">
+                        <h4>Workers for this Address</h4>
+                        <div id="modalMinerWorkersList" class="miner-workers-list">
+                            <div class="miner-worker-item">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Modal -->
+        <div id="searchModal" class="search-modal" style="display: none;">
+            <div class="search-modal-content">
+                <div class="search-modal-header">
+                    <h2>🔍 Search Address</h2>
+                    <button class="modal-close-btn" onclick="closeSearchModal()">&times;</button>
+                </div>
+                <div class="search-modal-body">
+                    <div class="search-input-container">
+                        <input type="text" id="searchModalInput" placeholder="Enter wallet address..." oninput="searchAddressInModal()">
+                    </div>
+                    <div class="search-results-container">
+                        <h4>Connected Addresses</h4>
+                        <div id="searchModalResults" class="search-results-list">
+                            <div class="search-result-item no-results">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Block Search Modal -->
+        <div id="blockSearchModal" class="search-modal" style="display: none;">
+            <div class="search-modal-content">
+                <div class="search-modal-header">
+                    <h2>🔍 Search Blocks by Address</h2>
+                    <button class="modal-close-btn" onclick="closeBlockSearchModal()">&times;</button>
+                </div>
+                <div class="search-modal-body">
+                    <div class="search-input-container">
+                        <input type="text" id="blockSearchInput" placeholder="Enter wallet address..." oninput="searchBlocksByAddress()">
+                    </div>
+                    <div class="search-results-container">
+                        <h4>Addresses with Blocks Found</h4>
+                        <div id="blockSearchResults" class="search-results-list">
+                            <div class="search-result-item no-results">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Diagnostic Modal -->
+        <div id="apiDiagnosticModal" class="search-modal" style="display: none;">
+            <div class="search-modal-content diagnostic-modal">
+                <div class="search-modal-header">
+                    <h2>🔧 API Diagnostic Tool</h2>
+                    <button class="modal-close-btn" onclick="closeApiDiagnostic()">&times;</button>
+                </div>
+                <div class="search-modal-body">
+                    <div id="apiDiagnosticResults" class="diagnostic-results">
+                        <div class="diagnostic-loading">Click scan to check available endpoints...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- WebSocket Status Indicator -->
+        <div id="wsIndicator" class="ws-indicator" style="display: none;">
+            <span class="ws-dot"></span>
+            <span class="ws-text">Live</span>
+        </div>
+
+    <!-- Load Modular JavaScript (ES6 Modules) -->
+        <script>
+            (function(){
+                let deferredPrompt = null;
+                const banner = document.getElementById('installBanner');
+                const installBtn = document.getElementById('installBtn');
+                const dismissBtn = document.getElementById('installDismiss');
+
+                function isMobileDevice(){
+                    return /Mobi|Android|iPhone|iPad|iPod/.test(navigator.userAgent) || window.matchMedia('(max-width: 900px)').matches;
+                }
+
+                function isAppInstalled(){
+                    try{
+                        if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return true;
+                        if (window.navigator && window.navigator.standalone) return true; // iOS
+                    }catch(e){}
+                    return false;
+                }
+
+                window.addEventListener('beforeinstallprompt', (e) => {
+                    e.preventDefault();
+                    // Only show the banner on mobile devices and when the app is not already installed
+                    if (!isMobileDevice() || isAppInstalled()) return;
+                    deferredPrompt = e;
+                    if (banner) banner.style.display = 'flex';
+                });
+
+                if (installBtn) installBtn.addEventListener('click', async function(){
+                    if (!deferredPrompt) return;
+                    try{ await deferredPrompt.prompt(); const choice = await deferredPrompt.userChoice; deferredPrompt = null; }catch(e){}
+                    if (banner) banner.style.display = 'none';
+                });
+
+                if (dismissBtn) dismissBtn.addEventListener('click', function(){ if (banner) banner.style.display = 'none'; });
+
+                window.addEventListener('appinstalled', function(){ if (banner) banner.style.display = 'none'; deferredPrompt = null; });
+
+                // Hide banner on load if installed or desktop
+                document.addEventListener('DOMContentLoaded', function(){ if (!isMobileDevice() || isAppInstalled()){ if (banner) banner.style.display = 'none'; } });
+            })();
+        </script>
+        <script type="module" src="js/main.js"></script>
+</body>
+</html>
