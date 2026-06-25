@@ -16,7 +16,7 @@ Push all 4 pages to 95%+ Performance and 95%+ Accessibility.
 
 | # | Task | Page | Status | Done? |
 |---|---|---|---|---|
-| P3.1 | Optimize hero image (WebP, srcset) | Index | pending |  |
+| P3.1 | Optimize hero image (WebP, srcset) | Index | done | ✅ |
 | P3.2 | Fix install button contrast WCAG AA | Mining | pending |  |
 | P3.3 | Fix donate pill contrast | Controller | pending |  |
 | P3.4 | Fix touch targets | Controller | pending |  |
@@ -33,7 +33,7 @@ Push all 4 pages to 95%+ Performance and 95%+ Accessibility.
 
 ## Next Task
 
-P3.1 - Optimize hero image (WebP, srcset)
+P3.2 - Fix install button contrast WCAG AA
 
 ## Commits
 
@@ -45,6 +45,7 @@ P3.1 - Optimize hero image (WebP, srcset)
 - `8f1c222` CLS fix mining, contrast controller donate
 - `46e417d` Revert media=print mining.css
 - `b574b3b` P2: minified CSS, native defer scripts
+- `ca75309` P3.1: hero image WebP + srcset (599KB→32KB OG, 1.4MB→64KB hero BG)
 
-Total commits: 8
-Total commits this session: 0
+Total commits: 9
+Total commits this session: 1
