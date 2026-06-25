@@ -25,7 +25,7 @@ Push all 4 pages to 95%+ Performance and 95%+ Accessibility.
 | P3.7 | decoding=async on all images | All | done | ✅ |
 | P3.8 | loading=lazy on below-fold images | All | done | ✅ |
 | P3.9 | QDEX mobile responsive | QDEX | done | ✅ |
-| P3.10 | Controller mobile verify | Controller | pending |  |
+| P3.10 | Controller mobile verify | Controller | done | ✅ |
 | P3.11 | Lighthouse audit final | All | pending |  |
 | P3.12 | Build script (npm run build) | All | pending |  |
 | P3.13 | HTML validation + link checker | All | pending |  |
@@ -33,7 +33,7 @@ Push all 4 pages to 95%+ Performance and 95%+ Accessibility.
 
 ## Next Task
 
-P3.10 - Controller mobile verify
+P3.11 - Lighthouse audit final
 
 ## Commits
 
@@ -56,6 +56,7 @@ P3.10 - Controller mobile verify
 - `e71930e` P3.7: decoding=async on all images (qdex, mining/index, controller/index)
 - `28e0028` P3.8: fix loading=lazy on above-fold images (nav logos → eager)
 - `190d14e` P3.9: QDEX mobile responsive — nav bar class-based CSS, 3 breakpoints, table scroll wrappers, touch targets
+- `b9da19f` P3.10: Controller mobile verify — fix form labels (aria-label), add nav landmark, section aria-labels
 
-Total commits: 17
-Total commits this session: 6
+Total commits: 18
+Total commits this session: 7
