@@ -122,7 +122,7 @@ header .subtitle {
 
 .donate-heart {
   font-size: 0.85rem;
-  color: #ff6b81;
+  color: #ff9db3;
 }
 
 .donate-label {
@@ -133,7 +133,7 @@ header .subtitle {
 .donate-address {
   font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   font-size: 0.68rem;
-  opacity: 0.9;
+  color: #d1d5db;
 }
 
 .github-pill {
