@@ -2,9 +2,9 @@
  * Wallet Pill — Shared wallet connection for the topnav pill
  * Loads on all pages: index.html, mining.html, controller_view.html, qdex.html
  *
- * Uses localStorage to persist wallet state across pages.
- * On QDEX page, delegates to qdex.js for actual balance/orderbook logic.
- * On other pages, just shows connected state.
+ * Uses QuaiWallet to connect to Quai wallets (Pelagus, MetaMask with Quai network).
+ * Supports quai_requestAccounts, quai_accounts, and shard-aware RPC calls.
+ * Persists wallet state in localStorage across pages.
  */
 
 (function () {
@@ -47,6 +47,7 @@
       btn.onclick = function (e) {
         e.preventDefault();
         if (confirm('Disconnect wallet ' + shortAddress(wallet.address) + '?')) {
+          disconnectWallet();
           clearWallet();
           updatePill(null);
           window.dispatchEvent(new CustomEvent('bitquai:wallet-disconnect'));
@@ -65,52 +66,121 @@
     }
   }
 
-  async function connectWallet() {
-    if (typeof window.ethereum !== 'undefined') {
-      try {
-        const accounts = await window.ethereum.request({
-          method: 'eth_requestAccounts',
-        });
-        if (accounts && accounts.length > 0) {
-          const wallet = {
-            address: accounts[0],
-            provider: 'metamask',
-          };
-          saveWallet(wallet);
-          updatePill(wallet);
-          window.dispatchEvent(new CustomEvent('bitquai:wallet-connect', { detail: wallet }));
+  // Global QuaiWallet instance
+  let quaiWallet = null;
 
-          // Listen for account changes
-          window.ethereum.on('accountsChanged', function (changed) {
-            if (changed.length === 0) {
-              clearWallet();
-              updatePill(null);
-              window.dispatchEvent(new CustomEvent('bitquai:wallet-disconnect'));
-            } else {
-              const wallet = { address: changed[0], provider: 'metamask' };
-              saveWallet(wallet);
-              updatePill(wallet);
-              window.dispatchEvent(new CustomEvent('bitquai:wallet-connect', { detail: wallet }));
-            }
-          });
-        }
-      } catch (err) {
-        console.warn('Wallet connect failed:', err);
+  async function connectWallet() {
+    if (!window.QuaiWallet) {
+      console.warn('QuaiWallet SDK not loaded');
+      alert('QuaiWallet SDK not available. Please reload the page.');
+      return;
+    }
+
+    try {
+      quaiWallet = new QuaiWallet({
+        chainId: 0x3A98, // 15000 = Orchard Cyprus-1
+        networkName: 'Quai Orchard Cyprus-1',
+      });
+
+      const result = await quaiWallet.connect();
+
+      if (!result || !result.address) {
+        throw new Error('No wallet address returned');
       }
-    } else {
-      alert(
-        'MetaMask not detected. Install MetaMask or a compatible wallet to connect.\n\nhttps://metamask.io/download/'
-      );
+
+      const walletData = {
+        address: result.address,
+        provider: 'quai',
+        chainId: result.chainId,
+        networkName: result.networkName,
+      };
+
+      saveWallet(walletData);
+      updatePill(walletData);
+      window.dispatchEvent(new CustomEvent('bitquai:wallet-connect', { detail: walletData }));
+
+      // Listen for account changes
+      quaiWallet.on('accountsChanged', (accounts) => {
+        const walletData = { address: accounts[0], provider: 'quai', chainId: quaiWallet.chainId };
+        saveWallet(walletData);
+        updatePill(walletData);
+        window.dispatchEvent(new CustomEvent('bitquai:wallet-connect', { detail: walletData }));
+      });
+
+      quaiWallet.on('disconnect', () => {
+        clearWallet();
+        updatePill(null);
+        window.dispatchEvent(new CustomEvent('bitquai:wallet-disconnect'));
+      });
+
+    } catch (err) {
+      console.warn('Wallet connect failed:', err);
+      alert('Wallet connection failed: ' + err.message);
     }
   }
 
-  // On page load: restore wallet from localStorage and update pill
+  function disconnectWallet() {
+    if (quaiWallet) {
+      quaiWallet.disconnect();
+      quaiWallet = null;
+    }
+  }
+
+  // Expose global API for other scripts
+  window.getQuaiWallet = function () {
+    return quaiWallet;
+  };
+
+  window.getWalletSigner = async function () {
+    if (!quaiWallet) {
+      // Try to reconnect from storage
+      const saved = loadWallet();
+      if (saved && saved.address) {
+        try {
+          quaiWallet = new QuaiWallet({
+            chainId: 0x3A98,
+            networkName: 'Quai Orchard Cyprus-1',
+          });
+          const accounts = await quaiWallet.getAccounts();
+          if (accounts && accounts.length > 0) {
+            quaiWallet.accounts = accounts;
+            quaiWallet.signer = new QuaiSigner(window.ethereum, accounts[0]);
+            return quaiWallet.getSigner();
+          }
+        } catch (e) {
+          console.warn('Failed to restore wallet signer:', e);
+        }
+      }
+      return null;
+    }
+    return quaiWallet.getSigner();
+  };
+
+  // On page load: restore wallet from localStorage
   function init() {
     const saved = loadWallet();
     if (saved && saved.address) {
       updatePill(saved);
-      // Dispatch event for other scripts (e.g., qdex.js) to pick up
       window.dispatchEvent(new CustomEvent('bitquai:wallet-restored', { detail: saved }));
+
+      // Try to restore QuaiWallet connection silently
+      if (window.QuaiWallet) {
+        try {
+          quaiWallet = new QuaiWallet({
+            chainId: 0x3A98,
+            networkName: 'Quai Orchard Cyprus-1',
+          });
+          quaiWallet.getAccounts().then((accounts) => {
+            if (accounts && accounts.length > 0) {
+              quaiWallet.accounts = accounts;
+              quaiWallet.signer = new QuaiSigner(window.ethereum, accounts[0]);
+              window.dispatchEvent(new CustomEvent('bitquai:wallet-restored', { detail: saved }));
+            }
+          }).catch(() => {});
+        } catch (e) {
+          console.warn('Failed to restore wallet connection:', e);
+        }
+      }
     } else {
       updatePill(null);
     }

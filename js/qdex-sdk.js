@@ -188,6 +188,7 @@ export class QDexClient {
     this.fetch = fetchImpl;
     this.WebSocket = WebSocketImpl;
 
+    // Mock endpoints
     this.markets = {
       list: async () => (await this.#requestOk('/v1/markets')).markets,
     };
@@ -359,6 +360,31 @@ export class QDexClient {
         body: request,
         expectedStatus: 501,
       }),
+    };
+
+    // Real network endpoints (read from chain)
+    this.real = {
+      network: {
+        get: async () => this.#requestOk('/v1/real/network'),
+      },
+      markets: {
+        list: async () => (await this.#requestOk('/v1/real/markets')).markets,
+      },
+      fees: {
+        get: async () => (await this.#requestOk('/v1/real/fees')).fees,
+      },
+      balances: {
+        get: async (address) => this.#requestOk(`/v1/real/balances/${encodeURIComponent(address)}`),
+      },
+      trades: {
+        list: async (marketId, limit = 50) => {
+          const params = limit ? `?limit=${limit}` : '';
+          return (await this.#requestOk(`/v1/real/trades${params}`)).trades;
+        },
+      },
+      block: {
+        get: async () => (await this.#requestOk('/v1/real/block')).blockNumber,
+      },
     };
 
     this.streams = {

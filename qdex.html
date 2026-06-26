@@ -1677,6 +1677,22 @@ input { font: inherit; }
 
   // ── Data Loading ───────────────────────────────
   async function loadMarkets() {
+    // Try real network data first if backend is ready
+    if (backendReady) {
+      try {
+        const realMarkets = await sdkFetch(() => qdexClient.real.markets.list());
+        if (realMarkets && realMarkets.length) {
+          state.markets = realMarkets;
+          renderMarkets();
+          renderTicker();
+          logActivity('Loaded real network markets', 'success');
+          return;
+        }
+      } catch (e) {
+        console.warn('[QDEX] Failed to load real markets:', e.message);
+      }
+    }
+
     // Try SDK first if backend is ready
     if (backendReady) {
       const data = await sdkFetch(() => qdexClient.markets.list());
@@ -2091,6 +2107,7 @@ input { font: inherit; }
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   }
 </script>
+<script src="js/quai-wallet.js"></script>
 <script src="js/wallet-pill.js"></script>
 </body>
 </html>
