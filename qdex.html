@@ -1045,22 +1045,35 @@ input { font: inherit; }
   <!-- TradingView Lightweight Charts -->
   <script src="vendor/lightweight-charts.cjs"></script>
 
+  <!-- QDEX SDK — connects to backend API -->
+  <script src="js/qdex-sdk.js"></script>
+
   <script>
   /* ═══════════════════════════════════════════════
      QDEX — Terminal Exchange UI
      Lightweight vanilla JS, no frameworks
      ═══════════════════════════════════════════════ */
 
-  const API = '';
   const QDEX_MODE = new URLSearchParams(location.search).get('mode') || 'auto';
-  const STATIC_DEMO = QDEX_MODE === 'demo' || (
-    QDEX_MODE !== 'live' && (
-      location.hostname === 'bitquai.live' ||
-      location.hostname.endsWith('github.io') ||
-      location.hostname === 'localhost' ||
-      location.hostname === '127.0.0.1'
-    )
-  );
+  const QDEX_API = 'https://api.bitquai.live';
+
+  let qdexClient = null;
+  let backendReady = false;
+
+  async function initQDexClient() {
+    try {
+      qdexClient = new QDexClient({ baseUrl: QDEX_API });
+      const contracts = await qdexClient.contracts.get();
+      if (contracts && contracts.chain) {
+        backendReady = true;
+        logActivity(`QDEX backend connected: ${contracts.deploymentStatus}`, 'success');
+        console.log('[QDEX] Backend ready', contracts);
+      }
+    } catch (e) {
+      console.warn('[QDEX] Backend connection failed:', e.message);
+      logActivity('QDEX backend offline — demo mode', 'warn');
+    }
+  }
   let tvChart = null;
   let tvSeries = null;
 
@@ -1135,14 +1148,24 @@ input { font: inherit; }
 
   // ── Fetch ──────────────────────────────────────
   async function api(path) {
-    if (STATIC_DEMO) return null;
     try {
-      const r = await fetch(`${API}${path}`);
+      const r = await fetch(`${QDEX_API}${path}`);
       const type = r.headers.get('content-type') || '';
       if (!r.ok || !type.includes('application/json')) return null;
       return await r.json();
     } catch(e) {
       console.warn('API fetch failed:', path, e);
+      return null;
+    }
+  }
+
+  // ── SDK-based fetch (uses QDexClient) ─────────
+  async function sdkFetch(fn) {
+    if (!backendReady || !qdexClient) return null;
+    try {
+      return await fn();
+    } catch (e) {
+      console.warn('[QDEX] SDK call failed:', e.message);
       return null;
     }
   }
@@ -1654,6 +1677,18 @@ input { font: inherit; }
 
   // ── Data Loading ───────────────────────────────
   async function loadMarkets() {
+    // Try SDK first if backend is ready
+    if (backendReady) {
+      const data = await sdkFetch(() => qdexClient.markets.list());
+      if (data && data.length) {
+        state.markets = data;
+        renderMarkets();
+        renderTicker();
+        return;
+      }
+    }
+
+    // Fallback to REST API
     const data = await api('/v1/markets');
     state.markets = (data?.markets && data.markets.length) ? data.markets : [...DEMO_MARKETS];
     renderMarkets();
@@ -1661,6 +1696,18 @@ input { font: inherit; }
   }
 
   async function loadTickers() {
+    // Try SDK first if backend is ready
+    if (backendReady) {
+      const data = await sdkFetch(() => qdexClient.tickers.list());
+      if (data && data.length) {
+        state.tickers = {};
+        for (const t of data) state.tickers[t.marketId] = t;
+        renderTicker();
+        return;
+      }
+    }
+
+    // Fallback to REST API
     const data = await api('/v1/tickers');
     state.tickers = {};
     if (data?.tickers && data.tickers.length) {
@@ -1672,6 +1719,27 @@ input { font: inherit; }
   }
 
   async function loadOrderbook() {
+    // Try SDK first if backend is ready
+    if (backendReady) {
+      const data = await sdkFetch(() => qdexClient.orderbook.get(state.market));
+      if (data && ((data.bids && data.bids.length) || (data.asks && data.asks.length))) {
+        state.orderbook = { bids: data.bids || [], asks: data.asks || [] };
+        if (state.orderbook.bids.length && state.orderbook.asks.length) {
+          const current = state.tickers[state.market] || { marketId: state.market, lastPrice: demoMid(state.market), volume24h: '0', change24h: '0' };
+          state.tickers[state.market] = {
+            ...current,
+            bestBid: state.orderbook.bids[0].price,
+            bestAsk: state.orderbook.asks[0].price,
+            lastPrice: current.lastPrice || ((Number(state.orderbook.bids[0].price) + Number(state.orderbook.asks[0].price)) / 2).toFixed(6),
+          };
+          renderTicker();
+        }
+        renderOrderbook();
+        return;
+      }
+    }
+
+    // Fallback to REST API
     const data = await api(`/v1/orderbook/${state.market}`);
     if (data && ((data.bids && data.bids.length) || (data.asks && data.asks.length))) {
       state.orderbook = { bids: data.bids || [], asks: data.asks || [] };
@@ -1692,6 +1760,17 @@ input { font: inherit; }
   }
 
   async function loadTrades() {
+    // Try SDK first if backend is ready
+    if (backendReady) {
+      const data = await sdkFetch(() => qdexClient.trades.list(state.market));
+      if (data && data.trades && data.trades.length) {
+        state.trades = data.trades;
+        renderTrades();
+        return;
+      }
+    }
+
+    // Fallback to REST API
     const data = await api(`/v1/trades/${state.market}`);
     state.trades = (data?.trades && data.trades.length) ? data.trades : generateMockTrades(state.market);
     renderTrades();
@@ -1991,8 +2070,10 @@ input { font: inherit; }
     renderOrders();
     renderPortfolioView();
     logActivity('BitQuai QDEX terminal loaded', 'info');
-    logActivity(STATIC_DEMO ? 'Static demo mode — GitHub Pages has no /v1 API backend' : 'API mode — live endpoints enabled', STATIC_DEMO ? 'warn' : 'success');
-    logActivity('No real transactions are sent from this demo UI', 'warn');
+
+    // Connect to backend
+    await initQDexClient();
+    logActivity(backendReady ? 'Connected to QDEX backend' : 'Demo mode — no backend', backendReady ? 'success' : 'warn');
 
     await loadMarkets();
     await refresh();
