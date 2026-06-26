@@ -735,21 +735,7 @@ input { font: inherit; }
 </head>
 <body>
 
-  
-<nav class="bitquai-nav">
-  <div class="bitquai-nav-logo">
-    <img src="assets/brand/bitquai-logo-nav.png" alt="BitQuai" decoding="async" loading="eager" width="120" height="24" />
-    <span>BitQuai</span>
-  </div>
-  <div class="bitquai-nav-links">
-    <a href="index.html" class="bitquai-nav-link">Home</a>
-    <a href="mining.html" class="bitquai-nav-link">Mining</a>
-    <a href="controller_view.html" class="bitquai-nav-link">Controller</a>
-    <span class="bitquai-nav-link active">QDEX</span>
-  </div>
-</nav>
-
-<!-- Top Bar -->
+  <!-- Shared topnav pill -->
   <nav class="topnav" aria-label="Primary navigation">
       <a class="brand" href="index.html" aria-label="BitQuai home">
         <picture><source src="assets/brand/bitquai-icon-q-256.webp" type="image/webp"><img src="assets/brand/bitquai-icon-q-256.png" alt="BitQuai" width="256" height="256" decoding="async" loading="eager" fetchpriority="high"></picture>
@@ -766,21 +752,23 @@ input { font: inherit; }
         <a href="#wallet" class="wallet-btn">Connect Wallet</a>
       </div>
     </nav>
-    <header class="topbar">
-      <div class="topbar-brand">QDEX</div>
-      <nav class="topbar-tabs">
-        <button class="topbar-tab active" data-view="trade">Trade</button>
-        <button class="topbar-tab" data-view="portfolio">Portfolio</button>
-        <button class="topbar-tab" data-view="markets">Markets</button>
-      </nav>
-      <div class="topbar-spacer"></div>
-      <div class="topbar-status">
-        <div class="status-dot mock" id="modeDot" title="Static demo mode — no real transactions"></div>
-        <span id="modeLabel">STATIC DEMO</span>
-        <span class="divider">/</span>
-        <span>TESTNET</span>
-      </div>
-    </header>
+
+  <!-- QDEX tabs bar (below pill) -->
+  <header class="topbar">
+    <div class="topbar-brand">QDEX</div>
+    <nav class="topbar-tabs">
+      <button class="topbar-tab active" data-view="trade">Trade</button>
+      <button class="topbar-tab" data-view="portfolio">Portfolio</button>
+      <button class="topbar-tab" data-view="markets">Markets</button>
+    </nav>
+    <div class="topbar-spacer"></div>
+    <div class="topbar-status">
+      <div class="status-dot mock" id="modeDot" title="Static demo mode — no real transactions"></div>
+      <span id="modeLabel">STATIC DEMO</span>
+      <span class="divider">/</span>
+      <span>TESTNET</span>
+    </div>
+  </header>
   <main>
 
   <!-- Mode Strip -->

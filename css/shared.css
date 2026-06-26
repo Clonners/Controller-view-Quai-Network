@@ -19,7 +19,7 @@
   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.42);
   max-width: 940px;
   width: 100%;
-  margin: 0 auto;
+  margin: 0 auto 24px auto;
 }
 
 .topnav .brand {
