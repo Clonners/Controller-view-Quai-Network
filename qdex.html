@@ -437,14 +437,9 @@ input { font: inherit; }
 
 
 /* ── View Switching / Mode Strip ───────────────── */
-.mode-strip {
-  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-  padding: 7px 16px;
-  background: linear-gradient(90deg, rgba(255,37,58,.09), rgba(18,7,11,.92));
-  border-bottom: 1px solid var(--border);
-  color: var(--text-dim);
-  font-size: 11px;
-}
+ .mode-strip {
+   display: none; /* hidden — status shown in topbar */
+ }
 .mode-pill {
   display: inline-flex; align-items: center; gap: 7px;
   padding: 4px 9px;
@@ -755,7 +750,7 @@ input { font: inherit; }
 
 <!-- Top Bar -->
   <header class="topbar">
-    <div class="topbar-brand">QDEX <span>terminal</span></div>
+    <div class="topbar-brand">QDEX</div>
     <nav class="topbar-tabs">
       <button class="topbar-tab active" data-view="trade">Trade</button>
       <button class="topbar-tab" data-view="portfolio">Portfolio</button>
