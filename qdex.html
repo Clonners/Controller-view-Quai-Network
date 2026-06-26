@@ -984,9 +984,8 @@ input { font: inherit; }
       <div>
         <div class="view-page-kicker">Wallet / Portfolio</div>
         <h2>Portfolio command center</h2>
-        <p class="view-page-subtitle">Wallet state, balances, open orders, and local activity. No transaction is sent from this static demo.</p>
+        <p class="view-page-subtitle">Wallet state, balances, open orders, and local activity. Use the top navigation pill to connect/disconnect.</p>
       </div>
-      <button class="terminal-btn primary" id="portfolioWalletBtn">Loading...</button>
     </div>
 
     <div class="view-grid">
@@ -1496,9 +1495,7 @@ input { font: inherit; }
   function renderWalletUI() {
     const label = state.wallet ? shortAddress(state.wallet) : 'Connect Wallet';
     const walletBtn = $('#walletBtn');
-    const portfolioWalletBtn = $('#portfolioWalletBtn');
     if (walletBtn) walletBtn.textContent = label;
-    if (portfolioWalletBtn) portfolioWalletBtn.textContent = state.wallet ? 'Disconnect Wallet' : 'Connect Wallet';
 
     const m = currentMarket();
     const token = state.side === 'buy' ? m?.quote : m?.base;
@@ -1566,16 +1563,10 @@ input { font: inherit; }
       <div class="wallet-address">${escapeHtml(shortAddress(state.wallet))}</div>
       <div class="wallet-meta">Provider: ${escapeHtml(state.walletProvider || 'unknown')}</div>
       <div class="wallet-meta">Mode: ${STATIC_DEMO ? 'static demo — no transactions' : 'API mode'}</div>
-      <div class="wallet-actions"><button class="terminal-btn" id="portfolioDisconnectBtn">Disconnect</button></div>
     ` : `
       <div class="wallet-address">Disconnected</div>
-      <div class="wallet-meta">Connect a browser wallet when available, otherwise QDEX uses a local mock wallet for UI testing.</div>
-      <div class="wallet-actions"><button class="terminal-btn primary" id="portfolioConnectInlineBtn">Connect Wallet</button></div>
+      <div class="wallet-meta">Connect your wallet using the pill above to view balances.</div>
     `;
-    const inlineConnect = $('#portfolioConnectInlineBtn');
-    const inlineDisconnect = $('#portfolioDisconnectBtn');
-    if (inlineConnect) inlineConnect.onclick = toggleWallet;
-    if (inlineDisconnect) inlineDisconnect.onclick = toggleWallet;
 
     const balancesBox = $('#portfolioBalances');
     const balanceCount = $('#portfolioBalanceCount');
@@ -1992,7 +1983,6 @@ input { font: inherit; }
   applyWalletFromStorage();
 
   // Wallet buttons — use toggleWallet for inline buttons only
-  $('#portfolioWalletBtn').onclick = toggleWallet;
   $('#marketSearch').oninput = renderMarketsView;
 
   // ── Init ───────────────────────────────────────
