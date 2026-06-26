@@ -385,6 +385,26 @@ export class QDexClient {
       block: {
         get: async () => (await this.#requestOk('/v1/real/block')).blockNumber,
       },
+      events: {
+        trades: {
+          list: async (limit = 50) => {
+            const params = limit ? `?limit=${limit}` : '';
+            return (await this.#requestOk(`/v1/real/events/trades${params}`)).trades;
+          },
+        },
+        deposits: {
+          list: async (limit = 50) => {
+            const params = limit ? `?limit=${limit}` : '';
+            return (await this.#requestOk(`/v1/real/events/deposits${params}`)).deposits;
+          },
+        },
+        withdrawals: {
+          list: async (limit = 50) => {
+            const params = limit ? `?limit=${limit}` : '';
+            return (await this.#requestOk(`/v1/real/events/withdrawals${params}`)).withdrawals;
+          },
+        },
+      },
     };
 
     this.streams = {

@@ -1931,7 +1931,7 @@ input { font: inherit; }
     }
   }
 
-  // Submit button — local mock order only, no transaction is sent
+  // Submit button — signs and submits order to backend
   $('#submitBtn').onclick = async () => {
     if (!state.wallet) return;
     const m = currentMarket();
@@ -1940,8 +1940,94 @@ input { font: inherit; }
       : Number($('#priceInput').value || 0);
     const amount = Number($('#amtInput').value || 0);
     if (!m || !amount || !price) return;
-    const order = {
-      id: 'ord_' + Math.random().toString(36).slice(2, 9),
+
+    const btn = $('#submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Signing...';
+
+    try {
+      // Get wallet signer
+      const signer = await window.getWalletSigner();
+      if (!signer) {
+        logActivity('Wallet not connected. Please reconnect.', 'error');
+        btn.disabled = false;
+        btn.textContent = `Place ${state.side} ${state.orderType} order`;
+        return;
+      }
+
+      // Build order
+      const nonce = Math.floor(Math.random() * 100000).toString();
+      const order = {
+        marketId: 'WQUAI-WQI',
+        side: state.side,
+        type: state.orderType === 'market' ? 'market_ioc' : 'limit',
+        baseToken: m.base,
+        quoteToken: m.quote,
+        amount: amount.toFixed(4),
+        price: price.toFixed(6),
+        timeInForce: state.orderType === 'market' ? 'IOC' : 'GTC',
+        maxSlippageBps: state.orderType === 'market' ? 50 : 0,
+        owner: state.wallet.address,
+        delegate: '0x0000000000000000000000000000000000000000',
+        nonce,
+        expiresAt: Math.floor(Date.now() / 1000) + 86400,
+        chainId: 15000,
+        settlementContract: '0x00497118fAA729aC1d981c680080d7428fE8a4Bd',
+      };
+
+      // Sign order with wallet
+      const orderHash = JSON.stringify(order);
+      const signature = await signer.signMessage(orderHash);
+
+      order.signature = {
+        scheme: 'mock',
+        signer: state.wallet.address,
+        value: signature,
+        signedAt: Math.floor(Date.now() / 1000),
+      };
+
+      logActivity(`Signing ${state.side} ${state.orderType} order: ${amount} ${m.base} @ ${price.toFixed(6)} ${m.quote}`, 'info');
+
+      // Submit to backend
+      if (backendReady && qdexClient) {
+        try {
+          const result = await qdexClient.orders.submitSignedOrder(order);
+          if (result && result.orderHash) {
+            logActivity(`Order submitted: ${result.orderHash.slice(0, 12)}... (${result.status || 'open'})`, 'success');
+            state.orders.unshift({
+              id: result.orderHash.slice(0, 12),
+              pair: `${m.base}/${m.quote}`,
+              side: state.side,
+              type: state.orderType,
+              price: price.toFixed(6),
+              amount: amount.toFixed(4),
+              filled: '0%',
+              status: result.status || 'open',
+              timestamp: Date.now(),
+            });
+            renderOrders();
+          }
+        } catch (e) {
+          console.warn('[QDEX] Order submission failed:', e.message);
+          logActivity(`Order submission failed: ${e.message}`, 'warn');
+          // Fallback to local mock
+          createLocalOrder(order, m, price, amount, nonce);
+        }
+      } else {
+        createLocalOrder(order, m, price, amount, nonce);
+      }
+    } catch (e) {
+      console.error('[QDEX] Order signing failed:', e);
+      logActivity(`Order signing failed: ${e.message}`, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = `Place ${state.side} ${state.orderType} order`;
+    }
+  };
+
+  function createLocalOrder(order, m, price, amount, nonce) {
+    const orderData = {
+      id: 'ord_' + nonce.slice(0, 7),
       pair: `${m.base}/${m.quote}`,
       side: state.side,
       type: state.orderType,
@@ -1951,10 +2037,10 @@ input { font: inherit; }
       status: 'open',
       timestamp: Date.now(),
     };
-    state.orders.unshift(order);
+    state.orders.unshift(orderData);
     renderOrders();
-    logActivity(`Created local ${state.side} ${state.orderType} order ${order.id}: ${order.amount} ${m.base} @ ${fmt(order.price)} ${m.quote}`, 'success');
-  };
+    logActivity(`Created local ${state.side} ${state.orderType} order: ${orderData.amount} ${m.base} @ ${orderData.price} ${m.quote}`, 'success');
+  }
 
   function demoWalletAddress() {
     const hex = Array.from({ length: 38 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
