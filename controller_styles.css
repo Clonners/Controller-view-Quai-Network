@@ -122,15 +122,7 @@ header .subtitle {
 }
 
 .donate-address {
-  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  font-size: 0.68rem;
-  color: #d1d5db;
-  display: inline-block;
-  max-width: 12.5rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  vertical-align: bottom;
+  display: none;
 }
 
 .github-pill {
@@ -158,8 +150,7 @@ header .subtitle {
 }
 
 .github-label {
-  font-weight: 500;
-  color: #e5e7eb;
+  display: none;
 }
 
 .grid {

@@ -51,7 +51,7 @@
     .donate-pill{border:1px solid rgba(248,250,252,.12);background:radial-gradient(circle at top left,rgba(255,37,58,.18),rgba(15,5,10,.96));color:var(--muted);box-shadow:0 10px 24px rgba(255,37,58,.35)}
     .donate-label,.github-label{font-weight:500;color:#e5e7eb}
     .donate-heart{font-size:.85rem;color:#ff9db3}
-    .donate-address{font-family:ui-monospace,monospace;font-size:.68rem;color:#d1d5db;display:inline-block;max-width:12.5rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom}
+    .donate-address{display:none}
     .github-pill{border:1px solid rgba(148,163,184,.5);background:rgba(8,10,15,.95);color:var(--muted);text-decoration:none;box-shadow:0 8px 18px rgba(15,23,42,.45)}
     .grid{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(0,1.3fr);gap:18px}
     .card{background:radial-gradient(circle at top left,#1a060b 0,#060106 55%);border-radius:var(--card-radius);border:1px solid rgba(56,12,24,.9);box-shadow:var(--shadow-soft);padding:16px 16px 14px;position:relative;overflow:hidden}
@@ -96,7 +96,9 @@
     .metric-unit{font-size:.8rem;color:var(--muted)}
     .metric-badge{font-size:.65rem;padding:2px 6px;border-radius:999px;background:rgba(255,37,58,.15);color:var(--accent)}
     .metric-footer{display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:.72rem;color:var(--muted);flex-wrap:wrap;gap:4px}
-    .metric-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;background:rgba(7,3,7,.95);border:1px solid rgba(75,85,99,.7)}
+    .metric-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;background:rgba(7,3,7,.95);border:1px solid rgba(75,85,99,.7);font-size:.68rem}
+    .metric-footer .metric-pill .dot{display:none}
+    .metric-footer .metric-pill span{display:none}
     .dot{width:6px;height:6px;border-radius:50%;display:inline-block}
     .metric-title-exrate{display:flex;flex-direction:column;gap:2px}
     .metric-title-exrate-sub{font-size:.65rem;color:var(--muted)}
@@ -133,11 +135,9 @@
 <body>
   <main class="app">
     <header>
-      <img src="assets/brand/bitquai-icon-q-256.png" alt="BitQuai logo" class="logo" fetchpriority="high" decoding="async" loading="eager" width="36" height="36" />
+      <img src="assets/brand/bitquai-icon-q-256.png" alt="BitQuai" class="logo" fetchpriority="high" decoding="async" loading="eager" width="36" height="36" />
       <div class="header-main">
-        <h1>
-          BitQuai Controller Dashboard
-        </h1>
+        <h1>Controller</h1>
       </div>
       <div class="header-actions">
         <nav aria-label="Main navigation">
@@ -150,6 +150,7 @@
           target="_blank"
           rel="noopener noreferrer"
           class="github-pill"
+          title="View on GitHub"
         >
           <span class="github-icon" aria-hidden="true">
             <svg viewBox="0 0 16 16" width="16" height="16" fill="#e5e7eb">
@@ -164,13 +165,11 @@
               </path>
             </svg>
           </span>
-          <span class="github-label">GitHub</span>
         </a>
 
-        <button id="donation-pill" class="donate-pill" type="button" title="Donate address: 0x0042843bC5C3fcAFda51d2c6BB17d47370567C9a">
+        <button id="donation-pill" class="donate-pill" type="button" title="0x0042843bC5C3fcAFda51d2c6BB17d47370567C9a">
           <span class="donate-heart">♥</span>
           <span class="donate-label">Donate</span>
-          <span class="donate-address">0x0042843bC5C3fcAFda51d2c6BB17d47370567C9a</span>
         </button>
       </div>
     </header>
@@ -184,12 +183,12 @@
             <input class="rpc-input" type="text" id="rpc-url" placeholder="RPC endpoint (prime)" value="https://prime.bitquai.live" spellcheck="false" aria-label="RPC endpoint URL" />
             <div class="header-actions-btns">
               <button id="refresh-btn"><span>Refresh</span></button>
-              <button id="auto-btn" class="secondary">Auto (10s)</button>
+              <button id="auto-btn" class="secondary">Auto</button>
             </div>
           </div>
           <div class="pill">
             <span class="pill-dot" id="conn-dot" style="background:#22c55e;"></span>
-            <span id="conn-label">Prime RPC connected</span>
+            <span id="conn-label">Connected</span>
           </div>
         </div>
 
@@ -219,17 +218,13 @@
             <span id="status-text">No data yet.</span>
           </div>
           <div class="status-bar-right">
-            <span class="status-tag">
+            <span class="status-tag" title="d*/d > 1 means FX helps Qi">
               <span class="status-dot-mini"></span>
-              <span>
-                d*/d &gt; 1 ⇒ <strong>FX helps Qi</strong> (more Quai per 1 Qi)
-              </span>
+              <span>&gt; 1 → FX helps Qi</span>
             </span>
-            <span class="status-tag">
+            <span class="status-tag" title="d*/d < 1 means FX helps Quai">
               <span class="status-dot-mini"></span>
-              <span>
-                d*/d &lt; 1 ⇒ <strong>FX helps Quai</strong> (less Quai per 1 Qi)
-              </span>
+              <span>&lt; 1 → FX helps Quai</span>
             </span>
           </div>
         </div>
