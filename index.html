@@ -387,32 +387,6 @@
     .dot { width: 7px; height: 7px; border-radius: 999px; background: var(--green); box-shadow: 0 0 16px rgba(74,222,128,.5); }
     .dot.demo { background: #f59e0b; box-shadow: 0 0 16px rgba(245,158,11,.5); }
 
-    .system {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-top: 18px;
-    }
-
-    .panel {
-      padding: 22px;
-      border-radius: 24px;
-      border: 1px solid rgba(255, 37, 58, .16);
-      background: rgba(18, 7, 11, .72);
-    }
-
-    .panel h3 { margin: 0 0 12px; font-size: 22px; }
-    .panel p { margin: 0; color: var(--muted); line-height: 1.55; }
-
-    .map {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      color: #dce1ea;
-      font-size: clamp(12px, 1.6vw, 14px);
-      line-height: 1.8;
-      white-space: pre-wrap;
-      overflow: auto;
-    }
-
     .footer {
       display: flex;
       align-items: center;
@@ -434,7 +408,7 @@
       .navlinks { justify-content: flex-start; }
       .hero { grid-template-columns: 1fr; min-height: auto; }
       .hero::after { inset: 8% -38% 48% 8%; opacity: .38; }
-      .surfaces, .system { grid-template-columns: 1fr; }
+      .surfaces { grid-template-columns: 1fr; }
       .hero-card { align-self: stretch; }
     }
 
@@ -475,13 +449,11 @@
         <div class="eyebrow"><span class="pulse" aria-hidden="true"></span> Quai network interface layer</div>
         <h1 id="hero-title">Order inside <span class="accent">entropy.</span></h1>
         <p class="subtitle">
-          BitQuai brings the project surfaces into one entry point: mining telemetry,
-          controller analytics, and a terminal-style QDEX testnet interface.
+          Mining, analytics, and exchange — one interface for Quai.
         </p>
         <div class="actions">
           <a class="btn primary" href="qdex.html">Launch QDEX</a>
-          <a class="btn secondary" href="mining.html">Open Mining Dashboard</a>
-          <a class="btn secondary" href="controller_view.html">View Controller</a>
+          <a class="btn secondary" href="mining.html">Mining Dashboard</a>
         </div>
       </div>
 
@@ -503,44 +475,23 @@
         <a class="surface-card" href="mining.html">
           <div class="surface-top"><span>01 / Mining</span><span class="status"><span class="dot"></span>Dashboard</span></div>
           <h2>Mining telemetry</h2>
-          <p>Pool-facing dashboard for worker, block, share, and diagnostic views.</p>
         </a>
 
         <a class="surface-card" href="controller_view.html">
           <div class="surface-top"><span>02 / Controller</span><span class="status"><span class="dot"></span>Analytics</span></div>
           <h2>Controller view</h2>
-          <p>Prime RPC analytics surface for conversion flow, discounts, and calculator tooling.</p>
         </a>
 
         <a class="surface-card" href="qdex.html">
           <div class="surface-top"><span>03 / QDEX</span><span class="status"><span class="dot demo"></span>Static demo</span></div>
           <h2>Exchange terminal</h2>
-          <p>Orderbook, market cards, ticker strip, chart shell, and wallet-gated trade form.</p>
         </a>
       </div>
     </section>
 
-    <section class="system" aria-label="System overview">
-      <div class="panel">
-        <h3>One public front-end</h3>
-        <p>
-          GitHub Pages serves the landing and static UI. Live backends can be wired behind the
-          same surfaces later without making the public site look empty while APIs are offline.
-        </p>
-      </div>
-      <div class="panel map" aria-label="Route map">bitquai.live
-├─ /              landing
-├─ /mining.html   mining dashboard
-├─ /controller_view.html
-└─ /qdex.html     QDEX terminal demo</div>
-    </section>
-
     <footer class="footer">
-      <span>BitQuai · Order inside entropy.</span>
-      <span>
-        <a href="https://github.com/Clonners/Controller-view-Quai-Network" target="_blank" rel="noopener noreferrer">GitHub</a>
-        · <a href="assets/brand/bitquai-og-1200x630.png">Preview image</a>
-      </span>
+      <span>BitQuai · Order inside entropy</span>
+      <a href="https://github.com/Clonners/Controller-view-Quai-Network" target="_blank" rel="noopener noreferrer">GitHub</a>
     </footer>
   </main>
 
