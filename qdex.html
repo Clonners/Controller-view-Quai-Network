@@ -986,7 +986,7 @@ input { font: inherit; }
         <h2>Portfolio command center</h2>
         <p class="view-page-subtitle">Wallet state, balances, open orders, and local activity. No transaction is sent from this static demo.</p>
       </div>
-      <button class="terminal-btn primary" id="portfolioWalletBtn">Connect Wallet</button>
+      <button class="terminal-btn primary" id="portfolioWalletBtn">Loading...</button>
     </div>
 
     <div class="view-grid">
@@ -1875,12 +1875,53 @@ input { font: inherit; }
     return '0x00' + hex;
   }
 
+  const STORAGE_KEY = 'bitquai_wallet';
+
+  function loadWalletState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (_) {}
+    return null;
+  }
+
+  function saveWalletState(addr, provider) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ address: addr, provider }));
+    } catch (_) {}
+  }
+
+  function clearWalletState() {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (_) {}
+  }
+
+  function applyWalletFromStorage() {
+    const saved = loadWalletState();
+    if (saved && saved.address) {
+      state.wallet = saved.address;
+      state.walletProvider = saved.provider || 'restored';
+      state.balances = [
+        { token: 'WQUAI', available: '1,250.00', locked: '0' },
+        { token: 'WQI', available: '8,432.50', locked: '0' },
+        { token: 'USDT', available: '5,000.00', locked: '0' },
+      ];
+    } else {
+      state.wallet = null;
+      state.walletProvider = null;
+      state.balances = [];
+    }
+    renderWalletUI();
+  }
+
   async function toggleWallet() {
     if (state.wallet) {
       const old = state.wallet;
       state.wallet = null;
       state.walletProvider = null;
       state.balances = [];
+      clearWalletState();
       renderWalletUI();
       logActivity(`Wallet disconnected ${shortAddress(old)}`, 'warn');
       return;
@@ -1892,7 +1933,15 @@ input { font: inherit; }
         if (accounts && accounts[0]) {
           state.wallet = accounts[0];
           state.walletProvider = 'browser provider';
+          saveWalletState(state.wallet, state.walletProvider);
           logActivity(`Wallet connected ${shortAddress(state.wallet)}`, 'success');
+          state.balances = [
+            { token: 'WQUAI', available: '1,250.00', locked: '0' },
+            { token: 'WQI', available: '8,432.50', locked: '0' },
+            { token: 'USDT', available: '5,000.00', locked: '0' },
+          ];
+          renderWalletUI();
+          return;
         }
       } catch (err) {
         logActivity(`Wallet connection rejected: ${err?.message || err}`, 'warn');
@@ -1903,6 +1952,7 @@ input { font: inherit; }
     if (!state.wallet) {
       state.wallet = demoWalletAddress();
       state.walletProvider = 'local mock';
+      saveWalletState(state.wallet, state.walletProvider);
       logActivity(`Wallet connected ${shortAddress(state.wallet)} (mock)`, 'success');
     }
 
@@ -1914,8 +1964,34 @@ input { font: inherit; }
     renderWalletUI();
   }
 
-  // Wallet buttons
-  $('#walletBtn').onclick = toggleWallet;
+  // Listen for global wallet events from wallet-pill.js
+  window.addEventListener('bitquai:wallet-connect', function (e) {
+    if (e.detail && e.detail.address) {
+      state.wallet = e.detail.address;
+      state.walletProvider = e.detail.provider || 'metamask';
+      state.balances = [
+        { token: 'WQUAI', available: '1,250.00', locked: '0' },
+        { token: 'WQI', available: '8,432.50', locked: '0' },
+        { token: 'USDT', available: '5,000.00', locked: '0' },
+      ];
+      renderWalletUI();
+      logActivity(`Wallet connected ${shortAddress(state.wallet)}`, 'success');
+    }
+  });
+
+  window.addEventListener('bitquai:wallet-disconnect', function () {
+    const old = state.wallet;
+    state.wallet = null;
+    state.walletProvider = null;
+    state.balances = [];
+    renderWalletUI();
+    if (old) logActivity(`Wallet disconnected ${shortAddress(old)}`, 'warn');
+  });
+
+  // Restore wallet from storage on init
+  applyWalletFromStorage();
+
+  // Wallet buttons — use toggleWallet for inline buttons only
   $('#portfolioWalletBtn').onclick = toggleWallet;
   $('#marketSearch').oninput = renderMarketsView;
 
@@ -1944,5 +2020,6 @@ input { font: inherit; }
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   }
 </script>
+<script src="js/wallet-pill.js"></script>
 </body>
 </html>

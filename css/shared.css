@@ -110,6 +110,21 @@
   background: linear-gradient(135deg, #ff3a50, #e62040);
 }
 
+.topnav .navlinks .wallet-btn.connected {
+  background: rgba(255, 37, 58, 0.12);
+  border: 1px solid rgba(255, 37, 58, 0.24);
+  color: #ff253a;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.topnav .navlinks .wallet-btn.connected:hover {
+  background: rgba(255, 37, 58, 0.18);
+  border-color: rgba(255, 37, 58, 0.34);
+  box-shadow: none;
+  transform: none;
+}
+
 @media (max-width: 900px) {
   .topnav {
     align-items: flex-start;
