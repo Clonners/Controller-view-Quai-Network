@@ -185,7 +185,8 @@
     .hero-bg img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
+      object-position: center;
       display: block;
     }
 
@@ -193,36 +194,8 @@
       content: "";
       position: absolute;
       inset: 0;
-      background:
-        radial-gradient(ellipse at center, rgba(5,3,7,.2) 0%, rgba(5,3,7,.65) 100%);
+      background: radial-gradient(ellipse at center, rgba(5,3,7,.15) 0%, rgba(5,3,7,.45) 100%);
       pointer-events: none;
-    }
-
-    .hero-brand {
-      position: relative;
-      z-index: 1;
-      text-align: center;
-    }
-
-    .hero-brand .logo-lg {
-      width: 72px;
-      height: 72px;
-      border-radius: 20px;
-      object-fit: cover;
-      box-shadow: 0 0 0 2px rgba(255,37,58,.35), 0 0 48px rgba(255,37,58,.25);
-    }
-
-    .hero-brand .tagline {
-      margin-top: 16px;
-      font-size: 13px;
-      letter-spacing: .18em;
-      text-transform: uppercase;
-      color: rgba(246,247,251,.55);
-    }
-
-    @media (max-width: 900px) {
-      .hero { min-height: calc(100vh - 140px); }
-      .hero-brand .logo-lg { width: 56px; height: 56px; }
     }
 
     .section-label {
@@ -373,10 +346,6 @@
           <source srcset="assets/brand/bitquai-hero-1920x1080.webp" type="image/webp">
           <img src="assets/brand/bitquai-hero-1920x1080.png" alt="BitQuai" width="1920" height="1080" fetchpriority="high" loading="eager" decoding="async">
         </picture>
-      </div>
-      <div class="hero-brand">
-        <img class="logo-lg" src="assets/brand/bitquai-icon-q-256.png" alt="BitQuai" width="72" height="72">
-        <div class="tagline">Order inside entropy</div>
       </div>
     </section>
 
