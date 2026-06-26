@@ -1,0 +1,137 @@
+/* ═══════════════════════════════════════════════════
+   BitQuai — Shared Topnav Pill
+   Used across: index.html, mining.html, controller_view.html, qdex.html
+   ═══════════════════════════════════════════════════ */
+
+.topnav {
+  position: sticky;
+  top: 14px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 37, 58, 0.16);
+  background: rgba(18, 7, 11, 0.78);
+  backdrop-filter: blur(16px);
+  border-radius: 999px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.42);
+  max-width: 940px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.topnav .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  text-decoration: none;
+  padding-left: 4px;
+  min-width: 0;
+}
+
+.topnav .brand img {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px rgba(255, 37, 58, 0.28),
+    0 0 28px rgba(255, 37, 58, 0.18);
+}
+
+.topnav .brand-text {
+  display: grid;
+  line-height: 1.05;
+}
+
+.topnav .brand-text strong {
+  letter-spacing: 0.04em;
+  font-size: 14px;
+  color: #e5e7eb;
+}
+
+.topnav .brand-text span {
+  color: #9ca3af;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.topnav .navlinks {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.topnav .navlinks a,
+.topnav .navlinks span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  text-decoration: none;
+  color: #9ca3af;
+  border: 1px solid transparent;
+  font-size: 13px;
+  transition: color 0.18s, border-color 0.18s, background 0.18s,
+    transform 0.18s;
+}
+
+.topnav .navlinks a:hover,
+.topnav .navlinks span:hover {
+  color: #e5e7eb;
+  background: rgba(255, 37, 58, 0.08);
+  border-color: rgba(255, 37, 58, 0.18);
+  transform: translateY(-1px);
+}
+
+.topnav .navlinks .active {
+  color: #ff253a;
+  background: rgba(255, 37, 58, 0.12);
+  border-color: rgba(255, 37, 58, 0.24);
+  font-weight: 700;
+}
+
+.topnav .navlinks .wallet-btn {
+  background: linear-gradient(135deg, #ff253a, #cc1e32);
+  color: #fff;
+  font-weight: 700;
+  border: none;
+  box-shadow: 0 4px 16px rgba(255, 37, 58, 0.3);
+}
+
+.topnav .navlinks .wallet-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(255, 37, 58, 0.45);
+  background: linear-gradient(135deg, #ff3a50, #e62040);
+}
+
+@media (max-width: 900px) {
+  .topnav {
+    align-items: flex-start;
+    border-radius: 24px;
+    flex-direction: column;
+    max-width: none;
+  }
+
+  .topnav .navlinks {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 560px) {
+  .topnav .navlinks {
+    width: 100%;
+  }
+
+  .topnav .navlinks a,
+  .topnav .navlinks span {
+    flex: 1 1 auto;
+    justify-content: center;
+    padding-inline: 10px;
+  }
+}

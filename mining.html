@@ -13,6 +13,7 @@
   <link rel="dns-prefetch" href="https://prime.bitquai.live">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BitQuai Mining Dashboard</title>
+  <link rel="stylesheet" href="css/shared.css">
   <link rel="stylesheet" href="css/styles.min.css">
   <meta name="description" content="BitQuai — Mining, controller analytics, and QDEX terminal exchange UI.">
   <meta name="theme-color" content="#ff253a">
@@ -86,16 +87,22 @@
 </head>
 <body>
     <main class="container">
-        <header>
-            <h1>Mining Dashboard</h1>
-            <div class="header-actions">
-                <div class="controller-link">
-                    <a href="index.html" class="nav-pill">Home</a>
-                    <a href="controller_view.html" class="nav-pill">Controller</a>
-                    <a href="qdex.html" class="nav-pill">QDEX</a>
-                </div>
-            </div>
-        </header>
+        <nav class="topnav" aria-label="Primary navigation">
+          <a class="brand" href="index.html" aria-label="BitQuai home">
+            <picture><source src="assets/brand/bitquai-icon-q-256.webp" type="image/webp"><img src="assets/brand/bitquai-icon-q-256.png" alt="BitQuai" width="256" height="256" decoding="async" loading="eager" fetchpriority="high"></picture>
+            <span class="brand-text">
+              <strong>BitQuai</strong>
+              <span>Order inside entropy</span>
+            </span>
+          </a>
+          <div class="navlinks">
+            <a href="index.html">Home</a>
+            <span class="active">Mining</span>
+            <a href="controller_view.html">Controller</a>
+            <a href="qdex.html">QDEX</a>
+            <a href="qdex.html" class="wallet-btn">Connect Wallet</a>
+          </div>
+        </nav>
 
         <!-- Install banner (compact pill for mobile like Controller View) -->
         <div id="installBanner">

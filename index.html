@@ -35,6 +35,7 @@
   <meta name="twitter:title" content="BitQuai">
   <meta name="twitter:description" content="Order inside entropy.">
   <meta name="twitter:image" content="https://bitquai.live/assets/brand/bitquai-og-1200x630.png">
+  <link rel="stylesheet" href="css/shared.css">
   <style>
     :root {
       color-scheme: dark;
@@ -56,7 +57,6 @@
     }
 
     * { box-sizing: border-box; }
-
     html { scroll-behavior: smooth; }
 
     body {
@@ -90,80 +90,6 @@
       width: min(100%, var(--max));
       margin: 0 auto;
       padding: 20px 20px 56px;
-    }
-
-    .topnav {
-      position: sticky;
-      top: 14px;
-      z-index: 10;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 10px 12px;
-      border: 1px solid rgba(255, 37, 58, 0.16);
-      background: rgba(18, 7, 11, 0.78);
-      backdrop-filter: blur(16px);
-      border-radius: 999px;
-      box-shadow: 0 14px 40px rgba(0,0,0,.42);
-      max-width: 940px;
-      margin: 0 auto;
-    }
-
-    .brand {
-      display: inline-flex;
-      align-items: center;
-      gap: 11px;
-      text-decoration: none;
-      padding-left: 4px;
-      min-width: 0;
-    }
-
-    .brand img {
-      width: 38px;
-      height: 38px;
-      border-radius: 12px;
-      object-fit: cover;
-      box-shadow: 0 0 0 1px rgba(255, 37, 58, .28), 0 0 28px rgba(255, 37, 58, .18);
-    }
-
-    .brand-text { display: grid; line-height: 1.05; }
-    .brand-text strong { letter-spacing: .04em; font-size: 14px; }
-    .brand-text span { color: var(--muted); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
-
-    .navlinks {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-
-    .navlinks a, .navlinks span {
-      display: inline-flex;
-      align-items: center;
-      min-height: 38px;
-      padding: 8px 14px;
-      border-radius: 999px;
-      text-decoration: none;
-      color: var(--muted);
-      border: 1px solid transparent;
-      font-size: 13px;
-      transition: color .18s, border-color .18s, background .18s, transform .18s;
-    }
-
-    .navlinks a:hover {
-      color: var(--text);
-      background: rgba(255, 37, 58, .08);
-      border-color: rgba(255, 37, 58, .18);
-      transform: translateY(-1px);
-    }
-
-    .navlinks .active {
-      color: var(--accent);
-      background: rgba(255, 37, 58, .12);
-      border-color: rgba(255, 37, 58, .24);
-      font-weight: 700;
     }
 
     .hero {
@@ -214,15 +140,14 @@
 
     .surface-card {
       position: relative;
-      min-height: 250px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
-      padding: 22px;
+      gap: 14px;
+      padding: 18px;
       border-radius: 24px;
       border: 1px solid rgba(255, 37, 58, .17);
       background:
-        linear-gradient(180deg, rgba(26,10,16,.94), rgba(10,5,9,.88)),
+        linear-gradient(180deg, rgba(26,10,16,.96), rgba(10,5,9,.9)),
         radial-gradient(circle at 20% 0%, rgba(255, 37, 58, .18), transparent 34%);
       text-decoration: none;
       overflow: hidden;
@@ -247,7 +172,27 @@
       box-shadow: 0 22px 54px rgba(0,0,0,.54);
     }
 
+    .surface-card .preview {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 37, 58, .12);
+      overflow: hidden;
+      background: #0a0508;
+    }
+
+    .surface-card .preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
     .surface-top {
+      position: relative;
+      z-index: 1;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -259,17 +204,22 @@
     }
 
     .surface-card h2 {
-      margin: auto 0 0;
-      font-size: clamp(28px, 4vw, 44px);
+      position: relative;
+      z-index: 1;
+      margin: 0;
+      font-size: clamp(22px, 3vw, 32px);
       line-height: .95;
-      letter-spacing: -.04em;
+      letter-spacing: -.03em;
     }
 
     .surface-card p {
+      position: relative;
+      z-index: 1;
       margin: 0;
       color: var(--muted);
       line-height: 1.5;
-      max-width: 310px;
+      font-size: 13px;
+      max-width: 280px;
     }
 
     .status {
@@ -305,16 +255,11 @@
     .footer a:hover { color: var(--accent); }
 
     @media (max-width: 900px) {
-      .topnav { align-items: flex-start; border-radius: 24px; flex-direction: column; max-width: none; }
-      .navlinks { justify-content: flex-start; }
       .surfaces { grid-template-columns: 1fr; }
-      .hero-card { align-self: stretch; }
     }
 
     @media (max-width: 560px) {
       .shell { padding-inline: 14px; }
-      .navlinks { width: 100%; }
-      .navlinks a, .navlinks span { flex: 1 1 auto; justify-content: center; padding-inline: 10px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -337,6 +282,7 @@
         <a href="mining.html">Mining</a>
         <a href="controller_view.html">Controller</a>
         <a href="qdex.html">QDEX</a>
+        <a href="qdex.html" class="wallet-btn">Connect Wallet</a>
       </div>
     </nav>
 
@@ -353,16 +299,75 @@
       <p class="section-label" id="surfaces-title">Project surfaces</p>
       <div class="surfaces">
         <a class="surface-card" href="mining.html">
+          <div class="preview" style="background:linear-gradient(135deg, #1a060b, #0a0408);display:flex;align-items:center;justify-content:center;border-radius:14px;">
+            <svg viewBox="0 0 320 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:85%;opacity:.7">
+              <rect x="10" y="10" width="300" height="30" rx="6" fill="rgba(255,37,58,0.1)" stroke="rgba(255,37,58,0.2)" stroke-width="1"/>
+              <text x="20" y="30" fill="#ff253a" font-size="11" font-family="monospace">Mining Dashboard</text>
+              <rect x="10" y="52" width="145" height="138" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,37,58,0.12)" stroke-width="1"/>
+              <rect x="170" y="52" width="140" height="66" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,37,58,0.12)" stroke-width="1"/>
+              <rect x="170" y="124" width="140" height="66" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,37,58,0.12)" stroke-width="1"/>
+              <text x="25" y="80" fill="#9ca3af" font-size="9" font-family="monospace">Workers</text>
+              <text x="25" y="96" fill="#4ade80" font-size="18" font-weight="bold" font-family="monospace">9 active</text>
+              <text x="185" y="76" fill="#9ca3af" font-size="9" font-family="monospace">Hashrate</text>
+              <text x="185" y="92" fill="#e5e7eb" font-size="14" font-family="monospace">180 TH/s</text>
+              <text x="185" y="148" fill="#9ca3af" font-size="9" font-family="monospace">Blocks</text>
+              <text x="185" y="164" fill="#e5e7eb" font-size="14" font-family="monospace">2 found</text>
+              <line x1="25" y1="110" x2="140" y2="110" stroke="rgba(255,37,58,0.3)" stroke-width="1"/>
+              <line x1="25" y1="120" x2="130" y2="120" stroke="rgba(255,37,58,0.2)" stroke-width="1"/>
+              <line x1="25" y1="130" x2="140" y2="130" stroke="rgba(255,37,58,0.3)" stroke-width="1"/>
+            </svg>
+          </div>
           <div class="surface-top"><span>01 / Mining</span><span class="status"><span class="dot"></span>Dashboard</span></div>
           <h2>Mining telemetry</h2>
         </a>
 
         <a class="surface-card" href="controller_view.html">
+          <div class="preview" style="background:linear-gradient(135deg, #1a060b, #0a0408);display:flex;align-items:center;justify-content:center;border-radius:14px;">
+            <svg viewBox="0 0 320 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:85%;opacity:.7">
+              <rect x="10" y="10" width="300" height="30" rx="6" fill="rgba(255,37,58,0.1)" stroke="rgba(255,37,58,0.2)" stroke-width="1"/>
+              <text x="20" y="30" fill="#ff253a" font-size="11" font-family="monospace">Controller</text>
+              <rect x="10" y="52" width="200" height="138" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,37,58,0.12)" stroke-width="1"/>
+              <rect x="220" y="52" width="90" height="66" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,37,58,0.12)" stroke-width="1"/>
+              <rect x="220" y="124" width="90" height="66" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,37,58,0.12)" stroke-width="1"/>
+              <path d="M20 160 Q50 130 80 140 Q110 150 140 120 Q170 90 200 110" stroke="#ff253a" stroke-width="2" fill="none"/>
+              <path d="M20 170 Q50 150 80 155 Q110 160 140 140 Q170 120 200 135" stroke="rgba(255,37,58,0.4)" stroke-width="1.5" fill="none"/>
+              <text x="230" y="76" fill="#9ca3af" font-size="8" font-family="monospace">Conversion</text>
+              <text x="230" y="92" fill="#e5e7eb" font-size="12" font-family="monospace">1 WQI</text>
+              <text x="230" y="148" fill="#9ca3af" font-size="8" font-family="monospace">Price</text>
+              <text x="230" y="164" fill="#e5e7eb" font-size="12" font-family="monospace">$0.42</text>
+            </svg>
+          </div>
           <div class="surface-top"><span>02 / Controller</span><span class="status"><span class="dot"></span>Analytics</span></div>
           <h2>Controller view</h2>
         </a>
 
         <a class="surface-card" href="qdex.html">
+          <div class="preview" style="background:linear-gradient(135deg, #1a060b, #0a0408);display:flex;align-items:center;justify-content:center;border-radius:14px;">
+            <svg viewBox="0 0 320 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:85%;opacity:.7">
+              <rect x="10" y="10" width="300" height="24" rx="6" fill="rgba(255,37,58,0.08)" stroke="rgba(255,37,58,0.15)" stroke-width="1"/>
+              <text x="20" y="26" fill="#ff253a" font-size="10" font-family="monospace">QDEX</text>
+              <text x="200" y="26" fill="#9ca3af" font-size="9" font-family="monospace">Trade</text>
+              <text x="250" y="26" fill="#9ca3af" font-size="9" font-family="monospace">Portfolio</text>
+              <rect x="10" y="44" width="200" height="146" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,37,58,0.12)" stroke-width="1"/>
+              <rect x="220" y="44" width="90" height="146" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,37,58,0.12)" stroke-width="1"/>
+              <rect x="20" y="54" width="80" height="20" rx="4" fill="rgba(74,222,128,0.1)" stroke="rgba(74,222,128,0.2)" stroke-width="1"/>
+              <text x="28" y="68" fill="#4ade80" font-size="9" font-family="monospace">BUY</text>
+              <rect x="110" y="54" width="80" height="20" rx="4" fill="rgba(255,75,75,0.1)" stroke="rgba(255,75,75,0.2)" stroke-width="1"/>
+              <text x="120" y="68" fill="#ff4b4b" font-size="9" font-family="monospace">SELL</text>
+              <line x1="20" y1="90" x2="190" y2="90" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+              <line x1="20" y1="100" x2="180" y2="100" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+              <line x1="20" y1="110" x2="170" y2="110" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+              <line x1="20" y1="120" x2="185" y2="120" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+              <line x1="20" y1="130" x2="175" y2="130" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+              <line x1="20" y1="140" x2="190" y2="140" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+              <line x1="20" y1="150" x2="180" y2="150" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+              <rect x="230" y="54" width="70" height="120" rx="6" fill="rgba(255,37,58,0.08)"/>
+              <text x="235" y="70" fill="#9ca3af" font-size="7" font-family="monospace">Order</text>
+              <text x="235" y="80" fill="#9ca3af" font-size="7" font-family="monospace">Book</text>
+              <text x="235" y="100" fill="#4ade80" font-size="8" font-family="monospace">12.5</text>
+              <text x="235" y="116" fill="#ff4b4b" font-size="8" font-family="monospace">8.3</text>
+            </svg>
+          </div>
           <div class="surface-top"><span>03 / QDEX</span><span class="status"><span class="dot demo"></span>Static demo</span></div>
           <h2>Exchange terminal</h2>
         </a>

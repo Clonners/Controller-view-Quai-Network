@@ -11,6 +11,7 @@
   <link rel="dns-prefetch" href="https://prime.bitquai.live">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BitQuai Controller Dashboard</title>
+  <link rel="stylesheet" href="css/shared.css">
   <link rel="stylesheet" href="css/brand.min.css">
   <link rel="stylesheet" href="controller_styles.min.css">
   <meta name="description" content="BitQuai — Mining, controller analytics, and QDEX terminal exchange UI.">
@@ -134,45 +135,22 @@
 </head>
 <body>
   <main class="app">
-    <header>
-      <img src="assets/brand/bitquai-icon-q-256.png" alt="BitQuai" class="logo" fetchpriority="high" decoding="async" loading="eager" width="36" height="36" />
-      <div class="header-main">
-        <h1>Controller</h1>
+    <nav class="topnav" aria-label="Primary navigation">
+      <a class="brand" href="index.html" aria-label="BitQuai home">
+        <picture><source src="assets/brand/bitquai-icon-q-256.webp" type="image/webp"><img src="assets/brand/bitquai-icon-q-256.png" alt="BitQuai" width="256" height="256" decoding="async" loading="eager" fetchpriority="high"></picture>
+        <span class="brand-text">
+          <strong>BitQuai</strong>
+          <span>Order inside entropy</span>
+        </span>
+      </a>
+      <div class="navlinks">
+        <a href="index.html">Home</a>
+        <a href="mining.html">Mining</a>
+        <span class="active">Controller</span>
+        <a href="qdex.html">QDEX</a>
+        <a href="qdex.html" class="wallet-btn">Connect Wallet</a>
       </div>
-      <div class="header-actions">
-        <nav aria-label="Main navigation">
-          <a href="index.html" class="nav-pill">Home</a>
-          <a href="mining.html" class="nav-pill">Mining</a>
-          <a href="qdex.html" class="nav-pill">QDEX</a>
-        </nav>
-        <a
-          href="https://github.com/Clonners/Controller-view-Quai-Network"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="github-pill"
-          title="View on GitHub"
-        >
-          <span class="github-icon" aria-hidden="true">
-            <svg viewBox="0 0 16 16" width="16" height="16" fill="#e5e7eb">
-              <path fill-rule="evenodd"
-                d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
-                0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52
-                -.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95
-                0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.62 7.62 0 0 1 8 3.13c.68.01
-                1.36.09 2 .26 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15
-                0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2
-                0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z">
-              </path>
-            </svg>
-          </span>
-        </a>
-
-        <button id="donation-pill" class="donate-pill" type="button" title="0x0042843bC5C3fcAFda51d2c6BB17d47370567C9a">
-          <span class="donate-heart">♥</span>
-          <span class="donate-label">Donate</span>
-        </button>
-      </div>
-    </header>
+    </nav>
 
     
 
