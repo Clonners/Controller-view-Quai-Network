@@ -97,6 +97,7 @@
 
       saveWallet(walletData);
       updatePill(walletData);
+      window.quaiWalletInstance = quaiWallet; // Expose for QDEX SDK
       window.dispatchEvent(new CustomEvent('bitquai:wallet-connect', { detail: walletData }));
 
       // Listen for account changes
