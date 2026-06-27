@@ -177,10 +177,9 @@ input { font: inherit; }
 .chart-row {
   grid-column: 2; background: var(--surface);
   border-bottom: 1px solid var(--border);
-  display: none; flex-direction: column;
+  display: flex; flex-direction: column;
   flex-shrink: 0;
 }
-.chart-row.visible { display: flex; }
 .chart-container {
   width: 100%; height: 280px; position: relative;
   contain: layout;
@@ -498,1467 +497,805 @@ input { font: inherit; }
 }
 .view-card-body { padding: 12px; }
 .portfolio-hero { grid-column: span 1; }
-.portfolio-wide { grid-column: span 2; }
-.wallet-state {
-  display: grid; gap: 8px;
-  color: var(--text-dim);
-  font-size: 12px;
-}
-.wallet-address {
-  color: var(--text);
-  font-size: 16px;
-  font-weight: 800;
-  letter-spacing: .02em;
-  word-break: break-all;
-}
+.wallet-state { }
+.wallet-address { font-weight: 600; font-size: 13px; }
 .wallet-meta { color: var(--text-muted); }
 .wallet-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-.terminal-btn {
-  padding: 7px 10px;
-  color: var(--text);
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-.terminal-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-.terminal-btn:hover { border-color: var(--border-hi); }
-.markets-toolbar {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 12px;
-  border-bottom: 1px solid var(--border);
-}
-.market-search {
-  min-width: 220px;
-  padding: 8px 10px;
-  color: var(--text);
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  outline: none;
-}
-.market-search:focus { border-color: var(--border-hi); }
-.market-table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 580px; }
-.market-table th {
-  padding: 9px 12px;
-  color: var(--text-muted);
-  background: rgba(10,5,9,.55);
-  text-transform: uppercase;
-  letter-spacing: .06em;
-  font-size: 10px;
-  text-align: right;
-}
-.market-table th:first-child, .market-table td:first-child { text-align: left; }
-.market-table td {
-  padding: 9px 12px;
-  border-top: 1px solid var(--border);
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-.market-table tr { cursor: pointer; }
-.market-table tr:hover { background: var(--surface-2); }
-.market-table tr.active { background: rgba(255,37,58,.08); }
-.market-table .pair { color: var(--text); font-weight: 800; }
-.metric-row {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 8px 0;
-  border-bottom: 1px solid rgba(48,18,25,.72);
-  font-size: 12px;
-}
-.metric-row:last-child { border-bottom: 0; }
-.metric-row span:first-child { color: var(--text-muted); }
-.metric-row strong { color: var(--text); font-variant-numeric: tabular-nums; }
-.mini-order-row {
-  display: grid;
-  grid-template-columns: 1fr .8fr .8fr .7fr;
-  gap: 8px;
-  padding: 7px 0;
-  border-bottom: 1px solid rgba(48,18,25,.72);
-  font-size: 11px;
-}
-.mini-order-row:last-child { border-bottom: 0; }
-.mini-order-row.header { color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; font-size: 10px; }
-
-/* ── Nav Bar (moved from inline styles) ────────── */
-.bitquai-nav {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 8px 16px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  gap: 8px;
-  flex-wrap: wrap;
-}
-.bitquai-nav-logo {
-  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
-}
-.bitquai-nav-logo img { height: 22px; width: auto; }
-.bitquai-nav-logo span {
-  font-weight: 700; color: var(--accent); font-size: 14px;
-  white-space: nowrap;
-}
-.bitquai-nav-links {
-  display: flex; gap: 6px; flex-wrap: wrap;
-}
-.bitquai-nav-link {
-  padding: 5px 10px; border-radius: 6px;
-  background: var(--accent-soft);
-  color: var(--text-dim);
-  text-decoration: none;
-  border: 1px solid rgba(255,37,58,0.08);
-  font-size: 12px; white-space: nowrap;
-  min-height: 33px; display: flex; align-items: center;
-}
-.bitquai-nav-link.active {
-  color: var(--accent);
-  border-color: rgba(255,37,58,0.20);
-  font-weight: 600;
-}
-.bitquai-nav-link:hover {
-  border-color: var(--border-hi);
-}
-
-/* ── Table scroll wrappers ─────────────────────── */
-.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-
-/* ── Wallet button truncation ──────────────────── */
-.topbar-wallet {
-  max-width: 140px; overflow: hidden; text-overflow: ellipsis;
-  white-space: nowrap;
-}
 
 /* ── Responsive ───────────────────────────────── */
 @media (max-width: 1024px) {
-  .main {
-    grid-template-columns: 1fr 280px;
-    grid-template-rows: auto auto auto;
-  }
-  .markets-col { display: none; }
-  .chart-row { grid-column: 1; }
-  .view-grid { grid-template-columns: 1fr; }
-  .portfolio-wide { grid-column: span 1; }
-}
-
-@media (max-width: 768px) {
-  html { font-size: 12px; }
-
-  /* Nav bar — compact on tablet */
-  .bitquai-nav { padding: 6px 10px; gap: 6px; }
-  .bitquai-nav-logo span { font-size: 13px; }
-  .bitquai-nav-link { padding: 4px 8px; font-size: 11px; min-height: 30px; }
-
-  .mode-strip { padding: 6px 10px; gap: 6px; }
-  .view-page { padding: 10px; }
-  .view-page-header { align-items: flex-start; flex-direction: column; }
-  .markets-toolbar { align-items: stretch; flex-direction: column; }
-  .market-search { min-width: 0; width: 100%; }
-
-  .topbar { padding: 0 10px; gap: 6px; height: 40px; }
-  .topbar-brand { font-size: 13px; }
-  .topbar-tab { padding: 0 8px; font-size: 11px; }
-  .topbar-status span { display: none; }
-  .topbar-wallet { max-width: 100px; }
-
-  .ticker-strip {
-    flex-wrap: wrap; gap: 8px; padding: 6px 10px; height: auto;
-  }
-  .ticker-pair { font-size: 12px; width: 100%; }
-  .ticker-stat { flex: 1; min-width: 60px; }
-
   .main {
     grid-template-columns: 1fr;
     grid-template-rows: auto;
   }
   .chart-row { grid-column: 1; }
-  .chart-container { height: 220px; }
-
-  .bottom-grid {
-    grid-template-columns: 1fr;
-    min-height: auto;
-  }
-
-  .side-tab { padding: 6px; font-size: 11px; }
-  .submit-btn { padding: 8px; font-size: 12px; }
-
-  .ob-table, .trades-table, .orders-table, .market-table { font-size: 11px; }
-  .ob-table th, .ob-table td { padding: 2px 8px; }
-  .market-table th, .market-table td { padding: 6px 8px; font-size: 11px; }
+  .bottom-grid { grid-template-columns: 1fr; }
+  .ticker-strip { gap: 12px; }
+  .topbar-wallet { max-width: 100px; }
 }
 
-@media (max-width: 480px) {
-  /* Nav bar — stack vertically on narrow screens */
-  .bitquai-nav {
-    flex-direction: column; align-items: stretch; padding: 6px 8px; gap: 6px;
-  }
-  .bitquai-nav-logo { justify-content: center; }
-  .bitquai-nav-links { justify-content: center; }
-  .bitquai-nav-link { flex: 1; justify-content: center; text-align: center; font-size: 11px; padding: 6px 4px; min-height: 36px; }
-
-  .topbar { padding: 0 8px; gap: 4px; height: 38px; }
-  .topbar-tabs { gap: 0; flex: 1; justify-content: center; }
-  .topbar-tab { padding: 0 5px; font-size: 10px; }
-  .topbar-brand { font-size: 12px; margin-right: 4px; }
-  .topbar-wallet { max-width: 80px; padding: 3px 6px; font-size: 10px; }
-
-  .mode-strip { padding: 4px 8px; gap: 4px; font-size: 10px; }
-  .mode-pill { padding: 3px 6px; font-size: 9px; }
-  #apiState { display: none; }
-
+@media (max-width: 640px) {
+  .topbar { padding: 0 8px; }
+  .topbar-brand { font-size: 13px; }
+  .topbar-tab { padding: 0 8px; font-size: 10px; }
   .ticker-strip { gap: 4px; padding: 4px 8px; flex-wrap: wrap; }
-  .ticker-pair { font-size: 11px; }
-  .ticker-stat { min-width: 50px; flex: 1; }
-  .ticker-stat label { font-size: 8px; }
-  .ticker-stat .val { font-size: 10px; }
-
-  .chart-container { height: 160px; }
-  .chart-intervals { padding: 2px 6px; gap: 1px; }
-  .interval-btn { padding: 4px 6px; font-size: 10px; min-height: 32px; min-width: 32px; }
-
-  .form-group { margin-bottom: 8px; }
-  .input-row input { padding: 6px 8px; font-size: 13px; }
-  .input-row .step-btn { min-width: 36px; min-height: 36px; }
-  .slider-row { gap: 3px; }
-  .pct-btn { padding: 6px 2px; font-size: 10px; min-height: 32px; }
-
-  .balance-row { padding: 5px 8px; font-size: 11px; }
-  .log-entry { padding: 3px 8px; font-size: 10px; }
-
-  .tab-item { padding: 6px 8px; font-size: 10px; }
-  .view-page { padding: 8px; }
-  .view-page h2 { font-size: 18px; }
-
-  .market-table th, .market-table td { padding: 5px 6px; font-size: 10px; }
-  .orders-table th, .orders-table td { padding: 4px 6px; font-size: 10px; }
+  .ticker-stat { flex-direction: row; gap: 4px; }
+  .ticker-stat label { display: none; }
+  .topbar-wallet { max-width: 80px; padding: 3px 6px; font-size: 10px; }
+  .trade-form-panel { padding: 8px; }
+  .input-row input { font-size: 16px; } /* Prevent zoom on iOS */
+  .bottom-grid { min-height: 100px; }
 }
   </style>
 </head>
 <body>
+<nav class="topbar">
+  <div class="topbar-brand">BITQUAI <span>QDEX</span></div>
+  <div class="topbar-tabs">
+    <button class="topbar-tab active" onclick="switchView('trade')">Trade</button>
+    <button class="topbar-tab" onclick="switchView('portfolio')">Portfolio</button>
+    <button class="topbar-tab" onclick="switchView('markets')">Markets</button>
+  </div>
+  <div class="topbar-spacer"></div>
+  <div class="topbar-status">
+    <span class="status-dot" id="statusDot"></span>
+    <span id="apiState">Connecting...</span>
+  </div>
+  <a href="#wallet" class="wallet-btn">Connect Wallet</a>
+</nav>
 
-  <!-- Shared topnav pill -->
-  <nav class="topnav" aria-label="Primary navigation">
-      <a class="brand" href="index.html" aria-label="BitQuai home">
-        <picture><source src="assets/brand/bitquai-icon-q-256.webp" type="image/webp"><img src="assets/brand/bitquai-icon-q-256.png" alt="BitQuai" width="256" height="256" decoding="async" loading="eager" fetchpriority="high"></picture>
-        <span class="brand-text">
-          <strong>BitQuai</strong>
-          <span>Order inside entropy</span>
-        </span>
-      </a>
-      <div class="navlinks">
-        <a href="index.html">Home</a>
-        <a href="mining.html">Mining</a>
-        <a href="controller_view.html">Controller</a>
-        <span class="active">QDEX</span>
-        <a href="#wallet" class="wallet-btn">Connect Wallet</a>
-      </div>
-    </nav>
+<div class="ticker-strip" id="tickerStrip">
+  <span class="ticker-pair" id="tickerPair">WQUAI / WQI</span>
+  <div class="ticker-stat"><label>Last</label><span class="val dim" id="tickerLast">—</span></div>
+  <div class="ticker-stat"><label>24h Change</label><span class="val dim" id="tickerChange">—</span></div>
+  <div class="ticker-stat"><label>24h Volume</label><span class="val dim" id="tickerVol">—</span></div>
+  <div class="ticker-stat"><label>Best Bid</label><span class="val dim" id="tickerBid">—</span></div>
+  <div class="ticker-stat"><label>Best Ask</label><span class="val dim" id="tickerAsk">—</span></div>
+  <button id="chartToggle" onclick="toggleChart()" title="Toggle chart" style="margin-left:auto;background:none;border:1px solid var(--border);border-radius:4px;padding:2px 8px;color:var(--text-muted);font-size:11px;cursor:pointer;">📊 Chart</button>
+</div>
 
-  <!-- QDEX tabs bar (below pill) -->
-  <header class="topbar">
-    <div class="topbar-brand">QDEX</div>
-    <nav class="topbar-tabs">
-      <button class="topbar-tab active" data-view="trade">Trade</button>
-      <button class="topbar-tab" data-view="portfolio">Portfolio</button>
-      <button class="topbar-tab" data-view="markets">Markets</button>
-    </nav>
-    <div class="topbar-spacer"></div>
-    <div class="topbar-status">
-      <div class="status-dot mock" id="modeDot" title="Static demo mode — no real transactions"></div>
-      <span id="modeLabel">STATIC DEMO</span>
-      <span class="divider">/</span>
-      <span>TESTNET</span>
-    </div>
-  </header>
-  <main>
-
-  <!-- Mode Strip -->
-  <div class="mode-strip" id="modeStrip">
-    <span class="mode-pill" id="modePill"><span class="status-dot mock" aria-hidden="true"></span><strong id="modeIndicator">STATIC DEMO MODE</strong></span>
-    <span id="apiState">GitHub Pages fallback data · no /v1 API connected</span>
-    <span class="divider">·</span>
-    <span id="walletStateLine">Wallet disconnected</span>
+<div class="main">
+  <!-- Markets List -->
+  <div class="panel" style="grid-column:1;grid-row:1/3">
+    <div class="panel-header"><span>Markets</span><span class="count" id="marketsCount">0</span></div>
+    <div class="panel-body markets-list" id="marketsList"></div>
   </div>
 
-  <!-- Trade View -->
-  <section class="view-container" id="view-trade">
-  <!-- Ticker Strip -->
-  <div class="ticker-strip" id="tickerStrip">
-    <div class="ticker-pair" id="tickerPair">WQUAI / WQI</div>
-    <div class="ticker-stat">
-      <label>Last</label>
-      <span class="val dim" id="tickerLast">—</span>
+  <!-- Chart Row -->
+  <div class="chart-row" id="chartRow">
+    <div class="chart-intervals">
+      <button class="interval-btn active" data-interval="15m">15m</button>
+      <button class="interval-btn" data-interval="1h">1h</button>
+      <button class="interval-btn" data-interval="4h">4h</button>
+      <button class="interval-btn" data-interval="1d">1d</button>
     </div>
-    <div class="ticker-stat">
-      <label>24h Change</label>
-      <span class="val dim" id="tickerChange">—</span>
-    </div>
-    <div class="ticker-stat">
-      <label>24h Volume</label>
-      <span class="val dim" id="tickerVol">—</span>
-    </div>
-    <div class="ticker-stat">
-      <label>Best Bid</label>
-      <span class="val dim" id="tickerBid">—</span>
-    </div>
-    <div class="ticker-stat">
-      <label>Best Ask</label>
-      <span class="val dim" id="tickerAsk">—</span>
-    </div>
-    <span style="flex:1"></span>
-    <button class="interval-btn chart-toggle" id="chartToggle" title="Show chart">📊</button>
+    <div class="chart-container"><div class="tv-chart" id="tvChart"></div></div>
   </div>
 
-  <!-- Main Grid -->
-  <div class="main">
-
-    <!-- Left: Markets -->
-    <div class="panel markets-col">
-      <div class="panel-header">Markets</div>
-      <div class="panel-body markets-list" id="marketsList"></div>
+  <!-- Orderbook / Trades -->
+  <div class="panel" style="grid-column:2;grid-row:2">
+    <div class="panel-header">
+      <span>Order Book</span>
+      <span class="count" id="obCount">0 levels</span>
     </div>
-
-    <!-- Chart Row (center only) -->
-    <div class="chart-row" id="chartRow">
-      <div class="chart-intervals" id="chartIntervals">
-        <button class="interval-btn" data-interval="1m">1m</button>
-        <button class="interval-btn active" data-interval="5m">5m</button>
-        <button class="interval-btn" data-interval="15m">15m</button>
-        <button class="interval-btn" data-interval="1h">1H</button>
-        <button class="interval-btn" data-interval="4h">4H</button>
-        <button class="interval-btn" data-interval="1d">1D</button>
-      </div>
-      <div class="chart-container">
-        <div class="tv-chart" id="tvChart"></div>
-      </div>
+    <div class="panel-body" id="obContainer">
+      <table class="ob-table" id="obTable">
+        <thead><tr><th>Price</th><th>Amount</th><th>Total</th></tr></thead>
+        <tbody></tbody>
+      </table>
     </div>
+  </div>
 
-    <!-- Center: Orderbook + Trades -->
-    <div class="panel">
-      <div class="tab-bar">
-        <button class="tab-item active" data-tab="orderbook">Order Book</button>
-        <button class="tab-item" data-tab="trades">Trade History</button>
-      </div>
-      <div class="tab-content">
-        <div class="tab-pane active" id="pane-orderbook">
-          <table class="ob-table" id="obTable">
-            <thead><tr><th>Price</th><th>Amount</th><th>Total</th></tr></thead>
-            <tbody></tbody>
-          </table>
+  <!-- Trade Form -->
+  <div class="panel" style="grid-column:3;grid-row:2">
+    <div class="panel-header"><span>Place Order</span></div>
+    <div class="panel-body">
+      <div class="trade-form-panel">
+        <div class="side-tabs">
+          <button class="side-tab buy active" id="buyTab" onclick="setSide('buy')">Buy</button>
+          <button class="side-tab sell" id="sellTab" onclick="setSide('sell')">Sell</button>
         </div>
-        <div class="tab-pane" id="pane-trades">
+        <div class="order-type-tabs">
+          <button class="order-type-tab active" id="limitTab" onclick="setOrderType('limit')">Limit</button>
+          <button class="order-type-tab" id="marketTab" onclick="setOrderType('market')">Market</button>
+        </div>
+        <div class="form-group">
+          <label>Price</label>
+          <div class="input-row">
+            <button class="step-btn" onclick="stepPrice(-0.001)">−</button>
+            <input type="number" id="priceInput" placeholder="0.00" step="0.001">
+            <span class="unit" id="priceUnit">WQI</span>
+            <button class="step-btn" onclick="stepPrice(0.001)">+</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Amount</label>
+          <div class="input-row">
+            <button class="step-btn" onclick="stepAmount(-0.1)">−</button>
+            <input type="number" id="amtInput" placeholder="0.00" step="0.01">
+            <span class="unit" id="amtUnit">WQUAI</span>
+            <button class="step-btn" onclick="stepAmount(0.1)">+</button>
+          </div>
+        </div>
+        <div class="slider-row">
+          <button class="pct-btn" onclick="setPct(25)">25%</button>
+          <button class="pct-btn" onclick="setPct(50)">50%</button>
+          <button class="pct-btn" onclick="setPct(75)">75%</button>
+          <button class="pct-btn" onclick="setPct(100)">100%</button>
+        </div>
+        <div class="form-total">
+          <span>Total</span>
+          <span class="amount" id="formTotal">—</span>
+        </div>
+        <button class="submit-btn buy" id="submitBtn" disabled>Connect wallet to trade</button>
+        <div class="form-balance">Available: <span id="formBalance">—</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Panels -->
+  <div class="bottom-panels">
+    <div class="bottom-grid">
+      <div class="bottom-panel">
+        <div class="tab-bar">
+          <button class="tab-item active" onclick="switchBottomTab(this, 'orders')">Open Orders</button>
+          <button class="tab-item" onclick="switchBottomTab(this, 'fills')">Trade Fills</button>
+        </div>
+        <div class="tab-content">
+          <div class="tab-pane active" id="ordersPane">
+            <div class="empty-state" id="ordersEmpty"><div class="icon">📋</div><p>No open orders</p></div>
+            <table class="orders-table" id="ordersTable" style="display:none">
+              <thead><tr><th>Pair</th><th>Side</th><th>Type</th><th>Price</th><th>Amount</th><th>Filled</th><th></th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="tab-pane" id="fillsPane">
+            <div class="empty-state" id="fillsEmpty"><div class="icon">✅</div><p>No fills yet</p></div>
+            <table class="orders-table" id="fillsTable" style="display:none">
+              <thead><tr><th>Time</th><th>Pair</th><th>Side</th><th>Price</th><th>Amount</th><th>Status</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-panel">
+        <div class="tab-bar">
+          <button class="tab-item active" onclick="switchBottomTab(this, 'wallet')">Wallet</button>
+          <button class="tab-item" onclick="switchBottomTab(this, 'activity')">Activity</button>
+        </div>
+        <div class="tab-content">
+          <div class="tab-pane active" id="walletPane">
+            <div class="empty-state" id="walletEmpty"><div class="icon">🔐</div><p>Connect wallet to view balances</p></div>
+            <div id="walletContent" style="display:none"></div>
+          </div>
+          <div class="tab-pane" id="activityPane">
+            <div id="activityLog"></div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-panel">
+        <div class="panel-header"><span>Trade History</span><span class="count" id="tradesCount">0</span></div>
+        <div class="panel-body">
           <table class="trades-table" id="tradesTable">
-            <thead><tr><th>Time</th><th>Price</th><th>Amount</th><th>Side</th></tr></thead>
+            <thead><tr><th>Time</th><th>Side</th><th>Price</th><th>Amount</th><th>Total</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
       </div>
     </div>
-
-    <!-- Right: Trade Form -->
-    <div class="panel">
-      <div class="panel-header">Order</div>
-      <div class="panel-body">
-        <div class="trade-form-panel">
-          <div class="side-tabs">
-            <button class="side-tab buy active" data-side="buy">Buy</button>
-            <button class="side-tab sell" data-side="sell">Sell</button>
-          </div>
-
-          <div class="order-type-tabs">
-            <button class="order-type-tab active" data-type="limit">Limit</button>
-            <button class="order-type-tab" data-type="market">Market</button>
-          </div>
-
-          <div class="form-group" id="priceGroup">
-            <label>Price</label>
-            <div class="input-row">
-              <button class="step-btn" id="priceDown">−</button>
-              <input type="text" id="priceInput" placeholder="0.00" />
-              <span class="unit" id="priceUnit">WQI</span>
-              <button class="step-btn" id="priceUp">+</button>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>Amount</label>
-            <div class="input-row">
-              <button class="step-btn" id="amtDown">−</button>
-              <input type="text" id="amtInput" placeholder="0.00" />
-              <span class="unit" id="amtUnit">WQUAI</span>
-              <button class="step-btn" id="amtUp">+</button>
-            </div>
-          </div>
-
-          <div class="slider-row">
-            <button class="pct-btn" data-pct="25">25%</button>
-            <button class="pct-btn" data-pct="50">50%</button>
-            <button class="pct-btn" data-pct="75">75%</button>
-            <button class="pct-btn" data-pct="100">100%</button>
-          </div>
-
-          <div class="form-total">
-            <span>Total</span>
-            <span class="amount" id="orderTotal">—</span>
-          </div>
-
-          <button class="submit-btn buy" id="submitBtn" disabled>
-            Connect Wallet to Trade
-          </button>
-
-          <div class="form-balance">
-            Available: <span id="formBalance">—</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Bottom Panels -->
-    <div class="bottom-panels">
-      <div class="bottom-grid">
-
-        <!-- Orders -->
-        <div class="bottom-panel">
-          <div class="tab-bar">
-            <button class="tab-item active" data-btab="open-orders">Open Orders</button>
-            <button class="tab-item" data-btab="order-history">Order History</button>
-          </div>
-          <div class="tab-content">
-            <div class="tab-pane active" id="pane-open-orders">
-              <div class="empty-state" id="noOrders">
-                <div class="icon">📋</div>
-                <p>No open orders</p>
-              </div>
-              <table class="orders-table" id="ordersTable" style="display:none">
-                <thead><tr><th>Pair</th><th>Side</th><th>Price</th><th>Amount</th><th>Filled</th><th></th></tr></thead>
-                <tbody></tbody>
-              </table>
-            </div>
-            <div class="tab-pane" id="pane-order-history">
-              <div class="empty-state">
-                <div class="icon">📜</div>
-                <p>No order history yet</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Trades / Fills -->
-        <div class="bottom-panel">
-          <div class="tab-bar">
-            <button class="tab-item active" data-btab="fills">Trade Fills</button>
-            <button class="tab-item" data-btab="activity">Activity</button>
-          </div>
-          <div class="tab-content">
-            <div class="tab-pane active" id="pane-fills">
-              <div class="empty-state">
-                <div class="icon">💱</div>
-                <p>No fills yet</p>
-              </div>
-            </div>
-            <div class="tab-pane" id="pane-activity">
-              <div id="activityLog"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Balances -->
-        <div class="bottom-panel">
-          <div class="panel-header">Balances</div>
-          <div class="panel-body" id="balancesList">
-            <div class="empty-state">
-              <div class="icon">🔐</div>
-              <p>Connect wallet to view balances</p>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
   </div>
-  </section>
+</div>
 
-  <!-- Portfolio View -->
-  <section class="view-container view-page hidden" id="view-portfolio">
+<!-- Portfolio View -->
+<div class="view-container hidden" id="portfolioView">
+  <div class="view-page">
     <div class="view-page-header">
       <div>
-        <div class="view-page-kicker">Wallet / Portfolio</div>
-        <h2>Portfolio command center</h2>
-        <p class="view-page-subtitle">Wallet state, balances, open orders, and local activity. Use the top navigation pill to connect/disconnect.</p>
+        <div class="view-page-kicker">Portfolio</div>
+        <h2>Your Balances</h2>
       </div>
+      <div id="walletProviderBadge" class="mode-pill">offline</div>
     </div>
-
+    <p class="view-page-subtitle">Wallet state, balances, open orders, and local activity. Use the top navigation pill to connect/disconnect.</p>
+    <br>
     <div class="view-grid">
       <div class="view-card portfolio-hero">
-        <div class="view-card-header"><span>Wallet State</span><span id="walletProviderBadge">offline</span></div>
+        <div class="view-card-header"><span>Wallet State</span><span id="walletProviderBadge2">offline</span></div>
         <div class="view-card-body wallet-state" id="portfolioWalletState"></div>
       </div>
-
       <div class="view-card">
-        <div class="view-card-header"><span>Balances</span><span id="portfolioBalanceCount">0 assets</span></div>
+        <div class="view-card-header"><span>Balances</span><span id="portfolioBalanceCount">0</span></div>
         <div class="view-card-body" id="portfolioBalances"></div>
       </div>
-
       <div class="view-card">
-        <div class="view-card-header"><span>Exposure</span><span>selected market</span></div>
-        <div class="view-card-body" id="portfolioExposure"></div>
-      </div>
-
-      <div class="view-card portfolio-wide">
-        <div class="view-card-header"><span>Open Orders</span><span id="portfolioOrderCount">0 open</span></div>
+        <div class="view-card-header"><span>Open Orders</span><span id="portfolioOrderCount">0</span></div>
         <div class="view-card-body" id="portfolioOrders"></div>
       </div>
-
-      <div class="view-card">
-        <div class="view-card-header"><span>Local Activity</span><span>latest</span></div>
-        <div class="view-card-body" id="portfolioActivity"></div>
-      </div>
     </div>
-  </section>
+  </div>
+</div>
 
-  <!-- Markets View -->
-  <section class="view-container view-page hidden" id="view-markets">
+<!-- Markets View -->
+<div class="view-container hidden" id="marketsView">
+  <div class="view-page">
     <div class="view-page-header">
       <div>
         <div class="view-page-kicker">Markets</div>
-        <h2>BitQuai market surface</h2>
-        <p class="view-page-subtitle">Search pairs, inspect demo liquidity, and jump back into the trade terminal with a selected market.</p>
+        <h2>Available Markets</h2>
       </div>
     </div>
+    <p class="view-page-subtitle">Browse and switch between available trading pairs.</p>
+    <br>
+    <div id="marketsTableContainer"></div>
+  </div>
+</div>
 
-    <div class="view-card">
-      <div class="markets-toolbar">
-        <input class="market-search" id="marketSearch" placeholder="Search WQUAI, WQI, USDT…" />
-        <span class="status-badge" id="marketsModeBadge">static demo</span>
-      </div>
-      <div class="panel-body">
-        <div class="table-scroll">
-        <table class="market-table" id="marketsOverviewTable">
-          <thead><tr><th>Pair</th><th>Last</th><th>24h</th><th>Bid</th><th>Ask</th><th>Volume</th><th>Status</th></tr></thead>
-          <tbody></tbody>
-        </table>
-        </div>
-      </div>
-    </div>
-  </section>
+<script type="module">
+import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
 
-  <!-- TradingView Lightweight Charts -->
-  <script src="vendor/lightweight-charts.cjs"></script>
+// ── Globals ──────────────────────────────────────
+  const $ = (id) => document.getElementById(id);
+  const fmt = (v) => v === undefined || v === null ? '—' : Number(v).toFixed(6);
+  const fmtAmt = (v) => {
+    if (v === undefined || v === null) return '—';
+    const n = Number(v);
+    if (n >= 1e6) return (n / 1e6).toFixed(2) + 'M';
+    if (n >= 1e3) return (n / 1e3).toFixed(2) + 'K';
+    return n.toFixed(2);
+  };
+  const shortAddress = (addr) => addr ? `${addr.slice(0, 6)}…${addr.slice(-4)}` : '';
 
-  <!-- QDEX SDK — connects to backend API -->
-  <script src="js/qdex-sdk.js"></script>
+  const DEMO_MARKETS = [
+    { id: 'WQUAI-WQI', base: 'WQUAI', quote: 'WQI', status: 'active' },
+    { id: 'WQUAI-USDT', base: 'WQUAI', quote: 'USDT', status: 'planned' },
+    { id: 'WQI-USDT', base: 'WQI', quote: 'USDT', status: 'planned' },
+  ];
 
-  <script>
-  /* ═══════════════════════════════════════════════
-     QDEX — Terminal Exchange UI
-     Lightweight vanilla JS, no frameworks
-     ═══════════════════════════════════════════════ */
-
-  const QDEX_MODE = new URLSearchParams(location.search).get('mode') || 'auto';
-  const QDEX_API = 'https://api.bitquai.live';
-
-  let qdexClient = null;
-  let backendReady = false;
-
-  async function initQDexClient() {
-    try {
-      qdexClient = new QDexClient({ baseUrl: QDEX_API });
-      const contracts = await qdexClient.contracts.get();
-      if (contracts && contracts.chain) {
-        backendReady = true;
-        logActivity(`QDEX backend connected: ${contracts.deploymentStatus}`, 'success');
-        console.log('[QDEX] Backend ready', contracts);
-      }
-    } catch (e) {
-      console.warn('[QDEX] Backend connection failed:', e.message);
-      logActivity('QDEX backend offline — demo mode', 'warn');
-    }
-  }
-  let tvChart = null;
-  let tvSeries = null;
-
-
-  // ── State ──────────────────────────────────────
-  const state = {
+  let state = {
     market: 'WQUAI-WQI',
-    side: 'buy',
-    orderType: 'limit',
-    interval: '5m',
-    wallet: null,
-    walletProvider: null,
-    view: 'trade',
-    markets: [],
+    markets: [...DEMO_MARKETS],
     tickers: {},
     orderbook: { bids: [], asks: [] },
     trades: [],
+    klines: [],
     orders: [],
     fills: [],
     balances: [],
-    klines: [],
-    activity: [],
+    wallet: null,
+    walletProvider: null,
+    side: 'buy',
+    orderType: 'limit',
+    backendReady: false,
   };
 
+  let qdexClient = null;
+  let backendReady = false;
+  let chartVisible = true;
+  let chart = null;
+  let series = null;
+
   // ── Helpers ────────────────────────────────────
-  const $ = (s) => document.querySelector(s);
-  const $$ = (s) => document.querySelectorAll(s);
-
-  function fmt(n, d=4) {
-    if (n == null || n === '') return '—';
-    const num = Number(n);
-    if (isNaN(num)) return String(n);
-    if (num === 0) return '0';
-    if (Math.abs(num) < 0.0001) return num.toExponential(2);
-    return num.toFixed(d);
+  function demoMid(marketId) {
+    if (marketId === 'WQUAI-WQI') return 5;
+    if (marketId.includes('USDT')) return 0.05;
+    return 1;
   }
 
-  function fmtAmt(n) { return fmt(n, 2); }
-
-  function escapeHtml(value) {
-    return String(value ?? '').replace(/[&<>"']/g, ch => ({
-      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-    }[ch]));
-  }
-
-  function shortAddress(addr) {
-    if (!addr) return 'Disconnected';
-    return addr.length > 14 ? `${addr.slice(0, 8)}…${addr.slice(-6)}` : addr;
-  }
-
-  function currentMarket() {
-    return state.markets.find(x => x.id === state.market) || DEMO_MARKETS.find(x => x.id === state.market);
-  }
-
-  function numericBalance(token) {
-    const b = state.balances.find(x => x.token === token);
-    return b ? Number(String(b.available || '0').replace(/,/g, '')) || 0 : 0;
-  }
-
-  function logActivity(msg, type='info') {
-    const time = new Date().toLocaleTimeString();
-    const safe = escapeHtml(msg);
-    state.activity.unshift({ time, msg: safe, type });
-    state.activity = state.activity.slice(0, 50);
+  function logActivity(msg, level = 'info') {
+    const log = $('activityLog');
+    if (!log) return;
+    const time = new Date().toLocaleTimeString('en-US', { hour12: false });
     const entry = document.createElement('div');
-    entry.className = `log-entry ${type}`;
-    entry.innerHTML = `<span class="time">${time}</span>${safe}`;
-    const log = $('#activityLog');
-    if (log) log.prepend(entry);
-    renderPortfolioActivity();
+    entry.className = `log-entry ${level}`;
+    entry.innerHTML = `<span class="time">${time}</span>${msg}`;
+    log.prepend(entry);
+    if (log.children.length > 50) log.removeChild(log.lastChild);
   }
 
-  // ── Fetch ──────────────────────────────────────
   async function api(path) {
     try {
-      const r = await fetch(`${QDEX_API}${path}`);
-      const type = r.headers.get('content-type') || '';
-      if (!r.ok || !type.includes('application/json')) return null;
-      return await r.json();
-    } catch(e) {
-      console.warn('API fetch failed:', path, e);
+      const res = await fetch(`https://api.bitquai.live:433${path}`);
+      const text = await res.text();
+      return text ? JSON.parse(text) : null;
+    } catch {
       return null;
     }
   }
 
-  // ── SDK-based fetch (uses QDexClient) ─────────
   async function sdkFetch(fn) {
-    if (!backendReady || !qdexClient) return null;
+    if (!qdexClient) return null;
     try {
       return await fn();
     } catch (e) {
-      console.warn('[QDEX] SDK call failed:', e.message);
+      console.warn('[QDEX] SDK fetch failed:', e.message);
       return null;
     }
   }
 
-  // ── Chart Toggle ──────────────────────────────
-  let chartVisible = false;
-  let chartInitialized = false;
+  // ── QDexClient ─────────────────────────────────
+  async function initQDexClient() {
+    try {
+      qdexClient = new QDexClient({ baseUrl: 'https://api.bitquai.live:433' });
+      backendReady = true;
+      state.backendReady = true;
+      logActivity('QDEX SDK initialized', 'success');
+    } catch (e) {
+      console.warn('[QDEX] SDK init failed:', e.message);
+      backendReady = false;
+      state.backendReady = false;
+    }
+  }
 
-  function initChartLazy() {
-    if (chartInitialized) return;
-    const container = $('#tvChart');
-    if (!container || typeof LightweightCharts === 'undefined') {
-      console.warn('Lightweight Charts not available');
+  // ── Data Loading ───────────────────────────────
+  async function loadMarkets() {
+    if (backendReady) {
+      const data = await sdkFetch(() => qdexClient.markets.list());
+      if (data && data.length) {
+        state.markets = data;
+        renderMarkets();
+        return;
+      }
+    }
+
+    const data = await api('/v1/markets');
+    state.markets = (data?.markets && data.markets.length) ? data.markets : [...DEMO_MARKETS];
+    renderMarkets();
+  }
+
+  async function loadOrderbook() {
+    if (backendReady) {
+      const data = await sdkFetch(() => qdexClient.orderbook.get(state.market));
+      if (data) {
+        state.orderbook = {
+          bids: data.bids || [],
+          asks: data.asks || [],
+        };
+        state.trades = data.recentTrades || [];
+        
+        // Update ticker from orderbook
+        updateTickerFromOrderbook();
+        
+        renderOrderbook();
+        renderTrades();
+        return;
+      }
+    }
+
+    const data = await api(`/v1/orderbook/${state.market}`);
+    if (data) {
+      state.orderbook = { bids: data.bids || [], asks: data.asks || [] };
+      state.trades = data.recentTrades || [];
+      updateTickerFromOrderbook();
+      renderOrderbook();
+      renderTrades();
       return;
     }
 
-    tvChart = LightweightCharts.createChart(container, {
-      layout: {
-        background: { type: 'solid', color: '#12070b' },
-        textColor: '#9ca3af',
-      },
-      grid: {
-        vertLines: { color: 'rgba(48,18,25,.55)' },
-        horzLines: { color: 'rgba(48,18,25,.55)' },
-      },
-      crosshair: {
-        mode: LightweightCharts.CrosshairMode.Normal,
-        vertLine: { color: 'rgba(255,37,58,.35)', labelBackgroundColor: '#ff253a' },
-        horzLine: { color: 'rgba(255,37,58,.35)', labelBackgroundColor: '#ff253a' },
-      },
-      rightPriceScale: {
-        borderColor: '#301219',
-        scaleMargins: { top: 0.1, bottom: 0.1 },
-      },
-      timeScale: {
-        borderColor: '#301219',
-        timeVisible: true,
-        rightOffset: 12,
-      },
-      handleScroll: true,
-      handleScale: true,
-    });
+    // Fallback to demo data
+    state.orderbook = { bids: [], asks: [] };
+    state.trades = [];
+    renderOrderbook();
+    renderTrades();
+  }
 
-    tvSeries = tvChart.addSeries(LightweightCharts.CandlestickSeries, {
-      upColor: '#4ade80',
-      downColor: '#ff4b4b',
-      borderVisible: false,
-      wickUpColor: '#4ade80',
-      wickDownColor: '#ff4b4b',
-    });
+  function updateTickerFromOrderbook() {
+    const { bids, asks } = state.orderbook;
+    const bestBid = bids.length > 0 ? bids[0].price : null;
+    const bestAsk = asks.length > 0 ? asks[0].price : null;
+    
+    const mid = bestBid && bestAsk ? (Number(bestBid) + Number(bestAsk)) / 2 : demoMid(state.market);
+    const last = bestBid || bestAsk || mid;
 
-    // Resize observer
-    const ro = new ResizeObserver(entries => {
-      for (const entry of entries) {
-        const { width, height } = entry.contentRect;
-        if (width > 0 && height > 0) {
-          tvChart.applyOptions({ width, height });
-        }
+    state.tickers[state.market] = {
+      lastPrice: last,
+      bestBid: bestBid || (mid * 0.9985),
+      bestAsk: bestAsk || (mid * 1.0015),
+      volume24h: state.trades.reduce((sum, t) => sum + (Number(t.quoteAmount) || Number(t.amount) * Number(t.price) || 0), 0),
+      change24h: 0,
+    };
+
+    renderTicker();
+  }
+
+  async function loadTrades() {
+    if (backendReady) {
+      const data = await sdkFetch(() => qdexClient.trades.list(state.market));
+      if (data) {
+        state.trades = data.trades || [];
+        renderTrades();
+        return;
       }
-    });
-    ro.observe(container);
-
-    chartInitialized = true;
-  }
-
-  function toggleChart() {
-    chartVisible = !chartVisible;
-    const row = $('#chartRow');
-    row.classList.toggle('visible', chartVisible);
-    const btn = $('#chartToggle');
-    if (btn) {
-      btn.textContent = chartVisible ? '✕' : '📊';
-      btn.title = chartVisible ? 'Hide chart' : 'Show chart';
     }
-    // Initialize chart when first shown
-    if (chartVisible) {
-      initChartLazy();
-      updateChart();
-    }
-  }
 
-  // Attach toggle handler immediately (script runs after DOM)
-  $('#chartToggle').onclick = toggleChart;
+    const data = await api(`/v1/trades/${state.market}`);
+    state.trades = (data?.trades && data.trades.length) ? data.trades : [];
+    renderTrades();
+  }
 
   async function loadKlines() {
-    const data = await api(`/v1/klines/${state.market}?interval=${state.interval}`);
-    const candles = data?.klines || data?.candles;
-    if (candles && candles.length > 0) {
-      state.klines = candles;
-    } else {
-      // Generate mock klines for demo
-      state.klines = generateMockKlines(100);
-    }
-    // Only update chart if visible
-    if (chartVisible) {
-      updateChart();
+    // Not implemented yet
+  }
+
+  async function refresh() {
+    await loadOrderbook();
+    if (state.wallet) {
+      loadBalances();
     }
   }
 
-  // ── Mock Kline Generator ──────────────────────
-
-  // ── Static Demo Data for GitHub Pages ───────────
-  const DEMO_MARKETS = Object.freeze([
-    { id: 'WQUAI-WQI', base: 'WQUAI', quote: 'WQI', status: 'demo' },
-    { id: 'WQUAI-USDT', base: 'WQUAI', quote: 'USDT', status: 'demo' },
-    { id: 'WQI-USDT', base: 'WQI', quote: 'USDT', status: 'demo' },
-  ]);
-
-  function demoMid(marketId=state.market) {
-    return {
-      'WQUAI-WQI': 1.7425,
-      'WQUAI-USDT': 0.0834,
-      'WQI-USDT': 0.0479,
-    }[marketId] || 1;
-  }
-
-  function generateMockTickers() {
-    const out = {};
-    for (const m of DEMO_MARKETS) {
-      const mid = demoMid(m.id);
-      const drift = (Math.sin(Date.now() / 90000 + mid) * 0.006);
-      const last = mid * (1 + drift);
-      out[m.id] = {
-        marketId: m.id,
-        lastPrice: last.toFixed(6),
-        bestBid: (last * 0.9985).toFixed(6),
-        bestAsk: (last * 1.0015).toFixed(6),
-        change24h: (drift * 100).toFixed(2),
-        volume24h: (42000 + Math.abs(drift) * 900000).toFixed(2),
-      };
-    }
-    return out;
-  }
-
-  function generateMockOrderbook(marketId=state.market) {
-    const mid = demoMid(marketId) * (1 + Math.sin(Date.now() / 70000) * 0.004);
-    const bids = [];
-    const asks = [];
-    for (let i = 0; i < 14; i++) {
-      const step = mid * 0.0012 * (i + 1);
-      const amount = (90 + (14 - i) * 18 + Math.random() * 65).toFixed(2);
-      bids.push({ price: (mid - step).toFixed(6), amount });
-      asks.push({ price: (mid + step).toFixed(6), amount: (Number(amount) * (0.88 + Math.random() * 0.28)).toFixed(2) });
-    }
-    return { bids, asks };
-  }
-
-  function generateMockTrades(marketId=state.market, count=18) {
-    const mid = demoMid(marketId);
-    const now = Date.now();
-    return Array.from({ length: count }, (_, i) => {
-      const side = i % 3 === 0 ? 'sell' : 'buy';
-      const price = mid * (1 + (Math.random() - 0.5) * 0.01);
-      return {
-        timestamp: now - i * 22000,
-        price: price.toFixed(6),
-        amount: (25 + Math.random() * 460).toFixed(2),
-        side,
-      };
-    });
-  }
-
-  function generateMockKlines(count=100) {
-    const now = Math.floor(Date.now() / 1000);
-    const intervalMs = {
-      '1m': 60, '5m': 300, '15m': 900, '1h': 3600, '4h': 14400, '1d': 86400,
-    }[state.interval] || 300;
-
-    let price = 0.001234;
-    const klines = [];
-    for (let i = count; i >= 0; i--) {
-      const time = now - i * intervalMs;
-      const open = price;
-      const change = (Math.random() - 0.48) * 0.0001;
-      const close = open + change;
-      const high = Math.max(open, close) + Math.random() * 0.00005;
-      const low = Math.min(open, close) - Math.random() * 0.00005;
-      klines.push({ time, open: open.toFixed(6), high: high.toFixed(6), low: low.toFixed(6), close: close.toFixed(6) });
-      price = close;
-    }
-    return klines;
-  }
-
-  function updateChart() {
-    if (!tvSeries || !state.klines.length) return;
-
-    const candles = state.klines.map(k => {
-      // Mock klines already have time in seconds (Unix timestamp)
-      const time = typeof k.time === 'number' && k.time > 1e10
-        ? Math.floor(k.time / 1000)  // API returns ms
-        : k.time;                    // Mock returns seconds
-      return {
-        time,
-        open: parseFloat(k.open),
-        high: parseFloat(k.high),
-        low: parseFloat(k.low),
-        close: parseFloat(k.close),
-      };
-    });
-
-    tvSeries.setData(candles);
-    tvChart.timeScale().fitContent();
-  }
-
-  // ── Render Functions ───────────────────────────
-
+  // ── UI Rendering ───────────────────────────────
   function renderMarkets() {
-    const list = $('#marketsList');
-    list.innerHTML = '';
-    for (const m of state.markets) {
-      const el = document.createElement('div');
-      el.className = `market-item${m.id === state.market ? ' active' : ''}`;
-      const pair = `${m.base}/${m.quote}`;
-      el.innerHTML = `<span class="pair">${pair}</span><span class="status-badge">${m.status}</span>`;
-      el.onclick = () => switchMarket(m.id);
-      list.appendChild(el);
-    }
-    renderMarketsView();
+    const list = $('marketsList');
+    if (!list) return;
+    $('marketsCount').textContent = state.markets.length;
+    list.innerHTML = state.markets.map(m => `
+      <div class="market-item ${m.id === state.market ? 'active' : ''}" onclick="window.switchMarket('${m.id}')">
+        <span class="pair">${m.base}/${m.quote}</span>
+        <span class="status-badge">${m.status}</span>
+      </div>
+    `).join('');
   }
 
   function renderTicker() {
     const m = state.markets.find(x => x.id === state.market);
     if (!m) return;
-    $('#tickerPair').textContent = `${m.base} / ${m.quote}`;
+    $('tickerPair').textContent = `${m.base} / ${m.quote}`;
 
     const t = state.tickers[state.market];
     if (t && t.lastPrice) {
-      $('#tickerLast').textContent = fmt(t.lastPrice);
-      $('#tickerLast').className = 'val green';
-      $('#tickerVol').textContent = fmtAmt(t.volume24h);
-      $('#tickerVol').className = 'val';
-      $('#tickerChange').textContent = `${Number(t.change24h || 0).toFixed(2)}%`;
-      $('#tickerChange').className = Number(t.change24h || 0) >= 0 ? 'val green' : 'val red';
-      $('#tickerBid').textContent = fmt(t.bestBid);
-      $('#tickerBid').className = 'val green';
-      $('#tickerAsk').textContent = fmt(t.bestAsk);
-      $('#tickerAsk').className = 'val red';
+      $('tickerLast').textContent = fmt(t.lastPrice);
+      $('tickerLast').className = 'val green';
+      $('tickerVol').textContent = fmtAmt(t.volume24h);
+      $('tickerVol').className = 'val';
+      $('tickerChange').textContent = `${Number(t.change24h || 0).toFixed(2)}%`;
+      $('tickerChange').className = Number(t.change24h || 0) >= 0 ? 'val green' : 'val red';
+      $('tickerBid').textContent = fmt(t.bestBid);
+      $('tickerBid').className = 'val green';
+      $('tickerAsk').textContent = fmt(t.bestAsk);
+      $('tickerAsk').className = 'val red';
     } else {
-      for (const id of ['tickerLast', 'tickerVol', 'tickerChange', 'tickerBid', 'tickerAsk']) {
-        const el = $('#' + id);
-        el.textContent = '—';
-        el.className = 'val dim';
+      // Try to populate from orderbook
+      const { bids, asks } = state.orderbook;
+      const bestBid = bids.length > 0 ? bids[0].price : null;
+      const bestAsk = asks.length > 0 ? asks[0].price : null;
+      const mid = bestBid && bestAsk ? (Number(bestBid) + Number(bestAsk)) / 2 : demoMid(state.market);
+
+      if (bestBid) {
+        $('tickerBid').textContent = fmt(bestBid);
+        $('tickerBid').className = 'val green';
+      }
+      if (bestAsk) {
+        $('tickerAsk').textContent = fmt(bestAsk);
+        $('tickerAsk').className = 'val red';
+      }
+      if (bestBid && bestAsk) {
+        $('tickerLast').textContent = fmt(mid);
+        $('tickerLast').className = 'val green';
+      }
+
+      if (!bestBid && !bestAsk) {
+        for (const id of ['tickerLast', 'tickerVol', 'tickerChange', 'tickerBid', 'tickerAsk']) {
+          const el = $('#' + id);
+          el.textContent = '—';
+          el.className = 'val dim';
+        }
       }
     }
 
     // Update units
-    $('#priceUnit').textContent = m.quote;
-    $('#amtUnit').textContent = m.base;
-    renderWalletUI();
-    renderMarketsView();
+    $('priceUnit').textContent = m.quote;
+    $('amtUnit').textContent = m.base;
   }
 
   function renderOrderbook() {
-    const tbody = $('#obTable tbody');
+    const tbody = $('obTable')?.querySelector('tbody');
+    if (!tbody) return;
     tbody.innerHTML = '';
 
     const { bids, asks } = state.orderbook;
+    $('obCount').textContent = `${bids.length + asks.length} levels`;
+
     const maxVol = Math.max(
       ...asks.map(a => Number(a.amount) || 0),
       ...bids.map(b => Number(b.amount) || 0),
       1
     );
 
-    // Asks (reversed to show highest first)
-    for (const a of [...asks].reverse().slice(-10)) {
-      const pct = (Number(a.amount) / maxVol * 100).toFixed(0);
-      tbody.innerHTML += `<tr class="ask">
-        <td>${fmt(a.price)}<div class="ob-depth-bar ask" style="width:${pct}%"></div></td>
-        <td>${fmtAmt(a.amount)}</td>
-        <td>${fmtAmt((a.price * a.amount).toFixed(4))}</td>
-      </tr>`;
+    // Asks (reversed)
+    for (let i = Math.min(asks.length, 15) - 1; i >= 0; i--) {
+      const ask = asks[i];
+      const pct = Number(ask.amount) / maxVol * 100;
+      tbody.insertAdjacentHTML('beforeend', `
+        <tr class="ask">
+          <td>${fmt(ask.price)}</td>
+          <td>${fmtAmt(ask.amount)}</td>
+          <td>${fmtAmt(Number(ask.price) * Number(ask.amount))}</td>
+          <td style="position:relative">
+            <div class="ob-depth-bar ask" style="width:${pct}%"></div>
+          </td>
+        </tr>
+      `);
     }
 
-    // Spread — best ask is the lowest ask, best bid is the highest bid.
-    if (asks.length && bids.length) {
+    // Spread
+    if (bids.length > 0 && asks.length > 0) {
       const bestAsk = Number(asks[0].price);
       const bestBid = Number(bids[0].price);
       const spread = Math.max(0, bestAsk - bestBid).toFixed(6);
-      tbody.innerHTML += `<tr class="spread"><td colspan="3">Spread: ${spread} ${state.markets.find(m=>m.id===state.market)?.quote}</td></tr>`;
-    } else {
-      tbody.innerHTML += `<tr class="spread"><td colspan="3">No order book data</td></tr>`;
+      tbody.insertAdjacentHTML('beforeend', `
+        <tr class="spread"><td colspan="4">Spread: ${spread}</td></tr>
+      `);
     }
 
     // Bids
-    for (const b of bids.slice(0, 10)) {
-      const pct = (Number(b.amount) / maxVol * 100).toFixed(0);
-      tbody.innerHTML += `<tr class="bid">
-        <td>${fmt(b.price)}<div class="ob-depth-bar bid" style="width:${pct}%"></div></td>
-        <td>${fmtAmt(b.amount)}</td>
-        <td>${fmtAmt((b.price * b.amount).toFixed(4))}</td>
-      </tr>`;
+    for (let i = 0; i < Math.min(bids.length, 15); i++) {
+      const bid = bids[i];
+      const pct = Number(bid.amount) / maxVol * 100;
+      tbody.insertAdjacentHTML('beforeend', `
+        <tr class="bid">
+          <td>${fmt(bid.price)}</td>
+          <td>${fmtAmt(bid.amount)}</td>
+          <td>${fmtAmt(Number(bid.price) * Number(bid.amount))}</td>
+          <td style="position:relative">
+            <div class="ob-depth-bar bid" style="width:${pct}%"></div>
+          </td>
+        </tr>
+      `);
     }
   }
 
   function renderTrades() {
-    const tbody = $('#tradesTable tbody');
-    if (!state.trades.length) {
-      tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px;">No trades yet</td></tr>`;
-      return;
-    }
+    const tbody = $('tradesTable')?.querySelector('tbody');
+    if (!tbody) return;
     tbody.innerHTML = '';
-    for (const t of state.trades.slice(0, 30)) {
-      const time = new Date(t.timestamp || Date.now()).toLocaleTimeString();
-      tbody.innerHTML += `<tr>
-        <td>${time}</td>
-        <td>${fmt(t.price)}</td>
-        <td>${fmtAmt(t.amount)}</td>
-        <td class="trade-side ${t.side}">${t.side.toUpperCase()}</td>
-      </tr>`;
-    }
-  }
+    $('tradesCount').textContent = state.trades.length;
 
-  function renderBalances() {
-    const list = $('#balancesList');
-    if (!state.wallet || !state.balances.length) {
-      list.innerHTML = `<div class="empty-state"><div class="icon">🔐</div><p>Connect wallet to view balances</p></div>`;
-      return;
+    for (const trade of state.trades.slice(0, 50)) {
+      const time = trade.createdAt ? new Date(trade.createdAt).toLocaleTimeString('en-US', { hour12: false }) : '—';
+      const total = (Number(trade.price) * Number(trade.amount)).toFixed(4);
+      tbody.insertAdjacentHTML('beforeend', `
+        <tr>
+          <td>${time}</td>
+          <td class="trade-side ${trade.side || 'buy'}">${(trade.side || 'buy').toUpperCase()}</td>
+          <td>${fmt(trade.price)}</td>
+          <td>${fmtAmt(trade.amount)}</td>
+          <td>${fmtAmt(total)}</td>
+        </tr>
+      `);
     }
-    list.innerHTML = '';
-    for (const b of state.balances) {
-      list.innerHTML += `<div class="balance-row">
-        <span class="balance-token">${b.token}</span>
-        <span class="balance-amount balance-available">${fmt(b.available || '0', 4)}</span>
-        ${b.locked ? `<span class="balance-locked">locked: ${fmt(b.locked, 4)}</span>` : ''}
-      </div>`;
-    }
-  }
-
-
-  function renderModeStatus() {
-    const isDemo = STATIC_DEMO;
-    const modeText = isDemo ? 'STATIC DEMO MODE' : 'API MODE';
-    const apiText = isDemo ? 'GitHub Pages fallback data · no /v1 API connected' : 'Live API endpoints enabled';
-    const topMode = $('#modeLabel');
-    const modeIndicator = $('#modeIndicator');
-    const modePill = $('#modePill');
-    const modeDot = $('#modeDot');
-    const apiState = $('#apiState');
-    const walletLine = $('#walletStateLine');
-    if (topMode) topMode.textContent = isDemo ? 'STATIC DEMO' : 'API MODE';
-    if (modeIndicator) modeIndicator.textContent = modeText;
-    if (apiState) apiState.textContent = apiText;
-    if (modePill) modePill.classList.toggle('live', !isDemo);
-    if (modeDot) modeDot.classList.toggle('mock', isDemo);
-    if (walletLine) walletLine.textContent = state.wallet
-      ? `Wallet ${shortAddress(state.wallet)} (${state.walletProvider || 'unknown'})`
-      : 'Wallet disconnected';
   }
 
   function renderWalletUI() {
-    const label = state.wallet ? shortAddress(state.wallet) : 'Connect Wallet';
-    const walletBtn = $('#walletBtn');
-    if (walletBtn) walletBtn.textContent = label;
+    const walletEmpty = $('walletEmpty');
+    const walletContent = $('walletContent');
+    
+    if (!state.wallet || !state.balances.length) {
+      walletEmpty.style.display = 'flex';
+      walletContent.style.display = 'none';
+      return;
+    }
 
-    const m = currentMarket();
-    const token = state.side === 'buy' ? m?.quote : m?.base;
-    const available = state.wallet && token ? numericBalance(token) : 0;
-    const formBalance = $('#formBalance');
-    if (formBalance) formBalance.textContent = state.wallet && token ? `${fmt(available, 4)} ${token}` : '—';
-
-    renderModeStatus();
-    renderBalances();
-    renderPortfolioView();
-    calcTotal();
+    walletEmpty.style.display = 'none';
+    walletContent.style.display = 'block';
+    walletContent.innerHTML = state.balances.map(b => `
+      <div class="balance-row">
+        <span class="balance-token">${b.token}</span>
+        <div>
+          <span class="balance-available">${b.available || '0'}</span>
+          ${b.locked ? `<span class="balance-locked"> (+${b.locked} locked)</span>` : ''}
+        </div>
+      </div>
+    `).join('');
   }
 
   function renderOrders() {
-    const table = $('#ordersTable');
-    const empty = $('#noOrders');
-    if (!table || !empty) return;
-    const tbody = table.querySelector('tbody');
-    if (!state.orders.length) {
-      empty.style.display = '';
-      table.style.display = 'none';
-      if (tbody) tbody.innerHTML = '';
-      renderPortfolioView();
-      return;
-    }
-    empty.style.display = 'none';
-    table.style.display = '';
-    tbody.innerHTML = state.orders.map(o => `<tr>
-      <td>${escapeHtml(o.pair)}</td>
-      <td class="trade-side ${o.side}">${escapeHtml(o.side.toUpperCase())}</td>
-      <td>${fmt(o.price)}</td>
-      <td>${fmtAmt(o.amount)}</td>
-      <td>${escapeHtml(o.filled || '0%')}</td>
-      <td><button class="cancel-btn" data-cancel="${escapeHtml(o.id)}">Cancel</button></td>
-    </tr>`).join('');
-    tbody.querySelectorAll('[data-cancel]').forEach(btn => {
-      btn.onclick = () => {
-        state.orders = state.orders.filter(o => o.id !== btn.dataset.cancel);
-        logActivity(`Cancelled order ${btn.dataset.cancel}`, 'warn');
-        renderOrders();
-      };
-    });
-    renderPortfolioView();
-  }
+    const empty = $('ordersEmpty');
+    const table = $('ordersTable');
+    const tbody = table?.querySelector('tbody');
+    if (!tbody) return;
 
-  function renderPortfolioActivity() {
-    const box = $('#portfolioActivity');
-    if (!box) return;
-    if (!state.activity.length) {
-      box.innerHTML = `<div class="empty-state"><div class="icon">▱</div><p>No local activity yet</p></div>`;
+    if (!state.orders.length) {
+      empty.style.display = 'flex';
+      table.style.display = 'none';
       return;
     }
-    box.innerHTML = state.activity.slice(0, 8).map(a =>
-      `<div class="log-entry ${a.type}"><span class="time">${a.time}</span>${a.msg}</div>`
-    ).join('');
+
+    empty.style.display = 'none';
+    table.style.display = 'table';
+    tbody.innerHTML = '';
+
+    for (const order of state.orders) {
+      tbody.insertAdjacentHTML('beforeend', `
+        <tr>
+          <td>${order.pair}</td>
+          <td class="trade-side ${order.side}">${order.side.toUpperCase()}</td>
+          <td>${order.type}</td>
+          <td>${fmt(order.price)}</td>
+          <td>${fmtAmt(order.amount)}</td>
+          <td>${order.filled}</td>
+          <td><button class="cancel-btn" onclick="cancelOrder('${order.id}')">Cancel</button></td>
+        </tr>
+      `);
+    }
   }
 
   function renderPortfolioView() {
-    const walletState = $('#portfolioWalletState');
+    const walletState = $('portfolioWalletState');
+    const balancesEl = $('portfolioBalances');
+    const ordersEl = $('portfolioOrders');
+    
     if (!walletState) return;
-    const provider = $('#walletProviderBadge');
-    if (provider) provider.textContent = state.walletProvider || 'offline';
 
-    walletState.innerHTML = state.wallet ? `
-      <div class="wallet-address">${escapeHtml(shortAddress(state.wallet))}</div>
-      <div class="wallet-meta">Provider: ${escapeHtml(state.walletProvider || 'unknown')}</div>
-      <div class="wallet-meta">Mode: ${STATIC_DEMO ? 'static demo — no transactions' : 'API mode'}</div>
-    ` : `
-      <div class="wallet-address">Disconnected</div>
-      <div class="wallet-meta">Connect your wallet using the pill above to view balances.</div>
-    `;
-
-    const balancesBox = $('#portfolioBalances');
-    const balanceCount = $('#portfolioBalanceCount');
-    if (balanceCount) balanceCount.textContent = `${state.balances.length} assets`;
-    if (balancesBox) {
-      balancesBox.innerHTML = state.wallet && state.balances.length
-        ? state.balances.map(b => `<div class="balance-row"><span class="balance-token">${escapeHtml(b.token)}</span><span class="balance-amount balance-available">${fmt(b.available, 4)}</span></div>`).join('')
-        : `<div class="empty-state"><div class="icon">🔐</div><p>Connect wallet to view balances</p></div>`;
+    // Wallet state
+    if (state.wallet) {
+      walletState.innerHTML = `
+        <div class="wallet-address">${shortAddress(state.wallet)}</div>
+        <div class="wallet-meta">Provider: ${state.walletProvider || 'quai'} · Network: Quai Orchard</div>
+        <div class="wallet-actions">
+          <button class="cancel-btn" onclick="window.disconnectWallet()">Disconnect</button>
+        </div>
+      `;
+      $('walletProviderBadge').textContent = 'connected';
+      $('walletProviderBadge').className = 'mode-pill live';
+      $('walletProviderBadge2').textContent = 'connected';
+      $('walletProviderBadge2').className = 'mode-pill live';
+    } else {
+      walletState.innerHTML = `<div class="empty-state"><div class="icon">🔐</div><p>Connect your Quai wallet</p></div>`;
+      $('walletProviderBadge').textContent = 'offline';
+      $('walletProviderBadge').className = 'mode-pill';
+      $('walletProviderBadge2').textContent = 'offline';
+      $('walletProviderBadge2').className = 'mode-pill';
     }
 
-    const m = currentMarket();
-    const t = state.tickers[state.market] || {};
-    const exposure = $('#portfolioExposure');
-    if (exposure) {
-      exposure.innerHTML = m ? `
-        <div class="metric-row"><span>Market</span><strong>${m.base}/${m.quote}</strong></div>
-        <div class="metric-row"><span>${m.base} available</span><strong>${fmt(numericBalance(m.base), 4)}</strong></div>
-        <div class="metric-row"><span>${m.quote} available</span><strong>${fmt(numericBalance(m.quote), 4)}</strong></div>
-        <div class="metric-row"><span>Last price</span><strong>${fmt(t.lastPrice || demoMid(state.market))}</strong></div>
-      ` : `<div class="empty-state"><p>No market selected</p></div>`;
-    }
+    // Balances
+    $('portfolioBalanceCount').textContent = state.balances.length;
+    balancesEl.innerHTML = state.balances.length ? state.balances.map(b => `
+      <div class="balance-row">
+        <span class="balance-token">${b.token}</span>
+        <div>
+          <span class="balance-available">${b.available || '0'}</span>
+          ${b.locked ? `<span class="balance-locked"> (+${b.locked} locked)</span>` : ''}
+        </div>
+      </div>
+    `).join('') : `<div class="empty-state"><p>No balances</p></div>`;
 
-    const orderBox = $('#portfolioOrders');
-    const orderCount = $('#portfolioOrderCount');
-    if (orderCount) orderCount.textContent = `${state.orders.length} open`;
-    if (orderBox) {
-      orderBox.innerHTML = state.orders.length ? `
-        <div class="mini-order-row header"><span>Pair</span><span>Side</span><span>Amount</span><span>Price</span></div>
-        ${state.orders.map(o => `<div class="mini-order-row"><span>${escapeHtml(o.pair)}</span><span class="trade-side ${o.side}">${escapeHtml(o.side)}</span><span>${fmtAmt(o.amount)}</span><span>${fmt(o.price)}</span></div>`).join('')}
-      ` : `<div class="empty-state"><div class="icon">📋</div><p>No open orders</p></div>`;
-    }
-
-    renderPortfolioActivity();
+    // Orders
+    $('portfolioOrderCount').textContent = state.orders.length;
+    ordersEl.innerHTML = state.orders.length ? state.orders.map(o => `
+      <div class="balance-row">
+        <span class="balance-token">${o.pair}</span>
+        <span class="trade-side ${o.side}">${o.side.toUpperCase()}</span>
+        <span>${fmt(o.price)}</span>
+      </div>
+    `).join('') : `<div class="empty-state"><p>No open orders</p></div>`;
   }
 
   function renderMarketsView() {
-    const table = $('#marketsOverviewTable tbody');
-    if (!table) return;
-    const q = ($('#marketSearch')?.value || '').trim().toLowerCase();
-    const rows = state.markets.filter(m => `${m.base}/${m.quote} ${m.id}`.toLowerCase().includes(q));
-    if (!rows.length) {
-      table.innerHTML = `<tr><td colspan="7"><div class="empty-state"><p>No markets match the filter</p></div></td></tr>`;
-      return;
-    }
-    table.innerHTML = rows.map(m => {
-      const t = state.tickers[m.id] || {};
-      const ch = Number(t.change24h || 0);
-      return `<tr data-market="${escapeHtml(m.id)}" class="${m.id === state.market ? 'active' : ''}">
-        <td><span class="pair">${escapeHtml(m.base)}/${escapeHtml(m.quote)}</span></td>
-        <td>${fmt(t.lastPrice || demoMid(m.id))}</td>
-        <td class="${ch >= 0 ? 'trade-side buy' : 'trade-side sell'}">${ch.toFixed(2)}%</td>
-        <td class="trade-side buy">${fmt(t.bestBid || demoMid(m.id) * .998)}</td>
-        <td class="trade-side sell">${fmt(t.bestAsk || demoMid(m.id) * 1.002)}</td>
-        <td>${fmtAmt(t.volume24h || 0)}</td>
-        <td><span class="status-badge">${escapeHtml(m.status || (STATIC_DEMO ? 'demo' : 'live'))}</span></td>
-      </tr>`;
-    }).join('');
-    table.querySelectorAll('[data-market]').forEach(row => {
-      row.onclick = async () => {
-        await switchMarket(row.dataset.market);
-        switchView('trade');
-      };
-    });
+    const container = $('marketsTableContainer');
+    if (!container) return;
+    
+    container.innerHTML = `
+      <table class="trades-table">
+        <thead><tr><th>Market</th><th>Status</th><th>Last</th><th>Bid</th><th>Ask</th><th>24h Vol</th></tr></thead>
+        <tbody>
+          ${state.markets.map(m => {
+            const t = state.tickers[m.id] || {};
+            return `
+              <tr onclick="window.switchMarket('${m.id}')" style="cursor:pointer">
+                <td class="pair" style="font-weight:600">${m.base}/${m.quote}</td>
+                <td><span class="status-badge">${m.status}</span></td>
+                <td>${fmt(t.lastPrice || demoMid(m.id))}</td>
+                <td class="trade-side buy">${fmt(t.bestBid || demoMid(m.id) * .998)}</td>
+                <td class="trade-side sell">${fmt(t.bestAsk || demoMid(m.id) * 1.002)}</td>
+                <td>${fmtAmt(t.volume24h || 0)}</td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    `;
   }
 
-  function switchView(view) {
-    state.view = view;
-    $$('.topbar-tab').forEach(b => b.classList.toggle('active', b.dataset.view === view));
-    $$('.view-container').forEach(v => v.classList.add('hidden'));
-    const target = $(`#view-${view}`);
-    if (target) target.classList.remove('hidden');
+  // ── View Switching ─────────────────────────────
+  window.switchView = function(view) {
+    document.querySelectorAll('.topbar-tab').forEach((tab, i) => {
+      tab.classList.toggle('active', ['trade', 'portfolio', 'markets'][i] === view);
+    });
+
+    $('chartRow').style.display = (view === 'trade') ? 'flex' : 'none';
+    document.querySelector('.main').style.display = (view === 'trade') ? 'grid' : 'none';
+    $('portfolioView').classList.toggle('hidden', view !== 'portfolio');
+    $('marketsView').classList.toggle('hidden', view !== 'markets');
+
     if (view === 'portfolio') renderPortfolioView();
     if (view === 'markets') renderMarketsView();
-  }
+  };
 
   // ── Market Switch ──────────────────────────────
-  async function switchMarket(id) {
+  window.switchMarket = async function(id) {
     state.market = id;
     renderMarkets();
     renderTicker();
-    await Promise.all([loadOrderbook(), loadTrades(), loadKlines()]);
+    await Promise.all([loadOrderbook(), loadTrades()]);
     renderPortfolioView();
     renderMarketsView();
-  }
-
-  // ── Data Loading ───────────────────────────────
-  async function loadMarkets() {
-    // Try real network data first if backend is ready
-    if (backendReady) {
-      try {
-        const realMarkets = await sdkFetch(() => qdexClient.real.markets.list());
-        if (realMarkets && realMarkets.length) {
-          state.markets = realMarkets;
-          renderMarkets();
-          renderTicker();
-          logActivity('Loaded real network markets', 'success');
-          return;
-        }
-      } catch (e) {
-        console.warn('[QDEX] Failed to load real markets:', e.message);
-      }
-    }
-
-    // Try SDK first if backend is ready
-    if (backendReady) {
-      const data = await sdkFetch(() => qdexClient.markets.list());
-      if (data && data.length) {
-        state.markets = data;
-        renderMarkets();
-        renderTicker();
-        return;
-      }
-    }
-
-    // Fallback to REST API
-    const data = await api('/v1/markets');
-    state.markets = (data?.markets && data.markets.length) ? data.markets : [...DEMO_MARKETS];
-    renderMarkets();
-    renderTicker();
-  }
-
-  async function loadTickers() {
-    // Try SDK first if backend is ready
-    if (backendReady) {
-      const data = await sdkFetch(() => qdexClient.tickers.list());
-      if (data && data.length) {
-        state.tickers = {};
-        for (const t of data) state.tickers[t.marketId] = t;
-        renderTicker();
-        return;
-      }
-    }
-
-    // Fallback to REST API
-    const data = await api('/v1/tickers');
-    state.tickers = {};
-    if (data?.tickers && data.tickers.length) {
-      for (const t of data.tickers) state.tickers[t.marketId] = t;
-    } else {
-      state.tickers = generateMockTickers();
-    }
-    renderTicker();
-  }
-
-  async function loadOrderbook() {
-    // Try SDK first if backend is ready
-    if (backendReady) {
-      const data = await sdkFetch(() => qdexClient.orderbook.get(state.market));
-      if (data && ((data.bids && data.bids.length) || (data.asks && data.asks.length))) {
-        state.orderbook = { bids: data.bids || [], asks: data.asks || [] };
-        if (state.orderbook.bids.length && state.orderbook.asks.length) {
-          const current = state.tickers[state.market] || { marketId: state.market, lastPrice: demoMid(state.market), volume24h: '0', change24h: '0' };
-          state.tickers[state.market] = {
-            ...current,
-            bestBid: state.orderbook.bids[0].price,
-            bestAsk: state.orderbook.asks[0].price,
-            lastPrice: current.lastPrice || ((Number(state.orderbook.bids[0].price) + Number(state.orderbook.asks[0].price)) / 2).toFixed(6),
-          };
-          renderTicker();
-        }
-        renderOrderbook();
-        return;
-      }
-    }
-
-    // Fallback to REST API
-    const data = await api(`/v1/orderbook/${state.market}`);
-    if (data && ((data.bids && data.bids.length) || (data.asks && data.asks.length))) {
-      state.orderbook = { bids: data.bids || [], asks: data.asks || [] };
-    } else {
-      state.orderbook = generateMockOrderbook(state.market);
-    }
-    if (state.orderbook.bids.length && state.orderbook.asks.length) {
-      const current = state.tickers[state.market] || { marketId: state.market, lastPrice: demoMid(state.market), volume24h: '0', change24h: '0' };
-      state.tickers[state.market] = {
-        ...current,
-        bestBid: state.orderbook.bids[0].price,
-        bestAsk: state.orderbook.asks[0].price,
-        lastPrice: current.lastPrice || ((Number(state.orderbook.bids[0].price) + Number(state.orderbook.asks[0].price)) / 2).toFixed(6),
-      };
-      renderTicker();
-    }
-    renderOrderbook();
-  }
-
-  async function loadTrades() {
-    // Try SDK first if backend is ready
-    if (backendReady) {
-      const data = await sdkFetch(() => qdexClient.trades.list(state.market));
-      if (data && data.trades && data.trades.length) {
-        state.trades = data.trades;
-        renderTrades();
-        return;
-      }
-    }
-
-    // Fallback to REST API
-    const data = await api(`/v1/trades/${state.market}`);
-    state.trades = (data?.trades && data.trades.length) ? data.trades : generateMockTrades(state.market);
-    renderTrades();
-  }
-
-  async function loadAccount() {
-    if (!state.wallet) return;
-    const data = await api('/v1/account');
-    if (data?.balances?.balances) {
-      state.balances = data.balances.balances;
-      renderWalletUI();
-    }
-  }
-
-  // ── Refresh Loop ───────────────────────────────
-  async function refresh() {
-    await Promise.all([loadTickers(), loadOrderbook(), loadTrades(), loadKlines()]);
-    if (state.wallet) await loadAccount();
-  }
-
-  // ── Event Bindings ─────────────────────────────
-
-  // Top tabs: real view switching
-  $$('.topbar-tab').forEach(btn => {
-    btn.onclick = () => switchView(btn.dataset.view || 'trade');
-  });
-
-  // Panel tabs
-  $$('.tab-bar .tab-item').forEach(btn => {
-    btn.onclick = () => {
-      const bar = btn.parentElement;
-      bar.querySelectorAll('.tab-item').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const content = bar.parentElement.querySelector('.tab-content');
-      const tab = btn.dataset.tab || btn.dataset.btab;
-      if (tab) {
-        content.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-        const pane = $(`#pane-${tab}`);
-        if (pane) pane.classList.add('active');
-      }
-    };
-  });
-
-  // Side tabs (buy/sell)
-  $$('.side-tab').forEach(btn => {
-    btn.onclick = () => {
-      $$('.side-tab').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      state.side = btn.dataset.side;
-      const submit = $('#submitBtn');
-      submit.className = `submit-btn ${state.side}`;
-      renderWalletUI();
-    };
-  });
-
-  // Order type tabs
-  $$('.order-type-tab').forEach(btn => {
-    btn.onclick = () => {
-      $$('.order-type-tab').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      state.orderType = btn.dataset.type;
-      $('#priceGroup').style.display = state.orderType === 'market' ? 'none' : '';
-      calcTotal();
-    };
-  });
-
-  // Chart interval buttons
-  $$('.interval-btn[data-interval]').forEach(btn => {
-    btn.onclick = async () => {
-      $$('.interval-btn[data-interval]').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      state.interval = btn.dataset.interval;
-      await loadKlines();
-    };
-  });
-
-  // Price step buttons
-  $('#priceDown').onclick = () => {
-    const inp = $('#priceInput');
-    inp.value = Math.max(0, Number(inp.value || 0) - 0.001).toFixed(4);
-    calcTotal();
-  };
-  $('#priceUp').onclick = () => {
-    const inp = $('#priceInput');
-    inp.value = (Number(inp.value || 0) + 0.001).toFixed(4);
-    calcTotal();
   };
 
-  // Amount step buttons
-  $('#amtDown').onclick = () => {
-    const inp = $('#amtInput');
-    inp.value = Math.max(0, Number(inp.value || 0) - 0.1).toFixed(4);
-    calcTotal();
-  };
-  $('#amtUp').onclick = () => {
-    const inp = $('#amtInput');
-    inp.value = (Number(inp.value || 0) + 0.1).toFixed(4);
-    calcTotal();
-  };
-
-  // Percentage buttons
-  $$('.pct-btn').forEach(btn => {
-    btn.onclick = () => {
-      const pct = Number(btn.dataset.pct) / 100;
-      const m = currentMarket();
-      const refPrice = Number($('#priceInput').value || state.tickers[state.market]?.lastPrice || demoMid(state.market));
-      const token = state.side === 'buy' ? m?.quote : m?.base;
-      const bal = state.wallet && token ? numericBalance(token) : 1000;
-      const amount = state.side === 'buy' ? (bal * pct / Math.max(refPrice, 0.000001)) : (bal * pct);
-      $('#amtInput').value = amount.toFixed(4);
-      calcTotal();
-    };
-  });
-
-  // Input changes
-  $('#priceInput').oninput = calcTotal;
-  $('#amtInput').oninput = calcTotal;
-
-  function calcTotal() {
-    const m = currentMarket();
-    const rawPrice = Number($('#priceInput').value || 0);
-    const price = state.orderType === 'market'
-      ? Number(state.tickers[state.market]?.lastPrice || demoMid(state.market))
-      : rawPrice;
-    const amt = Number($('#amtInput').value || 0);
-    const total = (price * amt).toFixed(4);
-    $('#orderTotal').textContent = `${fmt(total)} ${m?.quote || ''}`;
-
-    const token = state.side === 'buy' ? m?.quote : m?.base;
-    const available = state.wallet && token ? numericBalance(token) : 0;
-    const formBalance = $('#formBalance');
-    if (formBalance) formBalance.textContent = state.wallet && token ? `${fmt(available, 4)} ${token}` : '—';
-
-    const btn = $('#submitBtn');
-    const hasPrice = state.orderType === 'market' || price > 0;
-    if (hasPrice && amt > 0) {
-      btn.disabled = !state.wallet;
-      btn.textContent = state.wallet ? `Place ${state.side} ${state.orderType} order` : 'Connect Wallet to Trade';
-    } else {
-      btn.disabled = true;
-      btn.textContent = state.wallet ? `Enter ${state.orderType === 'market' ? 'amount' : 'price & amount'}` : 'Connect Wallet to Trade';
-    }
+  // ── Trade Form ─────────────────────────────────
+  function setSide(side) {
+    state.side = side;
+    $('buyTab').classList.toggle('active', side === 'buy');
+    $('sellTab').classList.toggle('active', side === 'sell');
+    $('submitBtn').className = `submit-btn ${side}`;
+    updateFormTotal();
   }
 
-  // Submit button — signs and submits order to backend
-  $('#submitBtn').onclick = async () => {
-    if (!state.wallet) return;
-    const m = currentMarket();
-    const price = state.orderType === 'market'
-      ? Number(state.tickers[state.market]?.lastPrice || demoMid(state.market))
-      : Number($('#priceInput').value || 0);
-    const amount = Number($('#amtInput').value || 0);
-    if (!m || !amount || !price) return;
+  function setOrderType(type) {
+    state.orderType = type;
+    $('limitTab').classList.toggle('active', type === 'limit');
+    $('marketTab').classList.toggle('active', type === 'market');
+    $('priceInput').disabled = (type === 'market');
+    updateFormTotal();
+  }
 
-    const btn = $('#submitBtn');
+  function stepPrice(delta) {
+    const input = $('priceInput');
+    input.value = Math.max(0, Number(input.value || 0) + delta).toFixed(3);
+    updateFormTotal();
+  }
+
+  function stepAmount(delta) {
+    const input = $('amtInput');
+    input.value = Math.max(0, Number(input.value || 0) + delta).toFixed(2);
+    updateFormTotal();
+  }
+
+  function setPct(pct) {
+    if (!state.balances.length) return;
+    const m = state.markets.find(x => x.id === state.market);
+    if (!m) return;
+    
+    const balance = state.balances.find(b => b.token === (state.side === 'buy' ? m.quote : m.base));
+    if (!balance) return;
+    
+    const available = Number(balance.available || 0);
+    $('amtInput').value = (available * pct / 100).toFixed(2);
+    updateFormTotal();
+  }
+
+  function updateFormTotal() {
+    const price = Number($('priceInput').value || 0);
+    const amount = Number($('amtInput').value || 0);
+    const total = price * amount;
+    $('formTotal').textContent = total ? total.toFixed(4) : '—';
+    $('formBalance').textContent = state.balances.length ? 
+      state.balances.find(b => b.token === (state.side === 'buy' ? state.markets.find(m => m.id === state.market)?.quote : state.markets.find(m => m.id === state.market)?.base))?.available || '0' : '—';
+  }
+
+  async function submitOrder() {
+    const m = state.markets.find(x => x.id === state.market);
+    if (!m) return;
+
+    const price = state.orderType === 'limit' ? Number($('priceInput').value || 0) : demoMid(state.market);
+    const amount = Number($('amtInput').value || 0);
+    if (!amount || (state.orderType === 'limit' && !price)) return;
+
+    const btn = $('submitBtn');
     btn.disabled = true;
     btn.textContent = 'Signing...';
 
     try {
-      // Get wallet signer
       const signer = await window.getWalletSigner();
       if (!signer) {
-        logActivity('Wallet not connected. Please reconnect.', 'error');
+        logActivity('Wallet not connected. Please connect your Quai wallet.', 'error');
         btn.disabled = false;
         btn.textContent = `Place ${state.side} ${state.orderType} order`;
         return;
       }
 
-      // Build order
       const nonce = Math.floor(Math.random() * 100000).toString();
       const order = {
-        marketId: 'WQUAI-WQI',
+        marketId: state.market,
         side: state.side,
         type: state.orderType === 'market' ? 'market_ioc' : 'limit',
         baseToken: m.base,
@@ -1967,7 +1304,7 @@ input { font: inherit; }
         price: price.toFixed(6),
         timeInForce: state.orderType === 'market' ? 'IOC' : 'GTC',
         maxSlippageBps: state.orderType === 'market' ? 50 : 0,
-        owner: state.wallet.address,
+        owner: state.wallet,
         delegate: '0x0000000000000000000000000000000000000000',
         nonce,
         expiresAt: Math.floor(Date.now() / 1000) + 86400,
@@ -1975,20 +1312,18 @@ input { font: inherit; }
         settlementContract: '0x00497118fAA729aC1d981c680080d7428fE8a4Bd',
       };
 
-      // Sign order with wallet
       const orderHash = JSON.stringify(order);
       const signature = await signer.signMessage(orderHash);
 
       order.signature = {
         scheme: 'mock',
-        signer: state.wallet.address,
+        signer: state.wallet,
         value: signature,
         signedAt: Math.floor(Date.now() / 1000),
       };
 
       logActivity(`Signing ${state.side} ${state.orderType} order: ${amount} ${m.base} @ ${price.toFixed(6)} ${m.quote}`, 'info');
 
-      // Submit to backend
       if (backendReady && qdexClient) {
         try {
           const result = await qdexClient.orders.submitSignedOrder(order);
@@ -2010,7 +1345,6 @@ input { font: inherit; }
         } catch (e) {
           console.warn('[QDEX] Order submission failed:', e.message);
           logActivity(`Order submission failed: ${e.message}`, 'warn');
-          // Fallback to local mock
           createLocalOrder(order, m, price, amount, nonce);
         }
       } else {
@@ -2023,7 +1357,7 @@ input { font: inherit; }
       btn.disabled = false;
       btn.textContent = `Place ${state.side} ${state.orderType} order`;
     }
-  };
+  }
 
   function createLocalOrder(order, m, price, amount, nonce) {
     const orderData = {
@@ -2042,101 +1376,7 @@ input { font: inherit; }
     logActivity(`Created local ${state.side} ${state.orderType} order: ${orderData.amount} ${m.base} @ ${orderData.price} ${m.quote}`, 'success');
   }
 
-  function demoWalletAddress() {
-    const hex = Array.from({ length: 38 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
-    return '0x00' + hex;
-  }
-
-  const STORAGE_KEY = 'bitquai_wallet';
-
-  function loadWalletState() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) return JSON.parse(raw);
-    } catch (_) {}
-    return null;
-  }
-
-  function saveWalletState(addr, provider) {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ address: addr, provider }));
-    } catch (_) {}
-  }
-
-  function clearWalletState() {
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch (_) {}
-  }
-
-  function applyWalletFromStorage() {
-    const saved = loadWalletState();
-    if (saved && saved.address) {
-      state.wallet = saved.address;
-      state.walletProvider = saved.provider || 'restored';
-      state.balances = [
-        { token: 'WQUAI', available: '1,250.00', locked: '0' },
-        { token: 'WQI', available: '8,432.50', locked: '0' },
-        { token: 'USDT', available: '5,000.00', locked: '0' },
-      ];
-    } else {
-      state.wallet = null;
-      state.walletProvider = null;
-      state.balances = [];
-    }
-    renderWalletUI();
-  }
-
-  async function toggleWallet() {
-    if (state.wallet) {
-      const old = state.wallet;
-      state.wallet = null;
-      state.walletProvider = null;
-      state.balances = [];
-      clearWalletState();
-      renderWalletUI();
-      logActivity(`Wallet disconnected ${shortAddress(old)}`, 'warn');
-      return;
-    }
-
-    if (window.ethereum?.request) {
-      try {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        if (accounts && accounts[0]) {
-          state.wallet = accounts[0];
-          state.walletProvider = 'browser provider';
-          saveWalletState(state.wallet, state.walletProvider);
-          logActivity(`Wallet connected ${shortAddress(state.wallet)}`, 'success');
-          state.balances = [
-            { token: 'WQUAI', available: '1,250.00', locked: '0' },
-            { token: 'WQI', available: '8,432.50', locked: '0' },
-            { token: 'USDT', available: '5,000.00', locked: '0' },
-          ];
-          renderWalletUI();
-          return;
-        }
-      } catch (err) {
-        logActivity(`Wallet connection rejected: ${err?.message || err}`, 'warn');
-        return;
-      }
-    }
-
-    if (!state.wallet) {
-      state.wallet = demoWalletAddress();
-      state.walletProvider = 'local mock';
-      saveWalletState(state.wallet, state.walletProvider);
-      logActivity(`Wallet connected ${shortAddress(state.wallet)} (mock)`, 'success');
-    }
-
-    state.balances = [
-      { token: 'WQUAI', available: '1,250.00', locked: '0' },
-      { token: 'WQI', available: '8,432.50', locked: '0' },
-      { token: 'USDT', available: '5,000.00', locked: '0' },
-    ];
-    renderWalletUI();
-  }
-
-  // Listen for global wallet events from wallet-pill.js
+  // ── Wallet Events ──────────────────────────────
   // QDEX wallet integration instance
   let qdexWallet;
   if (window.QDexWalletIntegration && qdexClient) {
@@ -2150,7 +1390,6 @@ input { font: inherit; }
       state.wallet = e.detail.address;
       state.walletProvider = e.detail.provider || 'quai';
       
-      // Fetch real vault balances
       logActivity(`Wallet connected ${shortAddress(state.wallet)} — fetching balances...`, 'info');
       
       if (qdexWallet) {
@@ -2185,12 +1424,6 @@ input { font: inherit; }
     if (old) logActivity(`Wallet disconnected ${shortAddress(old)}`, 'warn');
   });
 
-  // Restore wallet from storage on init
-  applyWalletFromStorage();
-
-  // Wallet buttons — use toggleWallet for inline buttons only
-  $('#marketSearch').oninput = renderMarketsView;
-
   // ── Init ───────────────────────────────────────
   async function init() {
     renderModeStatus();
@@ -2198,7 +1431,6 @@ input { font: inherit; }
     renderPortfolioView();
     logActivity('BitQuai QDEX terminal loaded', 'info');
 
-    // Connect to backend
     await initQDexClient();
     logActivity(backendReady ? 'Connected to QDEX backend' : 'Demo mode — no backend', backendReady ? 'success' : 'warn');
 
