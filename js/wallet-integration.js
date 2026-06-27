@@ -5,8 +5,11 @@
  * - Fetches real vault balances via backend API
  * - Signs orders using wallet signer
  * - Executes vault approve/deposit/withdraw on-chain
- * - Any Quai wallet (Pelagus, MetaMask with Quai network) works
+ * - ONLY works with Quai Network wallets
+ * - Rejects non-Quai EVM networks to prevent fund loss
  */
+
+const QUAI_CHAIN_IDS = new Set([15000, 15001, 15002, 100, 101, 102]);
 
 class QDexWalletIntegration {
   constructor(qdexClient, options = {}) {
@@ -24,8 +27,29 @@ class QDexWalletIntegration {
   }
 
   /**
+   * Validate wallet is on Quai Network before any operation
+   */
+  async #assertQuaiNetwork() {
+    if (!this.wallet) {
+      throw new Error('Wallet not connected. Please connect your Quai wallet.');
+    }
+
+    const chainId = await this.wallet.provider.request({ method: 'eth_chainId' });
+    const num = parseInt(chainId, 16);
+
+    if (!QUAI_CHAIN_IDS.has(num)) {
+      throw new Error(
+        `NOT ON QUAI NETWORK! Your wallet is on chain ${num}. ` +
+        `Only Quai Network is supported. Please switch to Quai Orchard Cyprus-1 (15000) or Mainnet.`
+      );
+    }
+
+    return num;
+  }
+
+  /**
    * Initialize from wallet-pill.js global
-   * Returns true if wallet is connected
+   * Returns true if wallet is connected and on Quai Network
    */
   async init() {
     if (window.quaiWalletInstance) {
@@ -33,6 +57,7 @@ class QDexWalletIntegration {
       this.signer = window.quaiWalletInstance.getSigner();
       if (this.signer) {
         this.address = this.signer.address;
+        await this.#assertQuaiNetwork();
         return true;
       }
     }
@@ -43,6 +68,9 @@ class QDexWalletIntegration {
         this.signer = signer;
         this.address = signer.address;
         this.wallet = window.quaiWalletInstance || window.getQuaiWallet();
+        if (this.wallet) {
+          await this.#assertQuaiNetwork();
+        }
         return true;
       }
     }
@@ -52,6 +80,7 @@ class QDexWalletIntegration {
 
   /**
    * Connect wallet using QuaiWallet
+   * ONLY connects Quai Network wallets
    */
   async connect() {
     if (!window.QuaiWallet) {
@@ -61,23 +90,25 @@ class QDexWalletIntegration {
     this.wallet = new QuaiWallet({
       chainId: this.chainId,
       networkName: 'Quai Orchard Cyprus-1',
+      rpcUrl: 'https://orchard.rpc.quai.network/cyprus1',
     });
 
     const result = await this.wallet.connect();
     this.signer = this.wallet.getSigner();
     this.address = result.address;
 
+    // Persist
     try {
       localStorage.setItem('bitquai_wallet', JSON.stringify({
         address: this.address,
         provider: 'quai',
-        chainId: this.chainId,
+        chainId: result.chainId,
         networkName: result.networkName,
       }));
     } catch (_) {}
 
     window.dispatchEvent(new CustomEvent('bitquai:wallet-connect', {
-      detail: { address: this.address, provider: 'quai', chainId: this.chainId }
+      detail: { address: this.address, provider: 'quai', chainId: result.chainId }
     }));
 
     return result;
@@ -200,7 +231,8 @@ class QDexWalletIntegration {
    * Approve token for vault deposit
    */
   async approveToken(tokenSymbol, amount) {
-    if (!this.signer) throw new Error('Wallet not connected');
+    await this.#assertQuaiNetwork();
+
     const tokenAddress = this.tokens[tokenSymbol];
     if (!tokenAddress) throw new Error(`Unknown token: ${tokenSymbol}`);
 
@@ -220,7 +252,8 @@ class QDexWalletIntegration {
    * Deposit tokens to vault
    */
   async depositToVault(tokenSymbol, amount) {
-    if (!this.signer) throw new Error('Wallet not connected');
+    await this.#assertQuaiNetwork();
+
     const tokenAddress = this.tokens[tokenSymbol];
     if (!tokenAddress) throw new Error(`Unknown token: ${tokenSymbol}`);
 
@@ -244,7 +277,8 @@ class QDexWalletIntegration {
    * Withdraw tokens from vault
    */
   async withdrawFromVault(tokenSymbol, amount) {
-    if (!this.signer) throw new Error('Wallet not connected');
+    await this.#assertQuaiNetwork();
+
     const tokenAddress = this.tokens[tokenSymbol];
     if (!tokenAddress) throw new Error(`Unknown token: ${tokenSymbol}`);
 
@@ -268,7 +302,7 @@ class QDexWalletIntegration {
    * Sign order for submission
    */
   async signOrder(order) {
-    if (!this.signer) throw new Error('Wallet not connected');
+    await this.#assertQuaiNetwork();
 
     const orderHash = JSON.stringify({
       marketId: order.marketId,
@@ -327,4 +361,5 @@ class QDexWalletIntegration {
   }
 }
 
+// Expose globally
 window.QDexWalletIntegration = QDexWalletIntegration;

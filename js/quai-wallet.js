@@ -1,54 +1,82 @@
 /**
  * Quai Wallet Connector
  * 
- * Connects to Quai wallets (Pelagus, MetaMask with Quai network)
- * Supports both standard Ethereum RPC methods and Quai-specific ones:
- * - quai_requestAccounts instead of eth_requestAccounts
- * - quai_accounts instead of eth_accounts  
- * - quai_signTransaction, quai_sendTransaction
- * - Shard-aware (Cyprus-1 on Orchard testnet)
+ * ONLY allows Quai Network wallets on Quai chains.
+ * Rejects MetaMask on non-Quai EVM networks.
  * 
- * Usage:
- *   const wallet = new QuaiWallet();
- *   await wallet.connect();
- *   const signer = await wallet.getSigner();
- *   const tx = await signer.sendTransaction({...});
+ * Supported wallets:
+ * - Pelagus (Quai native)
+ * - MetaMask configured with Quai network
+ * - Any wallet that reports Quai chain IDs
+ * 
+ * Quai chain IDs:
+ * - 15000 (0x3A98) = Orchard Cyprus-1
+ * - 15001 (0x3A99) = Orchard Cyprus-2
+ * - 15002 (0x3A9A) = Orchard Cyprus-3
+ * - 100   (0x64)   = Mainnet Solana-1
+ * - 101   (0x65)   = Mainnet Solana-2
+ * - 102   (0x66)   = Mainnet Solana-3
  */
 
+const QUAI_CHAIN_IDS = new Set([
+  15000, 15001, 15002, // Orchard testnet
+  100, 101, 102,       // Mainnet
+]);
+
+const QUAI_RPC_URLS = [
+  'https://orchard.rpc.quai.network',
+  'https://rpc.quai.network',
+  'https://api.bitquai.live',
+];
+
+function isQuaiChainId(chainId) {
+  const num = parseInt(chainId, 16) || chainId;
+  return QUAI_CHAIN_IDS.has(num);
+}
+
+function isQuaiProvider(provider) {
+  // Check if provider is on a Quai RPC
+  const url = provider.connection?.url || provider.host || '';
+  return QUAI_RPC_URLS.some(rpc => url.includes(rpc));
+}
+
 class QuaiWallet {
-  constructor({ chainId, networkName } = {}) {
+  constructor({ chainId, networkName, rpcUrl } = {}) {
     this.provider = window.ethereum || window.quai;
-    this.chainId = chainId || 0x3A98; // 15000 = Orchard Cyprus-1
-    this.networkName = networkName || 'Quai Orchard Cyprus-1';
+    this.targetChainId = chainId || 0x3A98; // 15000 = Orchard Cyprus-1
+    this.targetNetworkName = networkName || 'Quai Orchard Cyprus-1';
+    this.targetRpcUrl = rpcUrl || 'https://orchard.rpc.quai.network/cyprus1';
     this.accounts = [];
     this.signer = null;
     this._listeners = {};
   }
 
-  /**
-   * Check if a Quai-compatible wallet is available
-   */
   isWalletAvailable() {
     return !!(this.provider && typeof this.provider.request === 'function');
   }
 
-  /**
-   * Connect to wallet, requesting accounts
-   * Tries Quai-specific method first, falls back to Ethereum standard
-   */
   async connect() {
     if (!this.isWalletAvailable()) {
       throw new Error('No Quai wallet detected. Install Pelagus or add Quai network to MetaMask.');
     }
 
+    // STRICT: Verify we're on a Quai network BEFORE requesting accounts
+    const currentChainId = await this.#getCurrentChainId();
+    
+    if (!isQuaiChainId(currentChainId)) {
+      // Try to switch to Quai network
+      const switched = await this.switchToQuaiNetwork();
+      if (!switched) {
+        throw new Error('Could not switch to Quai Network. Please add Quai network to your wallet manually or use Pelagus wallet.');
+      }
+    }
+
     let accounts;
     try {
-      // Try Quai-specific request method first
       accounts = await this.provider.request({
         method: 'quai_requestAccounts',
       });
     } catch (e) {
-      // Fall back to standard Ethereum method
       try {
         accounts = await this.provider.request({
           method: 'eth_requestAccounts',
@@ -62,7 +90,14 @@ class QuaiWallet {
       throw new Error('No accounts returned from wallet');
     }
 
+    // Final chain ID verification AFTER connection
+    const finalChainId = await this.#getCurrentChainId();
+    if (!isQuaiChainId(finalChainId)) {
+      throw new Error('Wallet is not on Quai Network. Please switch to Quai chain.');
+    }
+
     this.accounts = accounts;
+    this.chainId = finalChainId;
     this.signer = new QuaiSigner(this.provider, accounts[0]);
 
     // Listen for account changes
@@ -77,10 +112,20 @@ class QuaiWallet {
       }
     };
 
-    // Listen for network changes
-    this._onChainChanged = (chainId) => {
-      this.chainId = parseInt(chainId, 16);
-      this._emit('chainChanged', this.chainId);
+    // Listen for network changes - REJECT non-Quai networks
+    this._onChainChanged = async (chainId) => {
+      const num = parseInt(chainId, 16);
+      if (!isQuaiChainId(num)) {
+        // Auto-switch back to Quai or disconnect
+        await this.switchToQuaiNetwork().catch(() => {
+          this._emit('wrongNetwork', num);
+          this.signer = null;
+          this._emit('disconnect');
+        });
+      } else {
+        this.chainId = num;
+        this._emit('chainChanged', this.chainId);
+      }
     };
 
     this.provider.on('accountsChanged', this._onAccountsChanged);
@@ -89,13 +134,21 @@ class QuaiWallet {
     return {
       address: this.accounts[0],
       chainId: this.chainId,
-      networkName: this.networkName,
+      networkName: this.targetNetworkName,
     };
   }
 
-  /**
-   * Get current accounts without requesting (read-only)
-   */
+  async #getCurrentChainId() {
+    try {
+      const chainId = await this.provider.request({
+        method: 'eth_chainId',
+      });
+      return parseInt(chainId, 16);
+    } catch {
+      return this.targetChainId;
+    }
+  }
+
   async getAccounts() {
     if (!this.isWalletAvailable()) {
       return [];
@@ -118,28 +171,25 @@ class QuaiWallet {
     }
   }
 
-  /**
-   * Get signer for the connected account
-   */
   getSigner() {
     return this.signer;
   }
 
-  /**
-   * Sign a message using the wallet
-   */
   async signMessage(message, address) {
+    // Verify chain before signing
+    const chainId = await this.#getCurrentChainId();
+    if (!isQuaiChainId(chainId)) {
+      throw new Error('Not on Quai Network. Cannot sign.');
+    }
+
     return this.provider.request({
       method: 'personal_sign',
       params: [message, address || this.accounts[0]],
     });
   }
 
-  /**
-   * Switch to Quai network
-   */
   async switchToQuaiNetwork() {
-    const quaiChainId = '0x3A98'; // 15000 hex
+    const quaiChainId = `0x${this.targetChainId.toString(16).toUpperCase()}`;
 
     // Try to switch to existing network
     try {
@@ -156,9 +206,9 @@ class QuaiWallet {
             method: 'wallet_addEthereumChain',
             params: [{
               chainId: quaiChainId,
-              chainName: 'Quai Orchard Cyprus-1',
+              chainName: this.targetNetworkName,
               nativeCurrency: { name: 'QI', symbol: 'QI', decimals: 18 },
-              rpcUrls: ['https://orchard.rpc.quai.network/cyprus1'],
+              rpcUrls: [this.targetRpcUrl],
               blockExplorerUrls: ['https://orchard.quaiscan.io'],
             }],
           });
@@ -171,9 +221,6 @@ class QuaiWallet {
     }
   }
 
-  /**
-   * Disconnect and clean up
-   */
   disconnect() {
     if (this.provider) {
       if (this._onAccountsChanged) {
@@ -206,9 +253,6 @@ class QuaiWallet {
   }
 }
 
-/**
- * QuaiSigner — wraps wallet provider for signing transactions
- */
 class QuaiSigner {
   constructor(provider, address) {
     this.provider = provider;
@@ -219,9 +263,6 @@ class QuaiSigner {
     return Promise.resolve(this.address);
   }
 
-  /**
-   * Sign a transaction
-   */
   async signTransaction(tx) {
     const signedTx = await this.provider.request({
       method: 'quai_signTransaction',
@@ -242,9 +283,6 @@ class QuaiSigner {
     return signedTx;
   }
 
-  /**
-   * Sign and send a transaction
-   */
   async sendTransaction(tx) {
     try {
       return await this.provider.request({
@@ -252,7 +290,6 @@ class QuaiSigner {
         params: [tx, this.address],
       });
     } catch (e) {
-      // Fall back to eth_sendTransaction
       return await this.provider.request({
         method: 'eth_sendTransaction',
         params: [tx],
@@ -260,9 +297,6 @@ class QuaiSigner {
     }
   }
 
-  /**
-   * Sign a message
-   */
   async signMessage(message) {
     return this.provider.request({
       method: 'personal_sign',
@@ -274,3 +308,4 @@ class QuaiSigner {
 // Export for use in browser
 window.QuaiWallet = QuaiWallet;
 window.QuaiSigner = QuaiSigner;
+window.isQuaiChainId = isQuaiChainId;

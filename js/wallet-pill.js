@@ -2,13 +2,13 @@
  * Wallet Pill — Shared wallet connection for the topnav pill
  * Loads on all pages: index.html, mining.html, controller_view.html, qdex.html
  *
- * Uses QuaiWallet to connect to Quai wallets (Pelagus, MetaMask with Quai network).
- * Supports quai_requestAccounts, quai_accounts, and shard-aware RPC calls.
- * Persists wallet state in localStorage across pages.
+ * ONLY connects Quai Network wallets (Pelagus, MetaMask with Quai network).
+ * Rejects non-Quai EVM networks to prevent fund loss.
  */
 
 (function () {
   const STORAGE_KEY = 'bitquai_wallet';
+  const QUAI_CHAIN_IDS = [15000, 15001, 15002, 100, 101, 102]; // Orchard + Mainnet
 
   function shortAddress(addr) {
     if (!addr) return '';
@@ -40,9 +40,17 @@
     if (!btn) return;
 
     if (wallet && wallet.address) {
+      // Validate it's still a Quai wallet
+      if (wallet.chainId && !QUAI_CHAIN_IDS.includes(wallet.chainId)) {
+        // Wrong network stored — clear it
+        clearWallet();
+        updatePill(null);
+        return;
+      }
+
       btn.className = 'wallet-btn connected';
       btn.href = '#';
-      btn.title = wallet.address;
+      btn.title = `${wallet.address} (Quai ${wallet.networkName || 'Orchard'})`;
       btn.textContent = shortAddress(wallet.address);
       btn.onclick = function (e) {
         e.preventDefault();
@@ -57,7 +65,7 @@
     } else {
       btn.className = 'wallet-btn';
       btn.href = '#';
-      btn.title = 'Connect your wallet';
+      btn.title = 'Connect your Quai wallet (Pelagus or MetaMask)';
       btn.textContent = 'Connect Wallet';
       btn.onclick = function (e) {
         e.preventDefault();
@@ -66,7 +74,6 @@
     }
   }
 
-  // Global QuaiWallet instance
   let quaiWallet = null;
 
   async function connectWallet() {
@@ -80,12 +87,18 @@
       quaiWallet = new QuaiWallet({
         chainId: 0x3A98, // 15000 = Orchard Cyprus-1
         networkName: 'Quai Orchard Cyprus-1',
+        rpcUrl: 'https://orchard.rpc.quai.network/cyprus1',
       });
 
       const result = await quaiWallet.connect();
 
       if (!result || !result.address) {
         throw new Error('No wallet address returned');
+      }
+
+      // STRICT: Final validation
+      if (!QUAI_CHAIN_IDS.includes(result.chainId)) {
+        throw new Error('Not on Quai Network. Connection rejected.');
       }
 
       const walletData = {
@@ -97,7 +110,7 @@
 
       saveWallet(walletData);
       updatePill(walletData);
-      window.quaiWalletInstance = quaiWallet; // Expose for QDEX SDK
+      window.quaiWalletInstance = quaiWallet;
       window.dispatchEvent(new CustomEvent('bitquai:wallet-connect', { detail: walletData }));
 
       // Listen for account changes
@@ -114,9 +127,22 @@
         window.dispatchEvent(new CustomEvent('bitquai:wallet-disconnect'));
       });
 
+      // WRONG NETWORK handler
+      quaiWallet.on('wrongNetwork', (chainId) => {
+        console.warn('[Wallet] Wrong network detected:', chainId);
+        clearWallet();
+        updatePill(null);
+        window.dispatchEvent(new CustomEvent('bitquai:wallet-wrong-network', { detail: { chainId } }));
+        alert('You switched to a non-Quai network. Wallet disconnected for safety.');
+      });
+
     } catch (err) {
       console.warn('Wallet connect failed:', err);
-      alert('Wallet connection failed: ' + err.message);
+      if (err.message.includes('Quai')) {
+        alert(err.message);
+      } else {
+        alert('Wallet connection failed: ' + err.message);
+      }
     }
   }
 
@@ -134,7 +160,6 @@
 
   window.getWalletSigner = async function () {
     if (!quaiWallet) {
-      // Try to reconnect from storage
       const saved = loadWallet();
       if (saved && saved.address) {
         try {
@@ -144,12 +169,18 @@
           });
           const accounts = await quaiWallet.getAccounts();
           if (accounts && accounts.length > 0) {
+            // Validate chain
+            const chainId = await quaiWallet.provider.request({ method: 'eth_chainId' });
+            if (!QUAI_CHAIN_IDS.includes(parseInt(chainId, 16))) {
+              throw new Error('Not on Quai Network');
+            }
             quaiWallet.accounts = accounts;
             quaiWallet.signer = new QuaiSigner(window.ethereum, accounts[0]);
             return quaiWallet.getSigner();
           }
         } catch (e) {
           console.warn('Failed to restore wallet signer:', e);
+          clearWallet();
         }
       }
       return null;
@@ -157,10 +188,17 @@
     return quaiWallet.getSigner();
   };
 
-  // On page load: restore wallet from localStorage
+  // On page load: restore wallet from localStorage with validation
   function init() {
     const saved = loadWallet();
     if (saved && saved.address) {
+      // Validate stored wallet is Quai
+      if (!QUAI_CHAIN_IDS.includes(saved.chainId)) {
+        clearWallet();
+        updatePill(null);
+        return;
+      }
+
       updatePill(saved);
       window.dispatchEvent(new CustomEvent('bitquai:wallet-restored', { detail: saved }));
 
@@ -177,7 +215,10 @@
               quaiWallet.signer = new QuaiSigner(window.ethereum, accounts[0]);
               window.dispatchEvent(new CustomEvent('bitquai:wallet-restored', { detail: saved }));
             }
-          }).catch(() => {});
+          }).catch(() => {
+            clearWallet();
+            updatePill(null);
+          });
         } catch (e) {
           console.warn('Failed to restore wallet connection:', e);
         }
@@ -187,7 +228,6 @@
     }
   }
 
-  // Run after DOM is ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
