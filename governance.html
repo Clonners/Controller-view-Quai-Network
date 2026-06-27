@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="css/shared.css">
+  <link rel="stylesheet" href="css/brand.min.css">
+  
+  <meta charset="utf-8" />
+  <link rel="preconnect" href="https://bitquai.live">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BitQuai QDEX — Governance</title>
+  <meta name="description" content="QDEX Protocol DAO — Governance dashboard for QDEX on Quai Network.">
+  <meta name="theme-color" content="#ff253a">
+  <link rel="icon" href="icons/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="icons/favicon-48x48.png">
+  <link rel="icon" type="image/png" sizes="64x64" href="icons/favicon-64x64.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon-180x180.png">
+  <link rel="manifest" href="site.webmanifest">
+  <meta property="og:title" content="BitQuai QDEX Governance">
+  <meta property="og:description" content="DAO governance for QDEX non-custodial exchange.">
+  <meta property="og:image" content="https://bitquai.live/assets/brand/bitquai-og-1200x630.png">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://bitquai.live/governance">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="BitQuai QDEX Governance">
+  <meta name="twitter:description" content="DAO governance for QDEX non-custodial exchange.">
+  <meta name="twitter:image" content="https://bitquai.live/assets/brand/bitquai-og-1200x630.png">
+  <style>
+/* ═══════════════════════════════════════════════════
+   QDEX Governance Dashboard
+   ═══════════════════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #050307;
+  --surface:   #12070b;
+  --surface-2: #0a0509;
+  --surface-3: #1a0e15;
+  --border:    #301219;
+  --border-hi: #4a1c2a;
+  --accent:    #ff253a;
+  --accent-soft: rgba(255, 37, 58, 0.18);
+  
+  --text:      #e5e7eb;
+  --text-dim:  #9ca3af;
+  --text-muted:#8b949e;
+  
+  --green:     #4ade80;
+  --green-bg:  rgba(74,222,128,.10);
+  --red:       #ff4b4b;
+  --red-bg:    rgba(255,75,75,.10);
+  --yellow:    #f59e0b;
+  --yellow-bg: rgba(245,158,11,.10);
+  --blue:      #60a5fa;
+  --blue-bg:   rgba(96,165,250,.10);
+  
+  --mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'SF Mono', 'CaskaydiaCove Nerd Font', ui-monospace, Consolas, monospace;
+}
+
+html {
+  background: radial-gradient(circle at top, #2b0005 0, #050307 40%, #020005 80%);
+  color: var(--text);
+  font: 13px/1.5 var(--mono);
+}
+body { min-height: 100vh; display: flex; flex-direction: column; }
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button { font: inherit; cursor: pointer; }
+input { font: inherit; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ── Top Bar ──────────────────────────────────── */
+.topbar {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; gap: 12px;
+  padding: 0 16px; height: 44px;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+}
+.topbar-brand {
+  font-weight: 800; font-size: 15px; letter-spacing: .08em;
+  color: var(--accent); margin-right: 8px;
+}
+.topbar-brand span { color: var(--text-dim); font-weight: 400; }
+
+.topbar-tabs { display: flex; gap: 2px; height: 100%; align-items: stretch; }
+.topbar-tab {
+  padding: 0 14px; display: flex; align-items: center;
+  font-size: 12px; color: var(--text-dim);
+  background: none; border: none; border-bottom: 2px solid transparent;
+  transition: color .15s, border-color .15s;
+}
+.topbar-tab:hover { color: var(--text); }
+.topbar-tab.active { color: var(--text); border-bottom-color: var(--accent); }
+
+.topbar-spacer { flex: 1; }
+
+.topbar-status {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11px; color: var(--text-muted);
+}
+.status-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+}
+.status-dot.mock { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); }
+
+.topbar-wallet {
+  padding: 4px 10px; border-radius: 6px;
+  font-size: 11px; color: var(--text-dim);
+  border: 1px solid var(--border); background: var(--surface-2);
+  cursor: pointer;
+}
+.topbar-wallet:hover { border-color: var(--border-hi); }
+
+/* ── Main Grid ────────────────────────────────── */
+.main {
+  flex: 1; display: grid;
+  grid-template-columns: 280px 1fr 320px;
+  grid-template-rows: auto 1fr auto;
+  gap: 1px; background: var(--border);
+}
+
+/* ── Panels ───────────────────────────────────── */
+.panel {
+  background: var(--surface);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 12px; font-size: 11px; font-weight: 600;
+  color: var(--text-dim); text-transform: uppercase; letter-spacing: .06em;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.panel-header .count {
+  font-weight: 400; color: var(--text-muted);
+}
+.panel-body {
+  flex: 1; overflow-y: auto; overflow-x: auto;
+}
+
+/* ── Proposals List ───────────────────────────── */
+.proposal-item {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 12px; cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: background .1s;
+}
+.proposal-item:hover { background: var(--surface-2); }
+.proposal-item.active { background: var(--surface-3); border-left-color: var(--accent); }
+.proposal-item .id { font-weight: 600; color: var(--text); }
+.proposal-item .title { font-size: 12px; color: var(--text-dim); }
+.proposal-item .meta { display: flex; gap: 8px; font-size: 10px; color: var(--text-muted); }
+
+.status-badge {
+  font-size: 10px; padding: 2px 6px; border-radius: 3px;
+  text-transform: uppercase; letter-spacing: .04em;
+}
+.status-badge.voting { background: var(--blue-bg); color: var(--blue); }
+.status-badge.ready { background: var(--green-bg); color: var(--green); }
+.status-badge.grace { background: var(--yellow-bg); color: var(--yellow); }
+.status-badge.processed { background: var(--green-bg); color: var(--green); }
+.status-badge.cancelled { background: var(--red-bg); color: var(--red); }
+
+/* ── Proposal Detail ──────────────────────────── */
+.proposal-detail {
+  display: flex; flex-direction: column; gap: 12px;
+  padding: 16px;
+}
+.proposal-detail .header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.proposal-detail .title { font-size: 16px; font-weight: 700; color: var(--text); }
+.proposal-detail .meta { display: flex; gap: 12px; font-size: 11px; color: var(--text-muted); }
+
+.vote-bar {
+  display: flex; gap: 1px; height: 8px;
+  background: var(--surface-2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.vote-bar .yes { background: var(--green); }
+.vote-bar .no { background: var(--red); }
+
+.vote-stats {
+  display: flex; gap: 16px;
+}
+.vote-stat {
+  display: flex; flex-direction: column;
+}
+.vote-stat .label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; }
+.vote-stat .value { font-size: 14px; font-weight: 600; }
+.vote-stat .value.green { color: var(--green); }
+.vote-stat .value.red { color: var(--red); }
+
+.vote-buttons {
+  display: flex; gap: 8px;
+  margin-top: 12px;
+}
+.vote-btn {
+  flex: 1; padding: 10px;
+  font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .04em;
+  border: none; border-radius: 6px;
+  transition: opacity .15s;
+}
+.vote-btn.yes { background: var(--green); color: #fff; }
+.vote-btn.no { background: var(--red); color: #fff; }
+.vote-btn:hover { opacity: .85; }
+.vote-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+/* ── Treasury Dashboard ───────────────────────── */
+.treasury-panel {
+  display: flex; flex-direction: column; gap: 12px;
+  padding: 16px;
+}
+.treasury-token {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--surface-2);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+.treasury-token .symbol { font-weight: 600; color: var(--text); }
+.treasury-token .amount { font-variant-numeric: tabular-nums; color: var(--green); }
+.treasury-token .address { font-size: 10px; color: var(--text-muted); }
+
+/* ── Voting Power ─────────────────────────────── */
+.voting-power-panel {
+  display: flex; flex-direction: column; gap: 12px;
+  padding: 16px;
+}
+.voting-power {
+  display: flex; flex-direction: column; gap: 4px;
+}
+.voting-power .label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; }
+.voting-power .value { font-size: 20px; font-weight: 700; color: var(--text); }
+.voting-power .unit { font-size: 12px; color: var(--text-dim); }
+
+.delegate-section {
+  display: flex; flex-direction: column; gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.delegate-input {
+  padding: 8px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 12px;
+}
+.delegate-input:focus { outline: none; border-color: var(--accent); }
+
+.delegate-btn {
+  padding: 8px 12px;
+  background: var(--accent);
+  color: #fff;
+  border: none; border-radius: 6px;
+  font-size: 12px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .04em;
+}
+.delegate-btn:hover { opacity: .85; }
+
+/* ── Navigation ───────────────────────────────── */
+.nav-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px;
+  font-size: 12px; color: var(--text-dim);
+  cursor: pointer; transition: background .1s;
+  border-left: 2px solid transparent;
+}
+.nav-item:hover { background: var(--surface-2); color: var(--text); }
+.nav-item.active { background: var(--surface-3); color: var(--text); border-left-color: var(--accent); }
+.nav-item .icon { width: 16px; text-align: center; }
+
+/* ── Empty State ──────────────────────────────── */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 40px 20px; color: var(--text-muted); font-size: 12px;
+  text-align: center;
+}
+.empty-state .icon { font-size: 28px; margin-bottom: 8px; opacity: .3; }
+.empty-state p { margin-top: 4px; }
+
+/* ── Form Elements ────────────────────────────── */
+.form-group { margin-bottom: 10px; }
+.form-group label {
+  display: block; font-size: 10px; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: .06em;
+  margin-bottom: 4px;
+}
+.input-row {
+  display: flex; align-items: center;
+  border: 1px solid var(--border); border-radius: 6px;
+  background: var(--surface-2); overflow: hidden;
+  transition: border-color .15s;
+}
+.input-row:focus-within { border-color: var(--border-hi); }
+.input-row input {
+  flex: 1; padding: 8px 10px;
+  background: none; border: none; color: var(--text);
+  font-size: 13px; outline: none;
+}
+.input-row input::placeholder { color: var(--text-muted); }
+.input-row .unit {
+  padding: 0 10px; font-size: 11px; color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.submit-btn {
+  width: 100%; padding: 10px;
+  font-size: 13px; font-weight: 700; text-transform: uppercase;
+  border: none; border-radius: 6px;
+  transition: opacity .15s;
+}
+.submit-btn.primary { background: var(--accent); color: #fff; }
+.submit-btn:hover { opacity: .85; }
+.submit-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+/* ── Responsive ───────────────────────────────── */
+@media (max-width: 768px) {
+  .main {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+  }
+}
+</style>
+</head>
+<body>
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="topbar-brand">QDEX <span>Governance</span></div>
+    
+    <div class="topbar-tabs">
+      <button class="topbar-tab active">Proposals</button>
+      <button class="topbar-tab">Treasury</button>
+      <button class="topbar-tab">Members</button>
+    </div>
+    
+    <div class="topbar-spacer"></div>
+    
+    <div class="topbar-status">
+      <div class="status-dot mock"></div>
+      <span>Testnet</span>
+    </div>
+    
+    <button class="topbar-wallet" id="walletBtn">Connect Wallet</button>
+  </div>
+  
+  <!-- Main Grid -->
+  <div class="main">
+    <!-- Left: Navigation -->
+    <div class="panel">
+      <div class="panel-header">Navigation</div>
+      <div class="panel-body">
+        <div class="nav-item active">
+          <span class="icon">📋</span>
+          <span>Proposals</span>
+        </div>
+        <div class="nav-item">
+          <span class="icon">🏛️</span>
+          <span>Treasury</span>
+        </div>
+        <div class="nav-item">
+          <span class="icon">👥</span>
+          <span>Members</span>
+        </div>
+        <div class="nav-item">
+          <span class="icon">📊</span>
+          <span>Analytics</span>
+        </div>
+        <div class="nav-item">
+          <span class="icon">⚙️</span>
+          <span>Settings</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Center: Proposals List -->
+    <div class="panel">
+      <div class="panel-header">
+        <span>Active Proposals</span>
+        <span class="count">0 active</span>
+      </div>
+      <div class="panel-body" id="proposalsList">
+        <div class="empty-state">
+          <div class="icon">📋</div>
+          <p>No proposals yet</p>
+          <p style="margin-top: 8px; font-size: 11px;">Submit the first proposal to start governance</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Right: Voting Power -->
+    <div class="panel">
+      <div class="panel-header">Voting Power</div>
+      <div class="panel-body">
+        <div class="voting-power-panel">
+          <div class="voting-power">
+            <div class="label">Your WQUAI (Shares)</div>
+            <div class="value">0.00</div>
+            <div class="unit">Shares</div>
+          </div>
+          
+          <div class="voting-power">
+            <div class="label">Voting Power</div>
+            <div class="value">0.00</div>
+            <div class="unit">Power</div>
+          </div>
+          
+          <div class="voting-power">
+            <div class="label">Loot (Revenue Share)</div>
+            <div class="value">0.00</div>
+            <div class="unit">Loot</div>
+          </div>
+          
+          <div class="delegate-section">
+            <div class="form-group">
+              <label>Delegate Voting Power</label>
+              <div class="input-row">
+                <input type="text" placeholder="0x..." class="delegate-input">
+              </div>
+            </div>
+            <button class="delegate-btn">Delegate</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Bottom: Treasury -->
+  <div class="panel" style="grid-column: 1 / -1;">
+    <div class="panel-header">
+      <span>Treasury (Quai Vault)</span>
+      <span class="count">3-of-5 multisig</span>
+    </div>
+    <div class="panel-body" style="padding: 16px;">
+      <div class="treasury-panel" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;">
+        <div class="treasury-token">
+          <div>
+            <div class="symbol">QUAI</div>
+            <div class="address">0x00...</div>
+          </div>
+          <div class="amount">0.00</div>
+        </div>
+        <div class="treasury-token">
+          <div>
+            <div class="symbol">WQI</div>
+            <div class="address">0x00...</div>
+          </div>
+          <div class="amount">0.00</div>
+        </div>
+        <div class="treasury-token">
+          <div>
+            <div class="symbol">USDT</div>
+            <div class="address">0x00...</div>
+          </div>
+          <div class="amount">0.00</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

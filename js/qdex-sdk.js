@@ -335,6 +335,10 @@ export class QDexClient {
     };
 
     this.proofs = {
+      list: async (limit = 50) => {
+        const params = limit ? `?limit=${limit}` : '';
+        return this.#requestOk(`/v1/proofs${params}`);
+      },
       trade: async (tradeId) => this.#requestOk(`/v1/proofs/trades/${encodeURIComponent(tradeId)}`),
     };
 
@@ -359,6 +363,30 @@ export class QDexClient {
         method: 'DELETE',
         body: request,
         expectedStatus: 501,
+      }),
+    };
+
+    // Real network endpoints (read from chain)
+    // Real vault operations (on-chain)
+    this.vaultReal = {
+      balances: {
+        get: async (owner, token) => this.#requestOk(`/v1/vault/balances/real?owner=${encodeURIComponent(owner)}&token=${encodeURIComponent(token)}`),
+        getAll: async (owner) => {
+          const params = new URLSearchParams({ owner });
+          return this.#requestOk(`/v1/vault/balances/real?${params.toString()}`);
+        },
+      },
+      approve: async (token, amount) => this.#requestOk('/v1/vault/approve', {
+        method: 'POST',
+        body: { token, amount },
+      }),
+      deposit: async (owner, token, amount) => this.#requestOk('/v1/vault/deposits/prepare', {
+        method: 'POST',
+        body: { owner, token, amount },
+      }),
+      withdraw: async (owner, token, amount) => this.#requestOk('/v1/vault/withdrawals/prepare', {
+        method: 'POST',
+        body: { owner, token, amount },
       }),
     };
 

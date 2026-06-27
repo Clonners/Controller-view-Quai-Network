@@ -2137,15 +2137,40 @@ input { font: inherit; }
   }
 
   // Listen for global wallet events from wallet-pill.js
-  window.addEventListener('bitquai:wallet-connect', function (e) {
+  // QDEX wallet integration instance
+  let qdexWallet;
+  if (window.QDexWalletIntegration && qdexClient) {
+    qdexWallet = new QDexWalletIntegration(qdexClient, {
+      onBalanceUpdate: (balances) => { state.balances = balances; renderWalletUI(); },
+    });
+  }
+
+  window.addEventListener('bitquai:wallet-connect', async function (e) {
     if (e.detail && e.detail.address) {
       state.wallet = e.detail.address;
-      state.walletProvider = e.detail.provider || 'metamask';
-      state.balances = [
-        { token: 'WQUAI', available: '1,250.00', locked: '0' },
-        { token: 'WQI', available: '8,432.50', locked: '0' },
-        { token: 'USDT', available: '5,000.00', locked: '0' },
-      ];
+      state.walletProvider = e.detail.provider || 'quai';
+      
+      // Fetch real vault balances
+      logActivity(`Wallet connected ${shortAddress(state.wallet)} — fetching balances...`, 'info');
+      
+      if (qdexWallet) {
+        try {
+          await qdexWallet.init();
+          const balances = await qdexWallet.getAllVaultBalances();
+          state.balances = balances.map(b => ({
+            token: b.token,
+            available: b.available || '0',
+            locked: b.locked || '0',
+          }));
+          logActivity(`Wallet balances loaded (${state.balances.length} tokens)`, 'success');
+        } catch (err) {
+          logActivity(`Balance fetch failed: ${err.message}`, 'warn');
+          state.balances = [];
+        }
+      } else {
+        state.balances = [];
+      }
+      
       renderWalletUI();
       logActivity(`Wallet connected ${shortAddress(state.wallet)}`, 'success');
     }
@@ -2195,5 +2220,6 @@ input { font: inherit; }
 </script>
 <script src="js/quai-wallet.js"></script>
 <script src="js/wallet-pill.js"></script>
+<script src="js/wallet-integration.js"></script>
 </body>
 </html>
