@@ -827,10 +827,8 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
     if (log.children.length > 50) log.removeChild(log.lastChild);
   }
 
-  // Same-origin detection: if running on dex.bitquai.live, use relative /api path
-  const API_BASE_URL = location.hostname.includes('dex.bitquai.live')
-    ? '/api'
-    : 'https://api.bitquai.live';
+  // API base URL — same as controller uses prime.bitquai.live
+  const API_BASE_URL = 'https://api.bitquai.live';
 
   async function api(path) {
     try {
