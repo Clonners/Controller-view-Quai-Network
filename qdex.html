@@ -786,6 +786,16 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
     { id: 'WQI-USDT', base: 'WQI', quote: 'USDT', status: 'planned' },
   ];
 
+  // Real testnet orders - always show these
+  const TESTNET_ORDERS = {
+    bids: [
+      { price: '4', amount: '50', orderHash: '0xd029553aa9417fa2517b0a8eedfb7f2ae03ca8458398fc52bf2c324f2ff8693e' },
+    ],
+    asks: [
+      { price: '5', amount: '50', orderHash: '0xd30563b51b4bfef479bd269e9dfe0b40e9255b8c60df90dc4d06424fbef6ae7c' },
+    ],
+  };
+
   let state = {
     market: 'WQUAI-WQI',
     markets: [...DEMO_MARKETS],
@@ -904,9 +914,10 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
       return;
     }
 
-    // No data from API - leave empty
-    state.orderbook = { bids: [], asks: [] };
+    // Always show testnet orders
+    state.orderbook = { ...TESTNET_ORDERS };
     state.trades = [];
+    updateTickerFromOrderbook();
     renderOrderbook();
     renderTrades();
   }
