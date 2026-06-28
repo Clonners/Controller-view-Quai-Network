@@ -915,7 +915,7 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
     }
 
     // Always show testnet orders
-    state.orderbook = { ...TESTNET_ORDERS };
+    state.orderbook = { bids: [...TESTNET_ORDERS.bids], asks: [...TESTNET_ORDERS.asks] };
     state.trades = [];
     updateTickerFromOrderbook();
     renderOrderbook();
