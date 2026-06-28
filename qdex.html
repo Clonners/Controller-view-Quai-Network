@@ -544,7 +544,7 @@ input { font: inherit; }
 <body>
 <!-- Shared Navigation Pill -->
 <nav class="topnav" aria-label="Primary navigation">
-  <a class="brand" href="index.html" aria-label="BitQuai home - Order inside entropy">
+  <a class="brand" href="https://proxy.bitquai.live/" aria-label="BitQuai home - Order inside entropy">
     <picture><source src="assets/brand/bitquai-icon-q-256.webp" type="image/webp"><img src="assets/brand/bitquai-icon-q-256.png" alt="BitQuai Q mark" width="256" height="256" decoding="async" loading="eager" fetchpriority="high"></picture>
     <span class="brand-text">
       <strong>BitQuai</strong>
@@ -552,9 +552,9 @@ input { font: inherit; }
     </span>
   </a>
   <div class="navlinks">
-    <a href="index.html">Home</a>
-    <a href="mining.html">Mining</a>
-    <a href="controller_view.html">Controller</a>
+    <a href="https://proxy.bitquai.live/">Home</a>
+    <a href="https://proxy.bitquai.live/mining.html">Mining</a>
+    <a href="https://proxy.bitquai.live/controller_view.html">Controller</a>
     <span class="active">QDEX</span>
     <a href="#wallet" class="wallet-btn">Connect Wallet</a>
   </div>
@@ -786,16 +786,6 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
     { id: 'WQI-USDT', base: 'WQI', quote: 'USDT', status: 'planned' },
   ];
 
-  // Real testnet orders - always show these
-  const TESTNET_ORDERS = {
-    bids: [
-      { price: '4', amount: '50', orderHash: '0xd029553aa9417fa2517b0a8eedfb7f2ae03ca8458398fc52bf2c324f2ff8693e' },
-    ],
-    asks: [
-      { price: '5', amount: '50', orderHash: '0xd30563b51b4bfef479bd269e9dfe0b40e9255b8c60df90dc4d06424fbef6ae7c' },
-    ],
-  };
-
   let state = {
     market: 'WQUAI-WQI',
     markets: [...DEMO_MARKETS],
@@ -839,7 +829,7 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
 
   async function api(path) {
     try {
-      const res = await fetch(`https://proxy.bitquai.live/qdex-api${path}`);
+      const res = await fetch(`/api${path}`);
       const text = await res.text();
       return text ? JSON.parse(text) : null;
     } catch (e) {
@@ -861,7 +851,7 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
   // ── QDexClient ─────────────────────────────────
   async function initQDexClient() {
     try {
-      qdexClient = new QDexClient({ baseUrl: "https://proxy.bitquai.live/qdex-api" });
+      qdexClient = new QDexClient({ baseUrl: "/api" });
       backendReady = true;
       state.backendReady = true;
       logActivity('QDEX SDK initialized', 'success');
@@ -914,10 +904,7 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
       return;
     }
 
-    // Always show testnet orders
-    state.orderbook = { bids: [...TESTNET_ORDERS.bids], asks: [...TESTNET_ORDERS.asks] };
-    state.trades = [];
-    updateTickerFromOrderbook();
+    // No data from API - orderbook stays empty
     renderOrderbook();
     renderTrades();
   }
