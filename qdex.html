@@ -829,7 +829,7 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
 
   async function api(path) {
     try {
-      const res = await fetch(`https://proxy.bitquai.live/qdex-api${path}`);
+      const res = await fetch(`https://190.137.254.252:8787${path}`);
       const text = await res.text();
       return text ? JSON.parse(text) : null;
     } catch (e) {
