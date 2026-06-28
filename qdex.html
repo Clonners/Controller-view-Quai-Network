@@ -89,10 +89,8 @@ input { font: inherit; }
   display: flex; align-items: center; gap: 12px;
   padding: 0 16px; height: 44px;
   background: var(--surface); border-bottom: 1px solid var(--border);
-  margin-top: 60px; /* Space for shared topnav */
-}
-@media (max-width: 640px) {
-  .qdex-topbar { margin-top: 80px; height: 40px; }
+  margin: 0 auto 24px auto;
+  max-width: 940px;
 }
 .qdex-topbar-brand {
   font-weight: 800; font-size: 15px; letter-spacing: .08em;
@@ -606,13 +604,7 @@ input { font: inherit; }
       <button class="qdex-interval-btn" data-interval="1d">1d</button>
     </div>
     <div class="qdex-chart-container">
-      <div class="tv-chart" id="tvChart">
-        <div class="qdex-empty-state">
-          <div class="icon">📊</div>
-          <p>No trading data yet</p>
-          <p style="font-size:10px;margin-top:8px;color:var(--text-muted)">Chart will appear after trades</p>
-        </div>
-      </div>
+      <div class="tv-chart" id="tvChart"></div>
     </div>
   </div>
 
@@ -795,20 +787,6 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
     { id: 'WQI-USDT', base: 'WQI', quote: 'USDT', status: 'planned' },
   ];
 
-  // Demo orderbook data for fallback
-  const DEMO_ORDERBOOK = {
-    bids: [
-      { price: '4', amount: '50' },
-      { price: '3.5', amount: '30' },
-      { price: '3', amount: '20' }
-    ],
-    asks: [
-      { price: '5', amount: '50' },
-      { price: '5.5', amount: '25' },
-      { price: '6', amount: '15' }
-    ]
-  };
-
   let state = {
     market: 'WQUAI-WQI',
     markets: [...DEMO_MARKETS],
@@ -927,13 +905,11 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
       return;
     }
 
-    // Fallback to demo data
-    state.orderbook = { ...DEMO_ORDERBOOK };
+    // No data from API - leave empty
+    state.orderbook = { bids: [], asks: [] };
     state.trades = [];
-    updateTickerFromOrderbook();
     renderOrderbook();
     renderTrades();
-    logActivity('Using demo orderbook data', 'warn');
   }
 
   function updateTickerFromOrderbook() {
