@@ -794,7 +794,7 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
 
   async function api(path) {
     try {
-      const res = await fetch(`https://proxy.bitquai.live/qdex-api${path}`);
+      const res = await fetch(`/api${path}`);
       const text = await res.text();
       return text ? JSON.parse(text) : null;
     } catch {
@@ -815,7 +815,7 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
   // ── QDexClient ─────────────────────────────────
   async function initQDexClient() {
     try {
-      qdexClient = new QDexClient({ baseUrl: 'https://proxy.bitquai.live/qdex-api' });
+      qdexClient = new QDexClient({ baseUrl: '/api' });
       backendReady = true;
       state.backendReady = true;
       logActivity('QDEX SDK initialized', 'success');
