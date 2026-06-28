@@ -827,9 +827,14 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
     if (log.children.length > 50) log.removeChild(log.lastChild);
   }
 
+  // Same-origin detection: if running on dex.bitquai.live, use relative /api path
+  const API_BASE_URL = location.hostname.includes('dex.bitquai.live')
+    ? '/api'
+    : 'https://api.bitquai.live';
+
   async function api(path) {
     try {
-      const res = await fetch(`https://api.bitquai.live${path}`);
+      const res = await fetch(`${API_BASE_URL}${path}`);
       const text = await res.text();
       return text ? JSON.parse(text) : null;
     } catch (e) {
@@ -851,10 +856,10 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
   // ── QDexClient ─────────────────────────────────
   async function initQDexClient() {
     try {
-      qdexClient = new QDexClient({ baseUrl: "https://api.bitquai.live" });
+      qdexClient = new QDexClient({ baseUrl: API_BASE_URL });
       backendReady = true;
       state.backendReady = true;
-      logActivity('QDEX SDK initialized', 'success');
+      logActivity('QDEX SDK initialized (base=' + API_BASE_URL + ')', 'success');
     } catch (e) {
       console.warn('[QDEX] SDK init failed:', e.message);
       backendReady = false;
