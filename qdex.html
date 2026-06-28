@@ -544,7 +544,7 @@ input { font: inherit; }
 <body>
 <!-- Shared Navigation Pill -->
 <nav class="topnav" aria-label="Primary navigation">
-  <a class="brand" href="https://proxy.bitquai.live/" aria-label="BitQuai home - Order inside entropy">
+  <a class="brand" href="https://bitquai.live/" aria-label="BitQuai home - Order inside entropy">
     <picture><source src="assets/brand/bitquai-icon-q-256.webp" type="image/webp"><img src="assets/brand/bitquai-icon-q-256.png" alt="BitQuai Q mark" width="256" height="256" decoding="async" loading="eager" fetchpriority="high"></picture>
     <span class="brand-text">
       <strong>BitQuai</strong>
@@ -829,7 +829,7 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
 
   async function api(path) {
     try {
-      const res = await fetch(`/api${path}`);
+      const res = await fetch(`https://api.bitquai.live${path}`);
       const text = await res.text();
       return text ? JSON.parse(text) : null;
     } catch (e) {
@@ -851,7 +851,7 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
   // ── QDexClient ─────────────────────────────────
   async function initQDexClient() {
     try {
-      qdexClient = new QDexClient({ baseUrl: "/api" });
+      qdexClient = new QDexClient({ baseUrl: "https://api.bitquai.live" });
       backendReady = true;
       state.backendReady = true;
       logActivity('QDEX SDK initialized', 'success');
