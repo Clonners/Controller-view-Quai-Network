@@ -503,28 +503,58 @@ input { font: inherit; }
 .wallet-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
 
 /* ── Responsive ───────────────────────────────── */
-@media (max-width: 1024px) {
+@media (max-width: 900px) {
   .main {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto;
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto !important;
   }
-  .chart-row { grid-column: 1; }
+  .main > .panel { grid-column: 1 !important; grid-row: auto !important; }
+  .chart-row { grid-column: 1 !important; }
   .bottom-grid { grid-template-columns: 1fr; }
-  .ticker-strip { gap: 12px; }
+  .ticker-strip { gap: 10px; }
   .topbar-wallet { max-width: 100px; }
 }
 
 @media (max-width: 640px) {
-  .topbar { padding: 0 8px; }
-  .topbar-brand { font-size: 13px; }
-  .topbar-tab { padding: 0 8px; font-size: 10px; }
-  .ticker-strip { gap: 4px; padding: 4px 8px; flex-wrap: wrap; }
+  .topbar { padding: 0 8px; height: 40px; }
+  .topbar-brand { font-size: 12px; }
+  .topbar-tab { padding: 0 6px; font-size: 10px; }
+  .ticker-strip { gap: 6px; padding: 4px 8px; flex-wrap: wrap; height: auto; }
   .ticker-stat { flex-direction: row; gap: 4px; }
   .ticker-stat label { display: none; }
   .topbar-wallet { max-width: 80px; padding: 3px 6px; font-size: 10px; }
-  .trade-form-panel { padding: 8px; }
+  .trade-form-panel { padding: 10px; }
   .input-row input { font-size: 16px; } /* Prevent zoom on iOS */
   .bottom-grid { min-height: 100px; }
+
+  /* Mobile: markets list horizontal scroll */
+  .markets-list {
+    display: flex; gap: 6px; overflow-x: auto; padding: 6px 8px;
+  }
+  .market-item {
+    flex-shrink: 0; padding: 5px 10px; border-radius: 6px;
+    border: 1px solid var(--border); font-size: 11px;
+  }
+  .market-item.active { border-color: var(--accent); background: var(--accent-soft); }
+
+  /* Mobile: chart always visible at 200px */
+  .chart-container { height: 200px !important; }
+
+  /* Mobile: orderbook compact */
+  .ob-table { font-size: 11px; min-width: unset; }
+  .ob-table th, .ob-table td { padding: 2px 8px; }
+
+  /* Mobile: trade form stacked */
+  .side-tabs { margin-bottom: 8px; }
+  .slider-row { margin-bottom: 8px; }
+
+  /* Mobile: bottom panels compact */
+  .bottom-panel { max-height: 250px; }
+  .panel-header { padding: 6px 10px; font-size: 10px; }
+
+  /* Mobile: trade history compact */
+  .trades-table { font-size: 10px; min-width: 280px; }
+  .trades-table th, .trades-table td { padding: 2px 8px; }
 }
   </style>
 </head>
