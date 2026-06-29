@@ -185,7 +185,7 @@ export class QDexClient {
     }
 
     this.baseUrl = trimTrailingSlash(baseUrl);
-    this.fetch = fetchImpl;
+    this.fetch = fetchImpl.bind(globalThis);
     this.WebSocket = WebSocketImpl;
 
     // Mock endpoints
