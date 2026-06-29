@@ -5,36 +5,20 @@
   <link rel="stylesheet" href="css/brand.min.css">
 
   <meta charset="utf-8" />
-  <!-- P3.6: Preconnect to external origins -->
   <link rel="preconnect" href="https://bitquai.live">
   <link rel="preconnect" href="https://github.com">
-  <!-- P3.14: DNS-prefetch for RPC endpoints -->
   <link rel="dns-prefetch" href="https://dpool.bitquai.live">
   <link rel="dns-prefetch" href="https://proxy.bitquai.live">
   <link rel="dns-prefetch" href="https://prime.bitquai.live">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>BitQuai QDEX</title>
-  <meta name="description" content="BitQuai QDEX — terminal-style non-custodial exchange UI for Quai.">
+  <meta name="description" content="BitQuai QDEX — non-custodial orderbook DEX on Quai Network.">
   <meta name="theme-color" content="#ff253a">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="icon" href="icons/favicon.ico" sizes="any">
   <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="48x48" href="icons/favicon-48x48.png">
-  <link rel="icon" type="image/png" sizes="64x64" href="icons/favicon-64x64.png">
   <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon-180x180.png">
   <link rel="manifest" href="site.webmanifest">
-  <meta property="og:title" content="BitQuai QDEX">
-  <meta property="og:description" content="Order inside entropy.">
-  <meta property="og:image" content="https://bitquai.live/assets/brand/bitquai-og-1200x630.png">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://bitquai.live/">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="BitQuai QDEX">
-  <meta name="twitter:description" content="Order inside entropy.">
-  <meta name="twitter:image" content="https://bitquai.live/assets/brand/bitquai-og-1200x630.png">
   <style>
 /* ═══════════════════════════════════════════════════
    QDEX — Terminal Exchange UI
@@ -43,7 +27,6 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* BitQuai burgundy — unificado con Mining/Controller */
   --bg:        #050307;
   --surface:   #12070b;
   --surface-2: #0a0509;
@@ -66,7 +49,7 @@
   --blue:      #60a5fa;
   --blue-bg:   rgba(96,165,250,.10);
 
-  --mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'SF Mono', 'CaskaydiaCove Nerd Font', ui-monospace, Consolas, monospace;
+  --mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'SF Mono', ui-monospace, Consolas, monospace;
 }
 
 html {
@@ -89,26 +72,21 @@ input { font: inherit; }
   display: flex; align-items: center; gap: 12px;
   padding: 0 16px; height: 44px;
   background: var(--surface); border-bottom: 1px solid var(--border);
-  margin: 0;
 }
 .qdex-topbar-brand {
   font-weight: 800; font-size: 15px; letter-spacing: .08em;
   color: var(--accent); margin-right: 8px;
 }
 .qdex-topbar-brand span { color: var(--text-dim); font-weight: 400; }
-
 .qdex-topbar-tabs { display: flex; gap: 2px; height: 100%; align-items: stretch; }
 .qdex-topbar-tab {
   padding: 0 14px; display: flex; align-items: center;
   font-size: 12px; color: var(--text-dim);
   background: none; border: none; border-bottom: 2px solid transparent;
-  transition: color .15s, border-color .15s;
 }
 .qdex-topbar-tab:hover { color: var(--text); }
 .qdex-topbar-tab.active { color: var(--text); border-bottom-color: var(--accent); }
-
 .qdex-topbar-spacer { flex: 1; }
-
 .qdex-topbar-status {
   display: flex; align-items: center; gap: 8px;
   font-size: 11px; color: var(--text-muted);
@@ -118,7 +96,7 @@ input { font: inherit; }
   background: var(--green);
   box-shadow: 0 0 6px var(--green);
 }
-.qdex-status-dot.mock { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); }
+.qdex-status-dot.offline { background: var(--red); box-shadow: 0 0 6px var(--red); }
 
 /* ── Ticker Strip ──────────────────────────────── */
 .qdex-ticker-strip {
@@ -159,43 +137,10 @@ input { font: inherit; }
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
-.qdex-panel-header .count {
-  font-weight: 400; color: var(--text-muted);
-}
-.qdex-panel-body {
-  flex: 1; overflow-y: auto; overflow-x: auto;
-}
-
-/* ── Chart ─────────────────────────────────────── */
-.qdex-chart-row {
-  grid-column: 2; background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  display: flex; flex-direction: column;
-  flex-shrink: 0;
-}
-.qdex-chart-container {
-  width: 100%; height: 280px; position: relative;
-  contain: layout;
-}
-.qdex-chart-container .tv-chart { width: 100%; height: 100%; }
-.qdex-chart-intervals {
-  display: flex; gap: 2px; padding: 4px 12px;
-  border-bottom: 1px solid var(--border);
-}
-.qdex-interval-btn {
-  padding: 3px 8px; font-size: 10px;
-  color: var(--text-muted); background: none;
-  border: 1px solid transparent; border-radius: 3px;
-  text-transform: uppercase; letter-spacing: .04em;
-}
-.qdex-interval-btn:hover { color: var(--text-dim); }
-.qdex-interval-btn.active {
-  color: var(--text); background: var(--surface-3);
-  border-color: var(--border);
-}
+.qdex-panel-header .count { font-weight: 400; color: var(--text-muted); }
+.qdex-panel-body { flex: 1; overflow-y: auto; overflow-x: auto; }
 
 /* ── Markets List ──────────────────────────────── */
-.qdex-markets-list { }
 .qdex-market-item {
   display: flex; align-items: center; justify-content: space-between;
   padding: 7px 12px; cursor: pointer;
@@ -211,7 +156,7 @@ input { font: inherit; }
 }
 
 /* ── Orderbook ─────────────────────────────────── */
-.qdex-ob-table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 280px; }
+.qdex-ob-table { width: 100%; border-collapse: collapse; font-size: 12px; }
 .qdex-ob-table th {
   position: sticky; top: 0; z-index: 1;
   padding: 5px 12px; text-align: right;
@@ -223,7 +168,6 @@ input { font: inherit; }
 .qdex-ob-table td {
   padding: 2px 12px; text-align: right;
   font-variant-numeric: tabular-nums;
-  position: relative;
 }
 .qdex-ob-table td:first-child { text-align: left; }
 .qdex-ob-table tr.ask td { color: var(--red); }
@@ -242,7 +186,7 @@ input { font: inherit; }
 .qdex-ob-depth-bar.bid { background: var(--green); }
 
 /* ── Trade History ─────────────────────────────── */
-.qdex-trades-table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 320px; }
+.qdex-trades-table { width: 100%; border-collapse: collapse; font-size: 12px; }
 .qdex-trades-table th {
   position: sticky; top: 0; z-index: 1;
   padding: 5px 12px; text-align: right;
@@ -260,8 +204,7 @@ input { font: inherit; }
 .qdex-trade-side.sell { color: var(--red); }
 
 /* ── Trade Form ────────────────────────────────── */
-.qdex-trade-form-panel { padding: 12px; contain: layout; }
-
+.qdex-trade-form-panel { padding: 12px; }
 .qdex-side-tabs { display: flex; gap: 4px; margin-bottom: 12px; }
 .qdex-side-tab {
   flex: 1; padding: 8px; text-align: center;
@@ -273,7 +216,6 @@ input { font: inherit; }
 .qdex-side-tab.buy.active { color: #fff; background: var(--green); border-color: var(--green); }
 .qdex-side-tab.sell { color: var(--text-dim); }
 .qdex-side-tab.sell.active { color: #fff; background: var(--red); border-color: var(--red); }
-
 .qdex-order-type-tabs { display: flex; gap: 2px; margin-bottom: 12px; }
 .qdex-order-type-tab {
   padding: 4px 10px; font-size: 11px;
@@ -281,7 +223,6 @@ input { font: inherit; }
   border-radius: 4px;
 }
 .qdex-order-type-tab.active { color: var(--text); background: var(--surface-3); }
-
 .qdex-form-group { margin-bottom: 10px; }
 .qdex-form-group label {
   display: block; font-size: 10px; color: var(--text-muted);
@@ -292,7 +233,6 @@ input { font: inherit; }
   display: flex; align-items: center;
   border: 1px solid var(--border); border-radius: 6px;
   background: var(--surface-2); overflow: hidden;
-  transition: border-color .15s;
 }
 .qdex-input-row:focus-within { border-color: var(--border-hi); }
 .qdex-input-row input {
@@ -300,18 +240,14 @@ input { font: inherit; }
   background: none; border: none; color: var(--text);
   font-size: 13px; outline: none;
 }
-.qdex-input-row input::placeholder { color: var(--text-muted); }
 .qdex-input-row .unit {
   padding: 0 10px; font-size: 11px; color: var(--text-muted);
-  white-space: nowrap;
 }
 .qdex-input-row .step-btn {
   width: 28px; height: 100%; display: flex; align-items: center; justify-content: center;
   background: none; border: none; color: var(--text-muted);
   font-size: 14px; cursor: pointer;
 }
-.qdex-input-row .step-btn:hover { color: var(--text); background: var(--surface-3); }
-
 .qdex-slider-row { display: flex; gap: 4px; margin-bottom: 12px; }
 .qdex-pct-btn {
   flex: 1; padding: 5px; font-size: 11px;
@@ -319,7 +255,6 @@ input { font: inherit; }
   border: 1px solid var(--border); border-radius: 4px;
 }
 .qdex-pct-btn:hover { color: var(--text); border-color: var(--border-hi); }
-
 .qdex-form-total {
   display: flex; justify-content: space-between;
   padding: 8px 0; font-size: 12px;
@@ -327,23 +262,18 @@ input { font: inherit; }
   margin-top: 4px; margin-bottom: 12px;
 }
 .qdex-form-total .amount { color: var(--text); font-weight: 600; }
-
 .qdex-submit-btn {
   width: 100%; padding: 10px;
   font-size: 13px; font-weight: 700; text-transform: uppercase;
   border: none; border-radius: 6px;
-  transition: opacity .15s;
 }
 .qdex-submit-btn.buy { background: var(--green); color: #fff; }
 .qdex-submit-btn.sell { background: var(--red); color: #fff; }
-.qdex-submit-btn:hover { opacity: .85; }
 .qdex-submit-btn:disabled { opacity: .4; cursor: not-allowed; }
-
 .qdex-form-balance {
   text-align: right; font-size: 11px; color: var(--text-muted);
   margin-top: 8px;
 }
-.qdex-form-balance span { color: var(--text-dim); }
 
 /* ── Bottom Panels ─────────────────────────────── */
 .qdex-bottom-panels { grid-column: 1 / -1; }
@@ -354,68 +284,26 @@ input { font: inherit; }
   min-height: 150px;
 }
 .qdex-bottom-panel { background: var(--surface); }
-
 .qdex-tab-bar {
   display: flex; gap: 0;
   padding: 0 12px; border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
 }
 .qdex-tab-item {
   padding: 8px 14px; font-size: 11px; font-weight: 600;
   color: var(--text-muted); background: none; border: none;
   border-bottom: 2px solid transparent;
-  text-transform: uppercase; letter-spacing: .05em;
-  transition: color .15s, border-color .15s;
 }
-.qdex-tab-item:hover { color: var(--text-dim); }
 .qdex-tab-item.active { color: var(--text); border-bottom-color: var(--accent); }
-
 .qdex-tab-content { flex: 1; overflow-y: auto; }
 .qdex-tab-pane { display: none; }
 .qdex-tab-pane.active { display: block; }
-
-.qdex-orders-table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 400px; }
-.qdex-orders-table th {
-  position: sticky; top: 0;
-  padding: 5px 12px; text-align: left;
-  font-size: 10px; color: var(--text-muted);
-  text-transform: uppercase; letter-spacing: .06em;
-  background: var(--surface);
-}
-.qdex-orders-table td {
-  padding: 5px 12px;
-  font-variant-numeric: tabular-nums;
-  border-top: 1px solid var(--border);
-}
-.qdex-cancel-btn {
-  padding: 2px 8px; font-size: 10px;
-  color: var(--text-muted); background: var(--surface-2);
-  border: 1px solid var(--border); border-radius: 3px;
-}
-.qdex-cancel-btn:hover { color: var(--red); border-color: var(--red); }
-
-/* ── Balances ──────────────────────────────────── */
-.qdex-balance-row {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 7px 12px; border-bottom: 1px solid var(--border);
-  font-size: 12px;
-}
-.qdex-balance-row:last-child { border-bottom: none; }
-.qdex-balance-token { font-weight: 600; }
-.qdex-balance-amount { font-variant-numeric: tabular-nums; }
-.qdex-balance-available { color: var(--green); }
-.qdex-balance-locked { color: var(--yellow); font-size: 11px; }
-
-/* ── Empty State ───────────────────────────────── */
 .qdex-empty-state {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 40px 20px; color: var(--text-muted); font-size: 12px;
-  text-align: center;
+  padding: 40px 20px; color: var(--text-muted); font-size: 12px; text-align: center;
 }
 .qdex-empty-state .icon { font-size: 28px; margin-bottom: 8px; opacity: .3; }
-.qdex-empty-state p { margin-top: 4px; }
 
-/* ── Log / Activity ────────────────────────────── */
+/* ── Activity Log ──────────────────────────────── */
 .qdex-log-entry {
   padding: 4px 12px; font-size: 11px; color: var(--text-muted);
   border-bottom: 1px solid rgba(39,39,42,.5);
@@ -426,67 +314,6 @@ input { font: inherit; }
 .qdex-log-entry.warn { color: var(--yellow); }
 .qdex-log-entry.error { color: var(--red); }
 
-/* ── View Switching ────────────────────────────── */
-.qdex-mode-strip { display: none; }
-.qdex-mode-pill {
-  display: inline-flex; align-items: center; gap: 7px;
-  padding: 4px 9px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,37,58,.22);
-  background: rgba(255,37,58,.10);
-  color: var(--accent);
-  font-weight: 700;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-}
-.qdex-mode-pill.live { color: var(--green); border-color: rgba(74,222,128,.28); background: rgba(74,222,128,.08); }
-.qdex-view-container { flex: 1; display: flex; flex-direction: column; min-height: 0; }
-.qdex-view-container.hidden { display: none; }
-.qdex-view-page {
-  flex: 1;
-  padding: 16px;
-  background:
-    radial-gradient(circle at 12% 0%, rgba(255,37,58,.14), transparent 28%),
-    var(--bg);
-  overflow: auto;
-}
-.qdex-view-page-header {
-  display: flex; align-items: flex-end; justify-content: space-between; gap: 16px;
-  margin-bottom: 14px;
-}
-.qdex-view-page-kicker {
-  color: var(--accent);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  margin-bottom: 4px;
-}
-.qdex-view-page h2 { font-size: 24px; line-height: 1.1; letter-spacing: -.03em; }
-.qdex-view-page-subtitle { color: var(--text-dim); font-size: 12px; max-width: 620px; }
-.qdex-view-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-.qdex-view-card {
-  background: linear-gradient(180deg, rgba(18,7,11,.96), rgba(10,5,9,.95));
-  border: 1px solid rgba(255,37,58,.16);
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 20px 55px rgba(0,0,0,.32);
-}
-.qdex-view-card-header {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--border);
-  color: var(--text-dim);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-}
-.qdex-view-card-body { padding: 12px; }
-.qdex-wallet-address { font-weight: 600; font-size: 13px; }
-.qdex-wallet-meta { color: var(--text-muted); }
-.qdex-wallet-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-
 /* ── Responsive ────────────────────────────────── */
 @media (max-width: 900px) {
   .qdex-main {
@@ -494,69 +321,23 @@ input { font: inherit; }
     grid-template-rows: auto !important;
   }
   .qdex-main > .qdex-panel { grid-column: 1 !important; grid-row: auto !important; }
-  .qdex-chart-row { grid-column: 1 !important; }
   .qdex-bottom-grid { grid-template-columns: 1fr; }
   .qdex-ticker-strip { gap: 10px; }
-}
-
-@media (max-width: 640px) {
-  .qdex-topbar { padding: 0 8px; }
-  .qdex-topbar-brand { font-size: 12px; }
-  .qdex-topbar-tab { padding: 0 6px; font-size: 10px; }
-  .qdex-ticker-strip { gap: 6px; padding: 4px 8px; flex-wrap: wrap; height: auto; }
-  .qdex-ticker-stat { flex-direction: row; gap: 4px; }
-  .qdex-ticker-stat label { display: none; }
-  .qdex-trade-form-panel { padding: 10px; }
-  .qdex-input-row input { font-size: 16px; } /* Prevent zoom on iOS */
-  .qdex-bottom-grid { min-height: 100px; }
-
-  /* Mobile: markets list horizontal scroll */
-  .qdex-markets-list {
-    display: flex; gap: 6px; overflow-x: auto; padding: 6px 8px;
-  }
-  .qdex-market-item {
-    flex-shrink: 0; padding: 5px 10px; border-radius: 6px;
-    border: 1px solid var(--border); font-size: 11px;
-  }
-  .qdex-market-item.active { border-color: var(--accent); background: var(--accent-soft); }
-
-  /* Mobile: chart always visible at 200px */
-  .qdex-chart-container { height: 200px !important; }
-
-  /* Mobile: orderbook compact */
-  .qdex-ob-table { font-size: 11px; min-width: unset; }
-  .qdex-ob-table th, .qdex-ob-table td { padding: 2px 8px; }
-
-  /* Mobile: trade form stacked */
-  .qdex-side-tabs { margin-bottom: 8px; }
-  .qdex-slider-row { margin-bottom: 8px; }
-
-  /* Mobile: bottom panels compact */
-  .qdex-bottom-panel { max-height: 250px; }
-  .qdex-panel-header { padding: 6px 10px; font-size: 10px; }
-
-  /* Mobile: trade history compact */
-  .qdex-trades-table { font-size: 10px; min-width: 280px; }
-  .qdex-trades-table th, .qdex-trades-table td { padding: 2px 8px; }
 }
   </style>
 </head>
 <body>
-<!-- Shared Navigation Pill -->
+<!-- Shared Navigation -->
 <nav class="topnav" aria-label="Primary navigation">
-  <a class="brand" href="https://bitquai.live/" aria-label="BitQuai home - Order inside entropy">
-    <picture><source src="assets/brand/bitquai-icon-q-256.webp" type="image/webp"><img src="assets/brand/bitquai-icon-q-256.png" alt="BitQuai Q mark" width="256" height="256" decoding="async" loading="eager" fetchpriority="high"></picture>
-    <span class="brand-text">
-      <strong>BitQuai</strong>
-      <span>Order inside entropy</span>
-    </span>
+  <a class="brand" href="https://bitquai.live/">
+    <picture><source srcset="assets/brand/bitquai-icon-q-256.webp" type="image/webp"><img src="assets/brand/bitquai-icon-q-256.png" alt="BitQuai" width="256" height="256"></picture>
+    <span class="brand-text"><strong>BitQuai</strong> <span>Order inside entropy</span></span>
   </a>
   <div class="navlinks">
     <a href="https://bitquai.live/">Home</a>
     <a href="https://bitquai.live/mining.html">Mining</a>
     <a href="https://bitquai.live/controller_view.html">Controller</a>
     <span class="active">QDEX</span>
-    <a href="#wallet" class="wallet-btn">Connect Wallet</a>
   </div>
 </nav>
 
@@ -566,7 +347,6 @@ input { font: inherit; }
   <div class="qdex-topbar-tabs">
     <button class="qdex-topbar-tab active" onclick="switchView('trade')">Trade</button>
     <button class="qdex-topbar-tab" onclick="switchView('portfolio')">Portfolio</button>
-    <button class="qdex-topbar-tab" onclick="switchView('markets')">Markets</button>
   </div>
   <div class="qdex-topbar-spacer"></div>
   <div class="qdex-topbar-status">
@@ -576,47 +356,33 @@ input { font: inherit; }
 </div>
 
 <!-- Ticker Strip -->
-<div class="qdex-ticker-strip" id="tickerStrip">
-  <span class="qdex-ticker-pair" id="tickerPair">WQUAI / WQI</span>
+<div class="qdex-ticker-strip">
+  <span class="qdex-ticker-pair">WQUAI / WQI</span>
   <div class="qdex-ticker-stat"><label>Last</label><span class="val dim" id="tickerLast">—</span></div>
-  <div class="qdex-ticker-stat"><label>24h Change</label><span class="val dim" id="tickerChange">—</span></div>
-  <div class="qdex-ticker-stat"><label>24h Volume</label><span class="val dim" id="tickerVol">—</span></div>
   <div class="qdex-ticker-stat"><label>Best Bid</label><span class="val dim" id="tickerBid">—</span></div>
   <div class="qdex-ticker-stat"><label>Best Ask</label><span class="val dim" id="tickerAsk">—</span></div>
-  <button id="chartToggle" onclick="toggleChart()" title="Toggle chart" style="margin-left:auto;background:none;border:1px solid var(--border);border-radius:4px;padding:2px 8px;color:var(--text-muted);font-size:11px;cursor:pointer;">📊 Chart</button>
 </div>
 
 <!-- Main Grid -->
 <div class="qdex-main">
   <!-- Markets List -->
   <div class="qdex-panel" style="grid-column:1;grid-row:1/3">
-    <div class="qdex-panel-header"><span>Markets</span><span class="count" id="marketsCount">0</span></div>
-    <div class="qdex-panel-body qdex-markets-list" id="marketsList"></div>
-  </div>
-
-  <!-- Chart Row -->
-  <div class="qdex-chart-row" id="chartRow">
-    <div class="qdex-chart-intervals">
-      <button class="qdex-interval-btn active" data-interval="15m">15m</button>
-      <button class="qdex-interval-btn" data-interval="1h">1h</button>
-      <button class="qdex-interval-btn" data-interval="4h">4h</button>
-      <button class="qdex-interval-btn" data-interval="1d">1d</button>
-    </div>
-    <div class="qdex-chart-container">
-      <div class="tv-chart" id="tvChart"></div>
+    <div class="qdex-panel-header"><span>Markets</span><span class="count" id="marketsCount">1</span></div>
+    <div class="qdex-panel-body" id="marketsList">
+      <div class="qdex-market-item active"><span class="pair">WQUAI/WQI</span><span class="qdex-status-badge">testnet</span></div>
     </div>
   </div>
 
-  <!-- Orderbook / Trades -->
+  <!-- Orderbook -->
   <div class="qdex-panel" style="grid-column:2;grid-row:2">
     <div class="qdex-panel-header">
       <span>Order Book</span>
       <span class="count" id="obCount">0 levels</span>
     </div>
-    <div class="qdex-panel-body" id="obContainer">
-      <table class="qdex-ob-table" id="obTable">
+    <div class="qdex-panel-body">
+      <table class="qdex-ob-table">
         <thead><tr><th>Price</th><th>Amount</th><th>Total</th></tr></thead>
-        <tbody></tbody>
+        <tbody id="obBody"></tbody>
       </table>
     </div>
   </div>
@@ -627,40 +393,22 @@ input { font: inherit; }
     <div class="qdex-panel-body">
       <div class="qdex-trade-form-panel">
         <div class="qdex-side-tabs">
-          <button class="qdex-side-tab buy active" id="buyTab" onclick="setSide('buy')">Buy</button>
-          <button class="qdex-side-tab sell" id="sellTab" onclick="setSide('sell')">Sell</button>
-        </div>
-        <div class="qdex-order-type-tabs">
-          <button class="qdex-order-type-tab active" id="limitTab" onclick="setOrderType('limit')">Limit</button>
-          <button class="qdex-order-type-tab" id="marketTab" onclick="setOrderType('market')">Market</button>
+          <button class="qdex-side-tab buy active" onclick="setSide('buy')">Buy</button>
+          <button class="qdex-side-tab sell" onclick="setSide('sell')">Sell</button>
         </div>
         <div class="qdex-form-group">
           <label>Price</label>
           <div class="qdex-input-row">
-            <button class="step-btn" onclick="stepPrice(-0.001)">−</button>
             <input type="number" id="priceInput" placeholder="0.00" step="0.001">
-            <span class="unit" id="priceUnit">WQI</span>
-            <button class="step-btn" onclick="stepPrice(0.001)">+</button>
+            <span class="unit">WQI</span>
           </div>
         </div>
         <div class="qdex-form-group">
           <label>Amount</label>
           <div class="qdex-input-row">
-            <button class="step-btn" onclick="stepAmount(-0.1)">−</button>
             <input type="number" id="amtInput" placeholder="0.00" step="0.01">
-            <span class="unit" id="amtUnit">WQUAI</span>
-            <button class="step-btn" onclick="stepAmount(0.1)">+</button>
+            <span class="unit">WQUAI</span>
           </div>
-        </div>
-        <div class="qdex-slider-row">
-          <button class="qdex-pct-btn" onclick="setPct(25)">25%</button>
-          <button class="qdex-pct-btn" onclick="setPct(50)">50%</button>
-          <button class="qdex-pct-btn" onclick="setPct(75)">75%</button>
-          <button class="qdex-pct-btn" onclick="setPct(100)">100%</button>
-        </div>
-        <div class="qdex-form-total">
-          <span>Total</span>
-          <span class="amount" id="formTotal">—</span>
         </div>
         <button class="qdex-submit-btn buy" id="submitBtn" disabled>Connect wallet to trade</button>
         <div class="qdex-form-balance">Available: <span id="formBalance">—</span></div>
@@ -671,49 +419,18 @@ input { font: inherit; }
   <!-- Bottom Panels -->
   <div class="qdex-bottom-panels">
     <div class="qdex-bottom-grid">
+      <!-- Activity Log -->
       <div class="qdex-bottom-panel">
-        <div class="qdex-tab-bar">
-          <button class="qdex-tab-item active" onclick="switchBottomTab(this, 'orders')">Open Orders</button>
-          <button class="qdex-tab-item" onclick="switchBottomTab(this, 'fills')">Trade Fills</button>
-        </div>
-        <div class="qdex-tab-content">
-          <div class="qdex-tab-pane active" id="ordersPane">
-            <div class="qdex-empty-state" id="ordersEmpty"><div class="icon">📋</div><p>No open orders</p></div>
-            <table class="qdex-orders-table" id="ordersTable" style="display:none">
-              <thead><tr><th>Pair</th><th>Side</th><th>Type</th><th>Price</th><th>Amount</th><th>Filled</th><th></th></tr></thead>
-              <tbody></tbody>
-            </table>
-          </div>
-          <div class="qdex-tab-pane" id="fillsPane">
-            <div class="qdex-empty-state" id="fillsEmpty"><div class="icon">✅</div><p>No fills yet</p></div>
-            <table class="qdex-orders-table" id="fillsTable" style="display:none">
-              <thead><tr><th>Time</th><th>Pair</th><th>Side</th><th>Price</th><th>Amount</th><th>Status</th></tr></thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
+        <div class="qdex-panel-header"><span>Activity</span></div>
+        <div class="qdex-panel-body" id="activityLog"></div>
       </div>
-      <div class="qdex-bottom-panel">
-        <div class="qdex-tab-bar">
-          <button class="qdex-tab-item active" onclick="switchBottomTab(this, 'wallet')">Wallet</button>
-          <button class="qdex-tab-item" onclick="switchBottomTab(this, 'activity')">Activity</button>
-        </div>
-        <div class="qdex-tab-content">
-          <div class="qdex-tab-pane active" id="walletPane">
-            <div class="qdex-empty-state" id="walletEmpty"><div class="icon">🔐</div><p>Connect wallet to view balances</p></div>
-            <div id="walletContent" style="display:none"></div>
-          </div>
-          <div class="qdex-tab-pane" id="activityPane">
-            <div id="activityLog"></div>
-          </div>
-        </div>
-      </div>
-      <div class="qdex-bottom-panel">
+      <!-- Trade History -->
+      <div class="qdex-bottom-panel" style="grid-column: span 2">
         <div class="qdex-panel-header"><span>Trade History</span><span class="count" id="tradesCount">0</span></div>
         <div class="qdex-panel-body">
-          <table class="qdex-trades-table" id="tradesTable">
+          <table class="qdex-trades-table">
             <thead><tr><th>Time</th><th>Side</th><th>Price</th><th>Amount</th><th>Total</th></tr></thead>
-            <tbody></tbody>
+            <tbody id="tradesBody"></tbody>
           </table>
         </div>
       </div>
@@ -721,840 +438,167 @@ input { font: inherit; }
   </div>
 </div>
 
-<!-- Portfolio View -->
-<div class="qdex-view-container hidden" id="portfolioView">
-  <div class="qdex-view-page">
-    <div class="qdex-view-page-header">
-      <div>
-        <div class="qdex-view-page-kicker">Portfolio</div>
-        <h2>Your Balances</h2>
-      </div>
-      <div id="walletProviderBadge" class="qdex-mode-pill">offline</div>
-    </div>
-    <p class="qdex-view-page-subtitle">Wallet state, balances, open orders, and local activity.</p>
-    <br>
-    <div class="qdex-view-grid">
-      <div class="qdex-view-card">
-        <div class="qdex-view-card-header"><span>Wallet State</span><span id="walletProviderBadge2">offline</span></div>
-        <div class="qdex-view-card-body" id="portfolioWalletState"></div>
-      </div>
-      <div class="qdex-view-card">
-        <div class="qdex-view-card-header"><span>Balances</span><span id="portfolioBalanceCount">0</span></div>
-        <div class="qdex-view-card-body" id="portfolioBalances"></div>
-      </div>
-      <div class="qdex-view-card">
-        <div class="qdex-view-card-header"><span>Open Orders</span><span id="portfolioOrderCount">0</span></div>
-        <div class="qdex-view-card-body" id="portfolioOrders"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Markets View -->
-<div class="qdex-view-container hidden" id="marketsView">
-  <div class="qdex-view-page">
-    <div class="qdex-view-page-header">
-      <div>
-        <div class="qdex-view-page-kicker">Markets</div>
-        <h2>Available Markets</h2>
-      </div>
-    </div>
-    <p class="qdex-view-page-subtitle">Browse and switch between available trading pairs.</p>
-    <br>
-    <div id="marketsTableContainer"></div>
-  </div>
-</div>
-
-<script type="module">
-import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
-
-// ── Globals ──────────────────────────────────────
-  const $ = (id) => document.getElementById(id);
-  const fmt = (v) => v === undefined || v === null ? '—' : Number(v).toFixed(6);
-  const fmtAmt = (v) => {
-    if (v === undefined || v === null) return '—';
-    const n = Number(v);
-    if (n >= 1e6) return (n / 1e6).toFixed(2) + 'M';
-    if (n >= 1e3) return (n / 1e3).toFixed(2) + 'K';
-    return n.toFixed(2);
-  };
-  const shortAddress = (addr) => addr ? `${addr.slice(0, 6)}…${addr.slice(-4)}` : '';
-
-  const DEMO_MARKETS = [
-    { id: 'WQUAI-WQI', base: 'WQUAI', quote: 'WQI', status: 'active' },
-    { id: 'WQUAI-USDT', base: 'WQUAI', quote: 'USDT', status: 'planned' },
-    { id: 'WQI-USDT', base: 'WQI', quote: 'USDT', status: 'planned' },
-  ];
-
-  let state = {
-    market: 'WQUAI-WQI',
-    markets: [...DEMO_MARKETS],
-    tickers: {},
-    orderbook: { bids: [], asks: [] },
-    trades: [],
-    klines: [],
-    orders: [],
-    fills: [],
-    balances: [],
-    wallet: null,
-    walletProvider: null,
-    side: 'buy',
-    orderType: 'limit',
-    backendReady: false,
-  };
-
-  let qdexClient = null;
-  let backendReady = false;
-  let chartVisible = true;
-  let chart = null;
-  let series = null;
-
-  // ── Helpers ────────────────────────────────────
-  function demoMid(marketId) {
-    if (marketId === 'WQUAI-WQI') return 4.5;
-    if (marketId.includes('USDT')) return 0.05;
-    return 1;
-  }
-
-  function logActivity(msg, level = 'info') {
-    const log = $('activityLog');
-    if (!log) return;
-    const time = new Date().toLocaleTimeString('en-US', { hour12: false });
-    const entry = document.createElement('div');
-    entry.className = `qdex-log-entry ${level}`;
-    entry.innerHTML = `<span class="time">${time}</span>${msg}`;
-    log.prepend(entry);
-    if (log.children.length > 50) log.removeChild(log.lastChild);
-  }
-
-  // API base URL — same as controller uses prime.bitquai.live
-  const API_BASE_URL = 'https://api.bitquai.live';
-
-  // ── WebSocket real-time updates ──────────────
-  let ws = null;
-  const WS_URL = 'wss://api.bitquai.live/v1/ws?channel=market.WQUAI-WQI.depth&channel=market.WQUAI-WQI.trades&channel=global.tickers';
-
-  function connectWebSocket() {
-    try {
-      ws = new WebSocket(WS_URL);
-
-      ws.onopen = () => {
-        console.log('[QDEX] WebSocket connected');
-        logActivity('WebSocket live', 'success');
-      };
-
-      ws.onmessage = (event) => {
-        try {
-          const msg = JSON.parse(event.data);
-          if (msg.type === 'snapshot' || msg.type === 'update') {
-            const data = msg.snapshot || msg.data || msg;
-            if (data.bids !== undefined && data.asks !== undefined) {
-              renderOrderbook(data);
-            }
-            if (data.trades) {
-              renderTrades(data.trades);
-            }
-            if (data.tickers) {
-              renderTickers(data.tickers);
-            }
-          }
-        } catch (e) {
-          console.warn('[QDEX] WS parse error:', e.message);
-        }
-      };
-
-      ws.onclose = () => {
-        console.log('[QDEX] WebSocket disconnected, retrying...');
-        setTimeout(connectWebSocket, 3000);
-      };
-
-      ws.onerror = (err) => {
-        console.warn('[QDEX] WebSocket error:', err);
-      };
-    } catch (e) {
-      console.warn('[QDEX] WS init failed:', e.message);
-      setTimeout(connectWebSocket, 5000);
-    }
-  }
-
-
-  async function api(path) {
-    try {
-      const res = await fetch(`${API_BASE_URL}${path}`);
-      const text = await res.text();
-      return text ? JSON.parse(text) : null;
-    } catch (e) {
-      console.warn('[QDEX] API fetch failed:', e.message);
-      return null;
-    }
-  }
-
-  async function sdkFetch(fn) {
-    if (!qdexClient) return null;
-    try {
-      return await fn();
-    } catch (e) {
-      console.warn('[QDEX] SDK fetch failed:', e.message);
-      return null;
-    }
-  }
-
-  // ── QDexClient ─────────────────────────────────
-  async function initQDexClient() {
-    try {
-      qdexClient = new QDexClient({ baseUrl: API_BASE_URL });
-      backendReady = true;
-      state.backendReady = true;
-      logActivity('QDEX SDK initialized (base=' + API_BASE_URL + ')', 'success');
-    } catch (e) {
-      console.warn('[QDEX] SDK init failed:', e.message);
-      backendReady = false;
-      state.backendReady = false;
-    }
-  }
-
-  // ── Data Loading ───────────────────────────────
-  async function loadMarkets() {
-    if (backendReady) {
-      const data = await sdkFetch(() => qdexClient.markets.list());
-      if (data && data.length) {
-        state.markets = data;
-        renderMarkets();
-        return;
-      }
-    }
-
-    const data = await api('/v1/markets');
-    state.markets = (data?.markets && data.markets.length) ? data.markets : [...DEMO_MARKETS];
-    renderMarkets();
-  }
-
-  async function loadOrderbook() {
-    let data = null;
-    
-    // Try SDK first
-    if (backendReady && qdexClient) {
-      try {
-        data = await qdexClient.orderbook.get(state.market);
-      } catch (e) {
-        console.warn('[QDEX] SDK orderbook failed:', e.message);
-      }
-    }
-    
-    // Fallback to direct API
-    if (!data || (!data.bids?.length && !data.asks?.length)) {
-      try {
-        const res = await fetch(`${API_BASE_URL}/v1/orderbook/${state.market}`);
-        if (res.ok) {
-          data = await res.json();
-          console.log('[QDEX] Fallback API orderbook:', data.bids?.length, 'bids,', data.asks?.length, 'asks');
-        }
-      } catch (e) {
-        console.warn('[QDEX] Direct API orderbook failed:', e.message);
-      }
-    }
-    
-    if (data && (data.bids?.length || data.asks?.length)) {
-      state.orderbook = {
-        bids: data.bids || [],
-        asks: data.asks || [],
-      };
-      state.trades = data.recentTrades || [];
-      updateTickerFromOrderbook();
-      renderOrderbook();
-      renderTrades();
-      console.log('[QDEX] Orderbook rendered:', state.orderbook.bids.length, 'bids,', state.orderbook.asks.length, 'asks');
-      return;
-    }
-    
-    console.warn('[QDEX] No orderbook data available');
-    renderOrderbook();
-    renderTrades();
-  }
-
-  function updateTickerFromOrderbook() {
-    const { bids, asks } = state.orderbook;
-    const bestBid = bids.length > 0 ? bids[0].price : null;
-    const bestAsk = asks.length > 0 ? asks[0].price : null;
-    
-    const mid = bestBid && bestAsk ? (Number(bestBid) + Number(bestAsk)) / 2 : demoMid(state.market);
-    const last = bestBid || bestAsk || mid;
-
-    state.tickers[state.market] = {
-      lastPrice: last,
-      bestBid: bestBid || (mid * 0.9985),
-      bestAsk: bestAsk || (mid * 1.0015),
-      volume24h: state.trades.reduce((sum, t) => sum + (Number(t.quoteAmount) || Number(t.amount) * Number(t.price) || 0), 0),
-      change24h: 0,
-    };
-
-    renderTicker();
-  }
-
-  async function loadTrades() {
-    let data = null;
-    
-    if (backendReady && qdexClient) {
-      try {
-        data = await qdexClient.trades.list(state.market);
-      } catch (e) {
-        console.warn('[QDEX] SDK trades failed:', e.message);
-      }
-    }
-    
-    if (!data || !data.trades?.length) {
-      try {
-        const res = await fetch(`${API_BASE_URL}/v1/trades/${state.market}`);
-        if (res.ok) {
-          data = await res.json();
-          console.log('[QDEX] Fallback API trades:', data.trades?.length, 'trades');
-        }
-      } catch (e) {
-        console.warn('[QDEX] Direct API trades failed:', e.message);
-      }
-    }
-    
-    state.trades = data?.trades || [];
-    renderTrades();
-  }
-
-  async function loadKlines() {
-    // Not implemented yet
-  }
-
-  async function refresh() {
-    await Promise.all([
-      loadOrderbook(),
-      loadTrades(),
-    ]);
-    if (state.wallet) {
-      loadBalances();
-    }
-  }
-
-  // ── UI Rendering ───────────────────────────────
-  function renderMarkets() {
-    const list = $('marketsList');
-    if (!list) return;
-    $('marketsCount').textContent = state.markets.length;
-    list.innerHTML = state.markets.map(m => `
-      <div class="qdex-market-item ${m.id === state.market ? 'active' : ''}" onclick="window.switchMarket('${m.id}')">
-        <span class="pair">${m.base}/${m.quote}</span>
-        <span class="qdex-status-badge">${m.status}</span>
-      </div>
-    `).join('');
-  }
-
-  function renderTicker() {
-    const m = state.markets.find(x => x.id === state.market);
-    if (!m) return;
-    $('tickerPair').textContent = `${m.base} / ${m.quote}`;
-
-    const t = state.tickers[state.market];
-    if (t && t.lastPrice) {
-      $('tickerLast').textContent = fmt(t.lastPrice);
-      $('tickerLast').className = 'val green';
-      $('tickerVol').textContent = fmtAmt(t.volume24h);
-      $('tickerVol').className = 'val';
-      $('tickerChange').textContent = `${Number(t.change24h || 0).toFixed(2)}%`;
-      $('tickerChange').className = Number(t.change24h || 0) >= 0 ? 'val green' : 'val red';
-      $('tickerBid').textContent = fmt(t.bestBid);
-      $('tickerBid').className = 'val green';
-      $('tickerAsk').textContent = fmt(t.bestAsk);
-      $('tickerAsk').className = 'val red';
-    } else {
-      const { bids, asks } = state.orderbook;
-      const bestBid = bids.length > 0 ? bids[0].price : null;
-      const bestAsk = asks.length > 0 ? asks[0].price : null;
-      const mid = bestBid && bestAsk ? (Number(bestBid) + Number(bestAsk)) / 2 : demoMid(state.market);
-
-      if (bestBid) {
-        $('tickerBid').textContent = fmt(bestBid);
-        $('tickerBid').className = 'val green';
-      }
-      if (bestAsk) {
-        $('tickerAsk').textContent = fmt(bestAsk);
-        $('tickerAsk').className = 'val red';
-      }
-      if (bestBid && bestAsk) {
-        $('tickerLast').textContent = fmt(mid);
-        $('tickerLast').className = 'val green';
-      }
-
-      if (!bestBid && !bestAsk) {
-        for (const id of ['tickerLast', 'tickerVol', 'tickerChange', 'tickerBid', 'tickerAsk']) {
-          const el = $('#' + id);
-          el.textContent = '—';
-          el.className = 'val dim';
-        }
-      }
-    }
-
-    // Update units
-    $('priceUnit').textContent = m.quote;
-    $('amtUnit').textContent = m.base;
-  }
-
-  function renderOrderbook() {
-    const tbody = $('obTable')?.querySelector('tbody');
-    if (!tbody) return;
-    tbody.innerHTML = '';
-
-    const { bids, asks } = state.orderbook;
-    $('obCount').textContent = `${bids.length + asks.length} levels`;
-
-    const maxVol = Math.max(
-      ...asks.map(a => Number(a.amount) || 0),
-      ...bids.map(b => Number(b.amount) || 0),
-      1
-    );
-
-    // Asks (reversed)
-    for (let i = Math.min(asks.length, 15) - 1; i >= 0; i--) {
-      const ask = asks[i];
-      const pct = Number(ask.amount) / maxVol * 100;
-      tbody.insertAdjacentHTML('beforeend', `
-        <tr class="ask">
-          <td>${fmt(ask.price)}</td>
-          <td>${fmtAmt(ask.amount)}</td>
-          <td>${fmtAmt(Number(ask.price) * Number(ask.amount))}</td>
-          <td style="position:relative">
-            <div class="qdex-ob-depth-bar ask" style="width:${pct}%"></div>
-          </td>
-        </tr>
-      `);
-    }
-
-    // Spread
-    if (bids.length > 0 && asks.length > 0) {
-      const bestAsk = Number(asks[0].price);
-      const bestBid = Number(bids[0].price);
-      const spread = Math.max(0, bestAsk - bestBid).toFixed(6);
-      tbody.insertAdjacentHTML('beforeend', `
-        <tr class="spread"><td colspan="4">Spread: ${spread}</td></tr>
-      `);
-    }
-
-    // Bids
-    for (let i = 0; i < Math.min(bids.length, 15); i++) {
-      const bid = bids[i];
-      const pct = Number(bid.amount) / maxVol * 100;
-      tbody.insertAdjacentHTML('beforeend', `
-        <tr class="bid">
-          <td>${fmt(bid.price)}</td>
-          <td>${fmtAmt(bid.amount)}</td>
-          <td>${fmtAmt(Number(bid.price) * Number(bid.amount))}</td>
-          <td style="position:relative">
-            <div class="qdex-ob-depth-bar bid" style="width:${pct}%"></div>
-          </td>
-        </tr>
-      `);
-    }
-  }
-
-  function renderTrades() {
-    const tbody = $('tradesTable')?.querySelector('tbody');
-    if (!tbody) return;
-    tbody.innerHTML = '';
-    $('tradesCount').textContent = state.trades.length;
-
-    for (const trade of state.trades.slice(0, 50)) {
-      const ts = trade.createdAt || trade.timestamp || trade.settlementStatus;
-      const time = ts ? (typeof ts === 'string' && ts.match(/\d{4}-/) ? new Date(ts).toLocaleTimeString('en-US', { hour12: false }) : ts) : '—';
-      const side = trade.side || (trade.maker && trade.taker ? 'buy' : 'buy');
-      const total = (Number(trade.price) * Number(trade.amount)).toFixed(4);
-      tbody.insertAdjacentHTML('beforeend', `
-        <tr>
-          <td>${time}</td>
-          <td class="qdex-trade-side ${side}">${side.toUpperCase()}</td>
-          <td>${fmt(trade.price)}</td>
-          <td>${fmtAmt(trade.amount)}</td>
-          <td>${fmtAmt(total)}</td>
-        </tr>
-      `);
-    }
-  }
-
-  function renderWalletUI() {
-    const walletEmpty = $('walletEmpty');
-    const walletContent = $('walletContent');
-    
-    if (!state.wallet || !state.balances.length) {
-      walletEmpty.style.display = 'flex';
-      walletContent.style.display = 'none';
-      return;
-    }
-
-    walletEmpty.style.display = 'none';
-    walletContent.style.display = 'block';
-    walletContent.innerHTML = state.balances.map(b => `
-      <div class="qdex-balance-row">
-        <span class="qdex-balance-token">${b.token}</span>
-        <div>
-          <span class="qdex-balance-available">${b.available || '0'}</span>
-          ${b.locked ? `<span class="qdex-balance-locked"> (+${b.locked} locked)</span>` : ''}
-        </div>
-      </div>
-    `).join('');
-  }
-
-  function renderOrders() {
-    const empty = $('ordersEmpty');
-    const table = $('ordersTable');
-    const tbody = table?.querySelector('tbody');
-    if (!tbody) return;
-
-    if (!state.orders.length) {
-      empty.style.display = 'flex';
-      table.style.display = 'none';
-      return;
-    }
-
-    empty.style.display = 'none';
-    table.style.display = 'table';
-    tbody.innerHTML = '';
-
-    for (const order of state.orders) {
-      tbody.insertAdjacentHTML('beforeend', `
-        <tr>
-          <td>${order.pair}</td>
-          <td class="qdex-trade-side ${order.side}">${order.side.toUpperCase()}</td>
-          <td>${order.type}</td>
-          <td>${fmt(order.price)}</td>
-          <td>${fmtAmt(order.amount)}</td>
-          <td>${order.filled}</td>
-          <td><button class="qdex-cancel-btn" onclick="cancelOrder('${order.id}')">Cancel</button></td>
-        </tr>
-      `);
-    }
-  }
-
-  function renderPortfolioView() {
-    const walletState = $('portfolioWalletState');
-    const balancesEl = $('portfolioBalances');
-    const ordersEl = $('portfolioOrders');
-    
-    if (!walletState) return;
-
-    if (state.wallet) {
-      walletState.innerHTML = `
-        <div class="qdex-wallet-address">${shortAddress(state.wallet)}</div>
-        <div class="qdex-wallet-meta">Provider: ${state.walletProvider || 'quai'} · Network: Quai Orchard</div>
-        <div class="qdex-wallet-actions">
-          <button class="qdex-cancel-btn" onclick="window.disconnectWallet()">Disconnect</button>
-        </div>
-      `;
-      $('walletProviderBadge').textContent = 'connected';
-      $('walletProviderBadge').className = 'qdex-mode-pill live';
-      $('walletProviderBadge2').textContent = 'connected';
-      $('walletProviderBadge2').className = 'qdex-mode-pill live';
-    } else {
-      walletState.innerHTML = `<div class="qdex-empty-state"><div class="icon">🔐</div><p>Connect your Quai wallet</p></div>`;
-      $('walletProviderBadge').textContent = 'offline';
-      $('walletProviderBadge').className = 'qdex-mode-pill';
-      $('walletProviderBadge2').textContent = 'offline';
-      $('walletProviderBadge2').className = 'qdex-mode-pill';
-    }
-
-    $('portfolioBalanceCount').textContent = state.balances.length;
-    balancesEl.innerHTML = state.balances.length ? state.balances.map(b => `
-      <div class="qdex-balance-row">
-        <span class="qdex-balance-token">${b.token}</span>
-        <div>
-          <span class="qdex-balance-available">${b.available || '0'}</span>
-          ${b.locked ? `<span class="qdex-balance-locked"> (+${b.locked} locked)</span>` : ''}
-        </div>
-      </div>
-    `).join('') : `<div class="qdex-empty-state"><p>No balances</p></div>`;
-
-    $('portfolioOrderCount').textContent = state.orders.length;
-    ordersEl.innerHTML = state.orders.length ? state.orders.map(o => `
-      <div class="qdex-balance-row">
-        <span class="qdex-balance-token">${o.pair}</span>
-        <span class="qdex-trade-side ${o.side}">${o.side.toUpperCase()}</span>
-        <span>${fmt(o.price)}</span>
-      </div>
-    `).join('') : `<div class="qdex-empty-state"><p>No open orders</p></div>`;
-  }
-
-  function renderMarketsView() {
-    const container = $('marketsTableContainer');
-    if (!container) return;
-    
-    container.innerHTML = `
-      <table class="qdex-trades-table">
-        <thead><tr><th>Market</th><th>Status</th><th>Last</th><th>Bid</th><th>Ask</th><th>24h Vol</th></tr></thead>
-        <tbody>
-          ${state.markets.map(m => {
-            const t = state.tickers[m.id] || {};
-            return `
-              <tr onclick="window.switchMarket('${m.id}')" style="cursor:pointer">
-                <td class="pair" style="font-weight:600">${m.base}/${m.quote}</td>
-                <td><span class="qdex-status-badge">${m.status}</span></td>
-                <td>${fmt(t.lastPrice || demoMid(m.id))}</td>
-                <td class="qdex-trade-side buy">${fmt(t.bestBid || demoMid(m.id) * .998)}</td>
-                <td class="qdex-trade-side sell">${fmt(t.bestAsk || demoMid(m.id) * 1.002)}</td>
-                <td>${fmtAmt(t.volume24h || 0)}</td>
-              </tr>
-            `;
-          }).join('')}
-        </tbody>
-      </table>
-    `;
-  }
-
-  // ── View Switching ─────────────────────────────
-  window.switchView = function(view) {
-    document.querySelectorAll('.qdex-topbar-tab').forEach((tab, i) => {
-      tab.classList.toggle('active', ['trade', 'portfolio', 'markets'][i] === view);
-    });
-
-    $('chartRow').style.display = (view === 'trade') ? 'flex' : 'none';
-    document.querySelector('.qdex-main').style.display = (view === 'trade') ? 'grid' : 'none';
-    $('portfolioView').classList.toggle('hidden', view !== 'portfolio');
-    $('marketsView').classList.toggle('hidden', view !== 'markets');
-
-    if (view === 'portfolio') renderPortfolioView();
-    if (view === 'markets') renderMarketsView();
-  };
-
-  // ── Market Switch ──────────────────────────────
-  window.switchMarket = async function(id) {
-    state.market = id;
-    renderMarkets();
-    renderTicker();
-    await Promise.all([loadOrderbook(), loadTrades()]);
-    renderPortfolioView();
-    renderMarketsView();
-  };
-
-  // ── Trade Form ─────────────────────────────────
-  function setSide(side) {
-    state.side = side;
-    $('buyTab').classList.toggle('active', side === 'buy');
-    $('sellTab').classList.toggle('active', side === 'sell');
-    $('submitBtn').className = `qdex-submit-btn ${side}`;
-    updateFormTotal();
-  }
-
-  function setOrderType(type) {
-    state.orderType = type;
-    $('limitTab').classList.toggle('active', type === 'limit');
-    $('marketTab').classList.toggle('active', type === 'market');
-    $('priceInput').disabled = (type === 'market');
-    updateFormTotal();
-  }
-
-  function stepPrice(delta) {
-    const input = $('priceInput');
-    input.value = Math.max(0, Number(input.value || 0) + delta).toFixed(3);
-    updateFormTotal();
-  }
-
-  function stepAmount(delta) {
-    const input = $('amtInput');
-    input.value = Math.max(0, Number(input.value || 0) + delta).toFixed(2);
-    updateFormTotal();
-  }
-
-  function setPct(pct) {
-    if (!state.balances.length) return;
-    const m = state.markets.find(x => x.id === state.market);
-    if (!m) return;
-    
-    const balance = state.balances.find(b => b.token === (state.side === 'buy' ? m.quote : m.base));
-    if (!balance) return;
-    
-    const available = Number(balance.available || 0);
-    $('amtInput').value = (available * pct / 100).toFixed(2);
-    updateFormTotal();
-  }
-
-  function updateFormTotal() {
-    const price = Number($('priceInput').value || 0);
-    const amount = Number($('amtInput').value || 0);
-    const total = price * amount;
-    $('formTotal').textContent = total ? total.toFixed(4) : '—';
-    $('formBalance').textContent = state.balances.length ? 
-      state.balances.find(b => b.token === (state.side === 'buy' ? state.markets.find(m => m.id === state.market)?.quote : state.markets.find(m => m.id === state.market)?.base))?.available || '0' : '—';
-  }
-
-  async function submitOrder() {
-    const m = state.markets.find(x => x.id === state.market);
-    if (!m) return;
-
-    const price = state.orderType === 'limit' ? Number($('priceInput').value || 0) : demoMid(state.market);
-    const amount = Number($('amtInput').value || 0);
-    if (!amount || (state.orderType === 'limit' && !price)) return;
-
-    const btn = $('submitBtn');
-    btn.disabled = true;
-    btn.textContent = 'Signing...';
-
-    try {
-      const signer = await window.getWalletSigner();
-      if (!signer) {
-        logActivity('Wallet not connected. Please connect your Quai wallet.', 'error');
-        btn.disabled = false;
-        btn.textContent = `Place ${state.side} ${state.orderType} order`;
-        return;
-      }
-
-      const nonce = Math.floor(Math.random() * 100000).toString();
-      const order = {
-        marketId: state.market,
-        side: state.side,
-        type: state.orderType === 'market' ? 'market_ioc' : 'limit',
-        baseToken: m.base,
-        quoteToken: m.quote,
-        amount: amount.toFixed(4),
-        price: price.toFixed(6),
-        timeInForce: state.orderType === 'market' ? 'IOC' : 'GTC',
-        maxSlippageBps: state.orderType === 'market' ? 50 : 0,
-        owner: state.wallet,
-        delegate: '0x0000000000000000000000000000000000000000',
-        nonce,
-        expiresAt: Math.floor(Date.now() / 1000) + 86400,
-        chainId: 15000,
-        settlementContract: '0x00497118fAA729aC1d981c680080d7428fE8a4Bd',
-      };
-
-      const orderHash = JSON.stringify(order);
-      const signature = await signer.signMessage(orderHash);
-
-      order.signature = {
-        scheme: 'mock',
-        signer: state.wallet,
-        value: signature,
-        signedAt: Math.floor(Date.now() / 1000),
-      };
-
-      logActivity(`Signing ${state.side} ${state.orderType} order: ${amount} ${m.base} @ ${price.toFixed(6)} ${m.quote}`, 'info');
-
-      if (backendReady && qdexClient) {
-        try {
-          const result = await qdexClient.orders.submitSignedOrder(order);
-          if (result && result.orderHash) {
-            logActivity(`Order submitted: ${result.orderHash.slice(0, 12)}... (${result.status || 'open'})`, 'success');
-            state.orders.unshift({
-              id: result.orderHash.slice(0, 12),
-              pair: `${m.base}/${m.quote}`,
-              side: state.side,
-              type: state.orderType,
-              price: price.toFixed(6),
-              amount: amount.toFixed(4),
-              filled: '0%',
-              status: result.status || 'open',
-              timestamp: Date.now(),
-            });
-            renderOrders();
-          }
-        } catch (e) {
-          console.warn('[QDEX] Order submission failed:', e.message);
-          logActivity(`Order submission failed: ${e.message}`, 'warn');
-          createLocalOrder(order, m, price, amount, nonce);
-        }
-      } else {
-        createLocalOrder(order, m, price, amount, nonce);
-      }
-    } catch (e) {
-      console.error('[QDEX] Order signing failed:', e);
-      logActivity(`Order signing failed: ${e.message}`, 'error');
-    } finally {
-      btn.disabled = false;
-      btn.textContent = `Place ${state.side} ${state.orderType} order`;
-    }
-  }
-
-  function createLocalOrder(order, m, price, amount, nonce) {
-    const orderData = {
-      id: 'ord_' + nonce.slice(0, 7),
-      pair: `${m.base}/${m.quote}`,
-      side: state.side,
-      type: state.orderType,
-      price: price.toFixed(6),
-      amount: amount.toFixed(4),
-      filled: '0%',
-      status: 'open',
-      timestamp: Date.now(),
-    };
-    state.orders.unshift(orderData);
-    renderOrders();
-    logActivity(`Created local ${state.side} ${state.orderType} order: ${orderData.amount} ${m.base} @ ${orderData.price} ${m.quote}`, 'success');
-  }
-
-  // ── Wallet Events ──────────────────────────────
-  let qdexWallet;
-  if (window.QDexWalletIntegration && qdexClient) {
-    qdexWallet = new QDexWalletIntegration(qdexClient, {
-      onBalanceUpdate: (balances) => { state.balances = balances; renderWalletUI(); },
-    });
-  }
-
-  window.addEventListener('bitquai:wallet-connect', async function (e) {
-    if (e.detail && e.detail.address) {
-      state.wallet = e.detail.address;
-      state.walletProvider = e.detail.provider || 'quai';
-      
-      logActivity(`Wallet connected ${shortAddress(state.wallet)} — fetching balances...`, 'info');
-      
-      if (qdexWallet) {
-        try {
-          await qdexWallet.init();
-          const balances = await qdexWallet.getAllVaultBalances();
-          state.balances = balances.map(b => ({
-            token: b.token,
-            available: b.available || '0',
-            locked: b.locked || '0',
-          }));
-          logActivity(`Wallet balances loaded (${state.balances.length} tokens)`, 'success');
-        } catch (err) {
-          logActivity(`Balance fetch failed: ${err.message}`, 'warn');
-          state.balances = [];
-        }
-      } else {
-        state.balances = [];
-      }
-      
-      renderWalletUI();
-      logActivity(`Wallet connected ${shortAddress(state.wallet)}`, 'success');
-    }
-  });
-
-  window.addEventListener('bitquai:wallet-disconnect', function () {
-    const old = state.wallet;
-    state.wallet = null;
-    state.walletProvider = null;
-    state.balances = [];
-    renderWalletUI();
-    if (old) logActivity(`Wallet disconnected ${shortAddress(old)}`, 'warn');
-  });
-
-  // ── Init ───────────────────────────────────────
-  async function init() {
-    logActivity('BitQuai QDEX terminal loaded', 'info');
-
-    await initQDexClient();
-    logActivity(backendReady ? 'Connected to QDEX backend' : 'Demo mode — no backend', backendReady ? 'success' : 'warn');
-
-    await loadMarkets();
-    await refresh();
-    switchView('trade');
-
-    // Refresh every 2s
-    setInterval(refresh, 2000);
-  }
-
-  init();
-  </script>
-</main>
 <script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
+// ═══════════════════════════════════════════════════
+// QDEX Frontend — Clean Architecture
+// Direct fetch to api.bitquai.live
+// No SDK, no fallbacks, one data path
+// ═══════════════════════════════════════════════════
+
+const API = 'https://api.bitquai.live';
+const MARKET = 'WQUAI-WQI';
+
+// ── Helpers ───────────────────────────────────────
+
+const $ = (id) => document.getElementById(id);
+const fmt = (v) => v === undefined || v === null ? '—' : Number(v).toFixed(2);
+
+const log = (msg, cls = '') => {
+  const entry = document.createElement('div');
+  entry.className = 'qdex-log-entry ' + cls;
+  entry.innerHTML = `<span class="time">${new Date().toLocaleTimeString('en-US', {hour12:false})}</span>${msg}`;
+  const container = $('activityLog');
+  if (container) {
+    container.prepend(entry);
+    while (container.children.length > 50) container.removeChild(container.lastChild);
   }
+};
+
+// ── API ───────────────────────────────────────────
+
+async function api(path) {
+  const res = await fetch(`${API}${path}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status} for ${path}`);
+  return res.json();
+}
+
+// ── Orderbook ─────────────────────────────────────
+
+async function loadOrderbook() {
+  const data = await api(`/v1/orderbook/${MARKET}`);
+  const bids = data.bids || [];
+  const asks = data.asks || [];
+  const tbody = $('obBody');
+  if (!tbody) return;
+
+  tbody.innerHTML = '';
+
+  const maxVol = Math.max(
+    ...asks.map(a => Number(a.amount) || 0),
+    ...bids.map(b => Number(b.amount) || 0),
+    1
+  );
+
+  // Asks (reversed so highest price on top)
+  for (let i = Math.min(asks.length, 10) - 1; i >= 0; i--) {
+    const a = asks[i];
+    const total = (Number(a.price) * Number(a.amount)).toFixed(2);
+    const pct = (Number(a.amount) / maxVol * 100).toFixed(1);
+    tbody.insertAdjacentHTML('beforeend', `
+      <tr class="ask">
+        <td>${fmt(a.price)}</td>
+        <td>${fmt(a.amount)}</td>
+        <td>${total}</td>
+      </tr>
+    `);
+  }
+
+  // Spread
+  if (bids.length > 0 && asks.length > 0) {
+    const spread = (Number(asks[0].price) - Number(bids[0].price)).toFixed(2);
+    tbody.insertAdjacentHTML('beforeend', `
+      <tr class="spread"><td colspan="3">Spread: ${spread}</td></tr>
+    `);
+  }
+
+  // Bids
+  for (let i = 0; i < Math.min(bids.length, 10); i++) {
+    const b = bids[i];
+    const total = (Number(b.price) * Number(b.amount)).toFixed(2);
+    tbody.insertAdjacentHTML('beforeend', `
+      <tr class="bid">
+        <td>${fmt(b.price)}</td>
+        <td>${fmt(b.amount)}</td>
+        <td>${total}</td>
+      </tr>
+    `);
+  }
+
+  // Update UI
+  $('obCount').textContent = `${bids.length + asks.length} levels`;
+
+  // Ticker
+  if (bids.length > 0) $('tickerBid').textContent = fmt(bids[0].price);
+  if (asks.length > 0) $('tickerAsk').textContent = fmt(asks[0].price);
+
+  log(`Orderbook: ${bids.length} bids, ${asks.length} asks`, 'success');
+}
+
+// ── Trades ────────────────────────────────────────
+
+async function loadTrades() {
+  const data = await api(`/v1/trades/${MARKET}`);
+  const trades = data.trades || [];
+  const tbody = $('tradesBody');
+  if (!tbody) return;
+
+  tbody.innerHTML = '';
+
+  for (const t of trades.slice(0, 50)) {
+    const ts = t.createdAt ? new Date(t.createdAt).toLocaleTimeString('en-US', {hour12: false}) : '—';
+    const side = t.side || 'buy';
+    const total = (Number(t.price) * Number(t.amount)).toFixed(2);
+    tbody.insertAdjacentHTML('beforeend', `
+      <tr>
+        <td>${ts}</td>
+        <td class="qdex-trade-side ${side}">${side.toUpperCase()}</td>
+        <td>${fmt(t.price)}</td>
+        <td>${fmt(t.amount)}</td>
+        <td>${total}</td>
+      </tr>
+    `);
+  }
+
+  $('tradesCount').textContent = trades.length;
+  if (trades.length > 0) {
+    $('tickerLast').textContent = fmt(trades[0].price);
+  }
+
+  log(`Trades: ${trades.length}`, 'success');
+}
+
+// ── Refresh ───────────────────────────────────────
+
+async function refresh() {
+  try {
+    await Promise.all([loadOrderbook(), loadTrades()]);
+    $('apiState').textContent = 'Orchard testnet';
+    $('statusDot').className = 'qdex-status-dot';
+  } catch (e) {
+    $('apiState').textContent = 'Disconnected';
+    $('statusDot').className = 'qdex-status-dot offline';
+    log(`Error: ${e.message}`, 'error');
+  }
+}
+
+// ── UI ────────────────────────────────────────────
+
+function setSide(side) {
+  document.querySelectorAll('.qdex-side-tab').forEach(el => el.classList.remove('active'));
+  const tab = side === 'buy' ? document.querySelector('.qdex-side-tab.buy') : document.querySelector('.qdex-side-tab.sell');
+  if (tab) tab.classList.add('active');
+}
+
+function switchView(view) {
+  document.querySelectorAll('.qdex-topbar-tab').forEach(el => el.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+// ── Init ──────────────────────────────────────────
+
+refresh();
+setInterval(refresh, 3000);
+log('QDEX connected to ' + API, 'info');
 </script>
-<script src="js/quai-wallet.js"></script>
-<script src="js/wallet-pill.js"></script>
-<script src="js/wallet-integration.js"></script>
 </body>
 </html>
