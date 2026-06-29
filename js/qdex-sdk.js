@@ -201,7 +201,7 @@ export class QDexClient {
     };
 
     this.orderbook = {
-      get: async (marketId) => this.#requestOk(`/v1/orderbook/${encodeURIComponent(marketId)}`),
+      get: async (marketId) => this.#requestOk('/v1/orderbook'),
       openStream: (marketId, options = {}) => this.streams.open(marketDepthChannel(marketId), options),
       stream: async (marketId, options = {}) => this.streams.read(marketDepthChannel(marketId), options),
     };
