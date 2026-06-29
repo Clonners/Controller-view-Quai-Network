@@ -830,6 +830,54 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
   // API base URL — same as controller uses prime.bitquai.live
   const API_BASE_URL = 'https://api.bitquai.live';
 
+  // ── WebSocket real-time updates ──────────────
+  let ws = null;
+  const WS_URL = 'wss://api.bitquai.live/v1/ws?channel=market.WQUAI-WQI.depth&channel=market.WQUAI-WQI.trades&channel=global.tickers';
+
+  function connectWebSocket() {
+    try {
+      ws = new WebSocket(WS_URL);
+
+      ws.onopen = () => {
+        console.log('[QDEX] WebSocket connected');
+        logActivity('WebSocket live', 'success');
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.type === 'snapshot' || msg.type === 'update') {
+            const data = msg.snapshot || msg.data || msg;
+            if (data.bids !== undefined && data.asks !== undefined) {
+              renderOrderbook(data);
+            }
+            if (data.trades) {
+              renderTrades(data.trades);
+            }
+            if (data.tickers) {
+              renderTickers(data.tickers);
+            }
+          }
+        } catch (e) {
+          console.warn('[QDEX] WS parse error:', e.message);
+        }
+      };
+
+      ws.onclose = () => {
+        console.log('[QDEX] WebSocket disconnected, retrying...');
+        setTimeout(connectWebSocket, 3000);
+      };
+
+      ws.onerror = (err) => {
+        console.warn('[QDEX] WebSocket error:', err);
+      };
+    } catch (e) {
+      console.warn('[QDEX] WS init failed:', e.message);
+      setTimeout(connectWebSocket, 5000);
+    }
+  }
+
+
   async function api(path) {
     try {
       const res = await fetch(`${API_BASE_URL}${path}`);
