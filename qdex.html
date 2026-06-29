@@ -949,7 +949,7 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
 
   // ── WebSocket real-time updates ──────────────
   let ws = null;
-  const WS_URL = 'wss://api.bitquai.live/v1/ws?channel=market.WQUAI-WQI.depth&channel=market.WQUAI-WQI.trades&channel=global.tickers';
+  const WS_URL = 'wss://wsapi.bitquai.live/v1/ws?channel=market.WQUAI-WQI.depth&channel=market.WQUAI-WQI.trades&channel=global.tickers';
 
   function connectWebSocket() {
     try {
