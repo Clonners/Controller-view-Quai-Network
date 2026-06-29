@@ -538,58 +538,8 @@ input { font: inherit; }
   /* Mobile: trade history compact */
   .qdex-trades-table { font-size: 10px; min-width: 280px; }
   .qdex-trades-table th, .qdex-trades-table td { padding: 2px 8px; }
-
-  /* Mobile: larger touch targets for interactive elements */
-  .qdex-market-item { min-height: 44px; }
-  .qdex-tab-item { min-height: 44px; padding: 12px 10px; font-size: 11px; }
-  .qdex-cancel-btn { min-height: 32px; min-width: 32px; padding: 6px 12px; font-size: 11px; }
-  .qdex-pct-btn { min-height: 36px; padding: 8px; }
-  .qdex-submit-btn { min-height: 44px; padding: 12px; }
-  .qdex-ob-table tr { min-height: 28px; }
-
-  /* Mobile: orders table row height for touch */
-  .qdex-orders-table td { padding: 8px 10px; }
-  .qdex-orders-table th { padding: 6px 10px; }
-
-  /* Mobile: balance rows taller */
-  .qdex-balance-row { min-height: 40px; padding: 10px 12px; }
-
-  /* Mobile: bottom tab bar larger */
-  .qdex-tab-bar { padding: 0 8px; }
 }
-
-/* ── Deposit / Withdraw ────────────────────────── */
-.qdex-dw-tabs { display: flex; gap: 4px; margin-bottom: 10px; }
-.qdex-dw-tab {
-  flex: 1; padding: 7px; text-align: center;
-  font-size: 11px; font-weight: 600; text-transform: uppercase;
-  border-radius: 5px; border: 1px solid var(--border);
-  background: none; color: var(--text-muted);
-  transition: all .15s;
-}
-.qdex-dw-tab.active { color: var(--text); background: var(--surface-3); border-color: var(--border-hi); }
-.qdex-dw-tab:hover { color: var(--text-dim); }
-.qdex-dw-pane { display: none; }
-.qdex-dw-pane.active { display: block; }
-.qdex-dw-form { padding: 8px 0; }
-.qdex-dw-form .qdex-form-group { margin-bottom: 10px; }
-.qdex-dw-balance { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; }
-.qdex-dw-balance span { color: var(--green); font-weight: 600; }
-.qdex-dw-submit {
-  width: 100%; padding: 10px; font-size: 12px; font-weight: 700;
-  text-transform: uppercase; border: none; border-radius: 5px;
-  transition: opacity .15s;
-}
-.qdex-dw-submit.deposit { background: var(--green); color: #fff; }
-.qdex-dw-submit.withdraw { background: var(--red); color: #fff; }
-.qdex-dw-submit:hover { opacity: .85; }
-.qdex-dw-submit:disabled { opacity: .4; cursor: not-allowed; }
-.qdex-dw-disclaimer {
-  font-size: 10px; color: var(--text-muted); margin-top: 6px;
-  padding: 5px 8px; background: var(--surface-2); border-radius: 4px;
-  line-height: 1.4;
-}
-</style>
+  </style>
 </head>
 <body>
 <!-- Shared Navigation Pill -->
@@ -752,73 +702,6 @@ input { font: inherit; }
           <div class="qdex-tab-pane active" id="walletPane">
             <div class="qdex-empty-state" id="walletEmpty"><div class="icon">🔐</div><p>Connect wallet to view balances</p></div>
             <div id="walletContent" style="display:none"></div>
-            <!-- Deposit / Withdraw Tabs -->
-            <div id="dwSection" style="display:none;padding:8px 12px">
-              <div class="qdex-dw-tabs">
-                <button class="qdex-dw-tab active" id="dwDepositTab" onclick="window.switchDWTab('deposit')">Deposit</button>
-                <button class="qdex-dw-tab" id="dwWithdrawTab" onclick="window.switchDWTab('withdraw')">Withdraw</button>
-              </div>
-              <!-- Deposit Form -->
-              <div class="qdex-dw-pane active" id="dwDepositPane">
-                <div class="qdex-dw-form">
-                  <div class="qdex-form-group">
-                    <label>Token</label>
-                    <div class="qdex-input-row">
-                      <select id="depositToken" style="flex:1;padding:8px 10px;background:none;border:none;color:var(--text);font-size:13px;outline:none;font-family:inherit" onchange="window.updateDepositBalance()">
-                        <option value="WQUAI">WQUAI</option>
-                        <option value="WQI">WQI</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div class="qdex-form-group">
-                    <label>Amount</label>
-                    <div class="qdex-input-row">
-                      <input type="number" id="depositAmount" placeholder="0.00" step="0.01" min="0">
-                      <span class="unit" id="depositUnit">WQUAI</span>
-                    </div>
-                    <div class="qdex-dw-balance">Available: <span id="depositBalance">—</span></div>
-                  </div>
-                  <div class="qdex-form-group">
-                    <label>Destination (Deposit Address)</label>
-                    <div class="qdex-input-row">
-                      <input type="text" id="depositAddress" placeholder="0x... (auto-filled)" readonly style="color:var(--text-muted)">
-                    </div>
-                  </div>
-                  <button class="qdex-dw-submit deposit" id="depositBtn" onclick="window.handleDeposit()">Deposit</button>
-                  <div class="qdex-dw-disclaimer">Deposits are sent to the QDEX vault contract. Use only Quai Network deposit addresses.</div>
-                </div>
-              </div>
-              <!-- Withdraw Form -->
-              <div class="qdex-dw-pane" id="dwWithdrawPane">
-                <div class="qdex-dw-form">
-                  <div class="qdex-form-group">
-                    <label>Token</label>
-                    <div class="qdex-input-row">
-                      <select id="withdrawToken" style="flex:1;padding:8px 10px;background:none;border:none;color:var(--text);font-size:13px;outline:none;font-family:inherit" onchange="window.updateWithdrawBalance()">
-                        <option value="WQUAI">WQUAI</option>
-                        <option value="WQI">WQI</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div class="qdex-form-group">
-                    <label>Amount</label>
-                    <div class="qdex-input-row">
-                      <input type="number" id="withdrawAmount" placeholder="0.00" step="0.01" min="0">
-                      <span class="unit" id="withdrawUnit">WQUAI</span>
-                    </div>
-                    <div class="qdex-dw-balance">Vault Balance: <span id="withdrawBalance">—</span></div>
-                  </div>
-                  <div class="qdex-form-group">
-                    <label>Withdraw Address</label>
-                    <div class="qdex-input-row">
-                      <input type="text" id="withdrawAddress" placeholder="0x...">
-                    </div>
-                  </div>
-                  <button class="qdex-dw-submit withdraw" id="withdrawBtn" onclick="window.handleWithdraw()">Withdraw</button>
-                  <div class="qdex-dw-disclaimer">Withdrawals are sent from your QDEX vault to your specified Quai Network address.</div>
-                </div>
-              </div>
-            </div>
           </div>
           <div class="qdex-tab-pane" id="activityPane">
             <div id="activityLog"></div>
@@ -882,6 +765,7 @@ input { font: inherit; }
   </div>
 </div>
 
+<script src="vendor/lightweight-charts.cjs"></script>
 <script type="module">
 import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
 
@@ -924,13 +808,97 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
   let backendReady = false;
   let chartVisible = true;
   let chart = null;
-  let series = null;
+  let chart = null; // LightweightCharts instance
 
   // ── Helpers ────────────────────────────────────
-  function demoMid(marketId) {
-    if (marketId === 'WQUAI-WQI') return 4.5;
-    if (marketId.includes('USDT')) return 0.05;
-    return 1;
+  function calcMidPrice() {
+    const { bids, asks } = state.orderbook;
+    if (bids.length === 0 || asks.length === 0) return null;
+    const bestBid = Number(bids[0].price);
+    const bestAsk = Number(asks[0].price);
+    return (bestBid + bestAsk) / 2;
+  }
+
+  function safeMidPrice() {
+    const mid = calcMidPrice();
+    return mid !== null ? mid : 0;
+  }
+
+  // ── Chart ────────────────────────────────────
+  function initChart() {
+    if (typeof LightweightCharts === 'undefined') {
+      console.warn('[QDEX] lightweight-charts not loaded');
+      return null;
+    }
+    const container = $('chartContainer');
+    if (!container) return null;
+    try {
+      const chartInstance = LightweightCharts.createChart(container, {
+        width: container.clientWidth || 600,
+        height: 220,
+        layout: {
+          background: { type: 'solid', color: 'transparent' },
+          textColor: '#9ca3af',
+          fontSize: 11,
+          fontFamily: "'JetBrains Mono', monospace",
+        },
+        grid: {
+          vertLines: { color: 'rgba(48,18,25,0.5)' },
+          horzLines: { color: 'rgba(48,18,25,0.5)' },
+        },
+        crosshair: {
+          mode: LightweightCharts.CrosshairMode.Normal,
+          vertLine: { labelBackgroundColor: '#ff253a' },
+          horzLine: { labelBackgroundColor: '#ff253a' },
+        },
+        timeScale: {
+          borderColor: 'rgba(48,18,25,0.5)',
+          timeVisible: true,
+          secondsVisible: false,
+        },
+        rightPriceScale: {
+          borderColor: 'rgba(48,18,25,0.5)',
+        },
+      });
+      const areaSeries = chartInstance.addAreaSeries({
+        topColor: 'rgba(255,37,58,0.25)',
+        bottomColor: 'rgba(255,37,58,0)',
+        lineColor: '#ff253a',
+        lineWidth: 1,
+      });
+      return { chart: chartInstance, series: areaSeries };
+    } catch (e) {
+      console.warn('[QDEX] Chart init failed:', e.message);
+      return null;
+    }
+  }
+
+  function updateChart() {
+    if (!chart || !chart.series) return;
+    const container = $('chartContainer');
+    if (!container) return;
+    // Build price data from orderbook depth
+    const data = [];
+    const now = new Date().getTime() / 1000;
+    // Asks (higher price) as area
+    const asks = (state.orderbook.asks || []).slice(0, 20);
+    const bids = (state.orderbook.bids || []).slice(0, 20);
+    // Show depth profile as time series
+    for (let i = 0; i < asks.length; i++) {
+      data.push({ time: now - (asks.length - i) * 10, value: Number(asks[i].price) });
+    }
+    if (bids.length > 0) {
+      data.push({ time: now, value: Number(bids[0].price) });
+    }
+    for (let i = 1; i < bids.length; i++) {
+      data.push({ time: now + i * 10, value: Number(bids[i].price) });
+    }
+    if (data.length > 0) {
+      chart.series.setData(data);
+      chart.chart.applyOptions({
+        width: container.clientWidth || 600,
+      });
+    }
   }
 
   function logActivity(msg, level = 'info') {
@@ -944,56 +912,10 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
     if (log.children.length > 50) log.removeChild(log.lastChild);
   }
 
-  // API base URL — same as controller uses prime.bitquai.live
-  const API_BASE_URL = 'https://api.bitquai.live';
-
-  // ── WebSocket real-time updates ──────────────
-  let ws = null;
-  const WS_URL = 'wss://wsapi.bitquai.live/v1/ws?channel=market.WQUAI-WQI.depth&channel=market.WQUAI-WQI.trades&channel=global.tickers';
-
-  function connectWebSocket() {
-    try {
-      ws = new WebSocket(WS_URL);
-
-      ws.onopen = () => {
-        console.log('[QDEX] WebSocket connected');
-        logActivity('WebSocket live', 'success');
-      };
-
-      ws.onmessage = (event) => {
-        try {
-          const msg = JSON.parse(event.data);
-          if (msg.type === 'snapshot' || msg.type === 'update') {
-            const data = msg.snapshot || msg.data || msg;
-            if (data.bids !== undefined && data.asks !== undefined) {
-              renderOrderbook(data);
-            }
-            if (data.trades) {
-              renderTrades(data.trades);
-            }
-            if (data.tickers) {
-              renderTickers(data.tickers);
-            }
-          }
-        } catch (e) {
-          console.warn('[QDEX] WS parse error:', e.message);
-        }
-      };
-
-      ws.onclose = () => {
-        console.log('[QDEX] WebSocket disconnected, retrying...');
-        setTimeout(connectWebSocket, 3000);
-      };
-
-      ws.onerror = (err) => {
-        console.warn('[QDEX] WebSocket error:', err);
-      };
-    } catch (e) {
-      console.warn('[QDEX] WS init failed:', e.message);
-      setTimeout(connectWebSocket, 5000);
-    }
-  }
-
+  // Same-origin detection: if running on dex.bitquai.live, use relative /api path
+  const API_BASE_URL = location.hostname.includes('dex.bitquai.live')
+    ? '/api'
+    : 'https://api.bitquai.live';
 
   async function api(path) {
     try {
@@ -1047,8 +969,8 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
   }
 
   async function loadOrderbook() {
-    try {
-      const data = await qdexClient.orderbook.get(state.market);
+    if (backendReady) {
+      const data = await sdkFetch(() => qdexClient.orderbook.get(state.market));
       if (data && (data.bids?.length || data.asks?.length)) {
         state.orderbook = {
           bids: data.bids || [],
@@ -1060,9 +982,19 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
         renderTrades();
         return;
       }
-    } catch (e) {
-      console.warn('[QDEX] Orderbook fetch failed:', e.message);
     }
+
+    const data = await api(`/v1/orderbook/${state.market}`);
+    if (data && (data.bids?.length || data.asks?.length)) {
+      state.orderbook = { bids: data.bids || [], asks: data.asks || [] };
+      state.trades = data.recentTrades || [];
+      updateTickerFromOrderbook();
+      renderOrderbook();
+      renderTrades();
+      return;
+    }
+
+    // No data from API - orderbook stays empty
     renderOrderbook();
     renderTrades();
   }
@@ -1072,13 +1004,13 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
     const bestBid = bids.length > 0 ? bids[0].price : null;
     const bestAsk = asks.length > 0 ? asks[0].price : null;
     
-    const mid = bestBid && bestAsk ? (Number(bestBid) + Number(bestAsk)) / 2 : demoMid(state.market);
-    const last = bestBid || bestAsk || mid;
+    const mid = bestBid && bestAsk ? (Number(bestBid) + Number(bestAsk)) / 2 : calcMidPrice();
+    const last = mid !== null ? mid : (bestBid || bestAsk);
 
     state.tickers[state.market] = {
-      lastPrice: last,
-      bestBid: bestBid || (mid * 0.9985),
-      bestAsk: bestAsk || (mid * 1.0015),
+      lastPrice: last !== null ? last : null,
+      bestBid: bestBid || null,
+      bestAsk: bestAsk || null,
       volume24h: state.trades.reduce((sum, t) => sum + (Number(t.quoteAmount) || Number(t.amount) * Number(t.price) || 0), 0),
       change24h: 0,
     };
@@ -1087,13 +1019,17 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
   }
 
   async function loadTrades() {
-    try {
-      const data = await qdexClient.trades.list(state.market);
-      state.trades = data.trades || [];
-    } catch (e) {
-      console.warn('[QDEX] Trades fetch failed:', e.message);
-      state.trades = [];
+    if (backendReady) {
+      const data = await sdkFetch(() => qdexClient.trades.list(state.market));
+      if (data) {
+        state.trades = data.trades || [];
+        renderTrades();
+        return;
+      }
     }
+
+    const data = await api(`/v1/trades/${state.market}`);
+    state.trades = (data?.trades && data.trades.length) ? data.trades : [];
     renderTrades();
   }
 
@@ -1102,10 +1038,7 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
   }
 
   async function refresh() {
-    await Promise.all([
-      loadOrderbook(),
-      loadTrades(),
-    ]);
+    await loadOrderbook();
     if (state.wallet) {
       loadBalances();
     }
@@ -1145,7 +1078,7 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
       const { bids, asks } = state.orderbook;
       const bestBid = bids.length > 0 ? bids[0].price : null;
       const bestAsk = asks.length > 0 ? asks[0].price : null;
-      const mid = bestBid && bestAsk ? (Number(bestBid) + Number(bestAsk)) / 2 : demoMid(state.market);
+      const mid = bestBid && bestAsk ? (Number(bestBid) + Number(bestAsk)) / 2 : calcMidPrice();
 
       if (bestBid) {
         $('tickerBid').textContent = fmt(bestBid);
@@ -1229,6 +1162,7 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
         </tr>
       `);
     }
+    updateChart();
   }
 
   function renderTrades() {
@@ -1238,14 +1172,12 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
     $('tradesCount').textContent = state.trades.length;
 
     for (const trade of state.trades.slice(0, 50)) {
-      const ts = trade.createdAt || trade.timestamp || trade.settlementStatus;
-      const time = ts ? (typeof ts === 'string' && ts.match(/\d{4}-/) ? new Date(ts).toLocaleTimeString('en-US', { hour12: false }) : ts) : '—';
-      const side = trade.side || (trade.maker && trade.taker ? 'buy' : 'buy');
+      const time = trade.createdAt ? new Date(trade.createdAt).toLocaleTimeString('en-US', { hour12: false }) : '—';
       const total = (Number(trade.price) * Number(trade.amount)).toFixed(4);
       tbody.insertAdjacentHTML('beforeend', `
         <tr>
           <td>${time}</td>
-          <td class="qdex-trade-side ${side}">${side.toUpperCase()}</td>
+          <td class="qdex-trade-side ${trade.side || 'buy'}">${(trade.side || 'buy').toUpperCase()}</td>
           <td>${fmt(trade.price)}</td>
           <td>${fmtAmt(trade.amount)}</td>
           <td>${fmtAmt(total)}</td>
@@ -1370,9 +1302,9 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
               <tr onclick="window.switchMarket('${m.id}')" style="cursor:pointer">
                 <td class="pair" style="font-weight:600">${m.base}/${m.quote}</td>
                 <td><span class="qdex-status-badge">${m.status}</span></td>
-                <td>${fmt(t.lastPrice || demoMid(m.id))}</td>
-                <td class="qdex-trade-side buy">${fmt(t.bestBid || demoMid(m.id) * .998)}</td>
-                <td class="qdex-trade-side sell">${fmt(t.bestAsk || demoMid(m.id) * 1.002)}</td>
+                <td>${t.lastPrice !== null ? fmt(t.lastPrice) : '—'}</td>
+                <td class="qdex-trade-side buy">${t.bestBid !== null ? fmt(t.bestBid) : '—'}</td>
+                <td class="qdex-trade-side sell">${t.bestAsk !== null ? fmt(t.bestAsk) : '—'}</td>
                 <td>${fmtAmt(t.volume24h || 0)}</td>
               </tr>
             `;
@@ -1462,7 +1394,7 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
     const m = state.markets.find(x => x.id === state.market);
     if (!m) return;
 
-    const price = state.orderType === 'limit' ? Number($('priceInput').value || 0) : demoMid(state.market);
+    const price = state.orderType === 'limit' ? Number($('priceInput').value || 0) : (calcMidPrice() || 0);
     const amount = Number($('amtInput').value || 0);
     if (!amount || (state.orderType === 'limit' && !price)) return;
 
@@ -1564,11 +1496,6 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
 
   // ── Wallet Events ──────────────────────────────
   let qdexWallet;
-  if (window.QDexWalletIntegration && qdexClient) {
-    qdexWallet = new QDexWalletIntegration(qdexClient, {
-      onBalanceUpdate: (balances) => { state.balances = balances; renderWalletUI(); },
-    });
-  }
 
   window.addEventListener('bitquai:wallet-connect', async function (e) {
     if (e.detail && e.detail.address) {
@@ -1596,8 +1523,17 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
       }
       
       renderWalletUI();
-      window.onWalletConnected(state.wallet);
-      logActivity(`Wallet connected ${shortAddress(state.wallet)}`, 'success');
+      renderOrders();
+
+      /* Enable submit button on wallet connect */
+      const btn = $('submitBtn');
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = `Place ${state.side} ${state.orderType} order`;
+        btn.className = `qdex-submit-btn ${state.side}`;
+      }
+      updateFormTotal();
+      logActivity(`Wallet connected ${shortAddress(state.wallet)} - ready to trade`, 'success');
     }
   });
 
@@ -1605,220 +1541,104 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
     const old = state.wallet;
     state.wallet = null;
     state.walletProvider = null;
-    state.balances = [];
     renderWalletUI();
-    window.onWalletDisconnected();
+    renderOrders();
     if (old) logActivity(`Wallet disconnected ${shortAddress(old)}`, 'warn');
-  });
-
-  // ── Deposit / Withdraw ────────────────────────
-  function switchDWTab(tab) {
-    $('dwDepositTab').classList.toggle('active', tab === 'deposit');
-    $('dwWithdrawTab').classList.toggle('active', tab === 'withdraw');
-    $('dwDepositPane').classList.toggle('active', tab === 'deposit');
-    $('dwWithdrawPane').classList.toggle('active', tab === 'withdraw');
-  }
-
-  function updateDepositBalance() {
-    const token = $('depositToken').value;
-    const bal = state.balances.find(b => b.token === token);
-    $('depositBalance').textContent = bal ? bal.available || '0' : '0';
-    $('depositUnit').textContent = token;
-  }
-
-  function updateWithdrawBalance() {
-    const token = $('withdrawToken').value;
-    const bal = state.balances.find(b => b.token === token);
-    $('withdrawBalance').textContent = bal ? bal.available || '0' : '0';
-    $('withdrawUnit').textContent = token;
-  }
-
-  async function handleDeposit() {
-    const btn = $('depositBtn');
-    const token = $('depositToken').value;
-    const amount = Number($('depositAmount').value || 0);
-    if (!amount || amount <= 0) {
-      logActivity('Deposit: please enter a valid amount', 'warn');
-      return;
+    
+    const btn = $('submitBtn');
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Connect wallet to trade';
     }
-    if (!state.wallet) {
-      logActivity('Deposit: wallet not connected', 'error');
-      return;
-    }
+    $('formBalance').textContent = '\u2014';
 
-    btn.disabled = true;
-    btn.textContent = 'Processing...';
-    logActivity(`Deposit: ${amount} ${token} — preparing...`, 'info');
+  // ── WebSocket ──────────────────────────────────
+  let wsConnected = false;
+  let ws = null;
+  let wsReconnectTimer = null;
 
+  function connectWebSocket() {
     try {
-      const res = await fetch(`${API_BASE_URL}/v1/deposits`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          owner: state.wallet,
-          token: token,
-          amount: amount.toFixed(4),
-        }),
-      });
-      const text = await res.text();
-      const body = text ? JSON.parse(text) : null;
+      const wsUrl = location.protocol === 'https:' ? 'wss://' : 'ws://';
+      const wsPath = wsUrl + location.hostname + ':8787/v1/ws';
 
-      if (!res.ok) {
-        throw new Error(body?.error || body?.message || `HTTP ${res.status}`);
-      }
-
-      logActivity(`Deposit ${amount} ${token} submitted: ${body?.txHash || body?.id || 'OK'}`, 'success');
-      $('depositAmount').value = '';
-    } catch (e) {
-      logActivity(`Deposit failed: ${e.message}`, 'error');
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'Deposit';
-    }
-  }
-
-  async function handleWithdraw() {
-    const btn = $('withdrawBtn');
-    const token = $('withdrawToken').value;
-    const amount = Number($('withdrawAmount').value || 0);
-    const address = $('withdrawAddress').value.trim();
-
-    if (!amount || amount <= 0) {
-      logActivity('Withdraw: please enter a valid amount', 'warn');
-      return;
-    }
-    if (!address || !address.startsWith('0x')) {
-      logActivity('Withdraw: please enter a valid Quai address', 'warn');
-      return;
-    }
-    if (!state.wallet) {
-      logActivity('Withdraw: wallet not connected', 'error');
-      return;
-    }
-
-    btn.disabled = true;
-    btn.textContent = 'Processing...';
-    logActivity(`Withdraw: ${amount} ${token} to ${shortAddress(address)} — preparing...`, 'info');
-
-    try {
-      const res = await fetch(`${API_BASE_URL}/v1/withdrawals`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          owner: state.wallet,
-          token: token,
-          amount: amount.toFixed(4),
-          address: address,
-        }),
-      });
-      const text = await res.text();
-      const body = text ? JSON.parse(text) : null;
-
-      if (!res.ok) {
-        throw new Error(body?.error || body?.message || `HTTP ${res.status}`);
-      }
-
-      logActivity(`Withdrawal ${amount} ${token} submitted: ${body?.txHash || body?.id || 'OK'}`, 'success');
-      $('withdrawAmount').value = '';
-    } catch (e) {
-      logActivity(`Withdrawal failed: ${e.message}`, 'error');
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'Withdraw';
-    }
-  }
-
-  // ── Cancel Order ──────────────────────────────
-  async function cancelOrder(orderHash) {
-    if (!orderHash) {
-      logActivity('Cancel: no order hash provided', 'error');
-      return;
-    }
-
-    logActivity(`Cancelling order ${orderHash.slice(0, 12)}...`, 'info');
-
-    try {
-      // Try POST /v1/orders/:orderHash/cancel as specified
-      const res = await fetch(`${API_BASE_URL}/v1/orders/${encodeURIComponent(orderHash)}/cancel`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      const text = await res.text();
-      const body = text ? JSON.parse(text) : null;
-
-      if (!res.ok) {
-        throw new Error(body?.error || body?.message || `HTTP ${res.status}`);
-      }
-
-      // Remove from state
-      state.orders = state.orders.filter(o => o.id !== orderHash && o.id !== orderHash.slice(0, 12));
-      renderOrders();
-      logActivity(`Order ${orderHash.slice(0, 12)} cancelled: ${body?.status || 'OK'}`, 'success');
-    } catch (e) {
-      // Fallback to SDK's DELETE method
-      try {
-        if (qdexClient) {
-          await qdexClient.orders.cancel(orderHash);
-          state.orders = state.orders.filter(o => o.id !== orderHash && o.id !== orderHash.slice(0, 12));
-          renderOrders();
-          logActivity(`Order ${orderHash.slice(0, 12)} cancelled (via SDK)`, 'success');
+      ws = new WebSocket(wsPath);
+      ws.onopen = () => {
+        wsConnected = true;
+        logActivity('WebSocket connected', 'success');
+        ws.send(JSON.stringify({
+          subscribe: ['orders', 'fills', 'market.WQUAI-WQI.depth']
+        }));
+      };
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.type === 'orderbook' || msg.type === 'depth') {
+            state.orderbook = { bids: msg.bids || [], asks: msg.asks || [] };
+            updateTickerFromOrderbook();
+            renderOrderbook();
+            updateChart();
+          } else if (msg.type === 'fill' || msg.type === 'trade') {
+            state.trades.unshift(msg);
+            renderTrades();
+          } else if (msg.type === 'order') {
+            loadOrderbook();
+          }
+        } catch (e) {
+          console.warn('[QDEX] WS parse error:', e.message);
         }
-      } catch (sdkErr) {
-        logActivity(`Cancel failed: ${e.message} — SDK fallback: ${sdkErr.message}`, 'error');
-      }
+      };
+      ws.onclose = () => {
+        wsConnected = false;
+        logActivity('WebSocket disconnected, reconnecting...', 'warn');
+        wsReconnectTimer = setTimeout(connectWebSocket, 3000);
+      };
+      ws.onerror = () => {
+        wsConnected = false;
+      };
+    } catch (e) {
+      console.warn('[QDEX] WebSocket init failed:', e.message);
     }
   }
-
-  // ── Wallet Connect / Disconnect Handlers ──────
-  function onWalletConnected(address) {
-    // Show deposit/withdraw section
-    const dwSection = $('dwSection');
-    if (dwSection) {
-      dwSection.style.display = 'block';
-    }
-    // Auto-fill deposit address
-    const depAddr = $('depositAddress');
-    if (depAddr) {
-      depAddr.value = address;
-    }
-    // Update balances in forms
-    updateDepositBalance();
-    updateWithdrawBalance();
-  }
-
-  function onWalletDisconnected() {
-    const dwSection = $('dwSection');
-    if (dwSection) {
-      dwSection.style.display = 'none';
-    }
-  }
-
-  // ── Global Exposure ───────────────────────────
-  window.switchDWTab = switchDWTab;
-  window.handleDeposit = handleDeposit;
-  window.handleWithdraw = handleWithdraw;
-  window.updateDepositBalance = updateDepositBalance;
-  window.updateWithdrawBalance = updateWithdrawBalance;
-  window.cancelOrder = cancelOrder;
-  window.onWalletConnected = onWalletConnected;
-  window.onWalletDisconnected = onWalletDisconnected;
 
   // ── Init ───────────────────────────────────────
   async function init() {
     logActivity('BitQuai QDEX terminal loaded', 'info');
 
     await initQDexClient();
+
+    /* FIX: Init qdexWallet after qdexClient is ready */
+    if (window.QDexWalletIntegration && qdexClient) {
+      qdexWallet = new QDexWalletIntegration(qdexClient, {
+        onBalanceUpdate: (balances) => { state.balances = balances; renderWalletUI(); },
+      });
+      logActivity('Wallet integration initialized', 'success');
+    } else {
+      logActivity('Wallet integration unavailable', 'warn');
+    }
+
     logActivity(backendReady ? 'Connected to QDEX backend' : 'Demo mode — no backend', backendReady ? 'success' : 'warn');
 
     await loadMarkets();
     await refresh();
+    chart = initChart();
     switchView('trade');
 
-    // Refresh every 2s
-    setInterval(refresh, 2000);
+    // WebSocket connection for real-time updates
+    connectWebSocket();
+
+    // Fallback refresh every 5s if WS disconnected
+    setInterval(() => {
+      if (!wsConnected) refresh();
+    }, 5000);
   }
 
-  init();
+  /* FIX: Wait for DOM to be fully ready */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
   </script>
 </main>
 <script>
