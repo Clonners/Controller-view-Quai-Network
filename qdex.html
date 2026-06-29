@@ -930,44 +930,22 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
   }
 
   async function loadOrderbook() {
-    let data = null;
-    
-    // Try SDK first
-    if (backendReady && qdexClient) {
-      try {
-        data = await qdexClient.orderbook.get(state.market);
-      } catch (e) {
-        console.warn('[QDEX] SDK orderbook failed:', e.message);
+    try {
+      const data = await qdexClient.orderbook.get(state.market);
+      if (data && (data.bids?.length || data.asks?.length)) {
+        state.orderbook = {
+          bids: data.bids || [],
+          asks: data.asks || [],
+        };
+        state.trades = data.recentTrades || [];
+        updateTickerFromOrderbook();
+        renderOrderbook();
+        renderTrades();
+        return;
       }
+    } catch (e) {
+      console.warn('[QDEX] Orderbook fetch failed:', e.message);
     }
-    
-    // Fallback to direct API
-    if (!data || (!data.bids?.length && !data.asks?.length)) {
-      try {
-        const res = await fetch(`${API_BASE_URL}/v1/orderbook/${state.market}`);
-        if (res.ok) {
-          data = await res.json();
-          console.log('[QDEX] Fallback API orderbook:', data.bids?.length, 'bids,', data.asks?.length, 'asks');
-        }
-      } catch (e) {
-        console.warn('[QDEX] Direct API orderbook failed:', e.message);
-      }
-    }
-    
-    if (data && (data.bids?.length || data.asks?.length)) {
-      state.orderbook = {
-        bids: data.bids || [],
-        asks: data.asks || [],
-      };
-      state.trades = data.recentTrades || [];
-      updateTickerFromOrderbook();
-      renderOrderbook();
-      renderTrades();
-      console.log('[QDEX] Orderbook rendered:', state.orderbook.bids.length, 'bids,', state.orderbook.asks.length, 'asks');
-      return;
-    }
-    
-    console.warn('[QDEX] No orderbook data available');
     renderOrderbook();
     renderTrades();
   }
@@ -992,29 +970,13 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
   }
 
   async function loadTrades() {
-    let data = null;
-    
-    if (backendReady && qdexClient) {
-      try {
-        data = await qdexClient.trades.list(state.market);
-      } catch (e) {
-        console.warn('[QDEX] SDK trades failed:', e.message);
-      }
+    try {
+      const data = await qdexClient.trades.list(state.market);
+      state.trades = data.trades || [];
+    } catch (e) {
+      console.warn('[QDEX] Trades fetch failed:', e.message);
+      state.trades = [];
     }
-    
-    if (!data || !data.trades?.length) {
-      try {
-        const res = await fetch(`${API_BASE_URL}/v1/trades/${state.market}`);
-        if (res.ok) {
-          data = await res.json();
-          console.log('[QDEX] Fallback API trades:', data.trades?.length, 'trades');
-        }
-      } catch (e) {
-        console.warn('[QDEX] Direct API trades failed:', e.message);
-      }
-    }
-    
-    state.trades = data?.trades || [];
     renderTrades();
   }
 
