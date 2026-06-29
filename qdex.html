@@ -930,32 +930,44 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
   }
 
   async function loadOrderbook() {
-    if (backendReady) {
-      const data = await sdkFetch(() => qdexClient.orderbook.get(state.market));
-      if (data && (data.bids?.length || data.asks?.length)) {
-        state.orderbook = {
-          bids: data.bids || [],
-          asks: data.asks || [],
-        };
-        state.trades = data.recentTrades || [];
-        updateTickerFromOrderbook();
-        renderOrderbook();
-        renderTrades();
-        return;
+    let data = null;
+    
+    // Try SDK first
+    if (backendReady && qdexClient) {
+      try {
+        data = await qdexClient.orderbook.get(state.market);
+      } catch (e) {
+        console.warn('[QDEX] SDK orderbook failed:', e.message);
       }
     }
-
-    const data = await api(`/v1/orderbook/${state.market}`);
+    
+    // Fallback to direct API
+    if (!data || (!data.bids?.length && !data.asks?.length)) {
+      try {
+        const res = await fetch(`${API_BASE_URL}/v1/orderbook/${state.market}`);
+        if (res.ok) {
+          data = await res.json();
+          console.log('[QDEX] Fallback API orderbook:', data.bids?.length, 'bids,', data.asks?.length, 'asks');
+        }
+      } catch (e) {
+        console.warn('[QDEX] Direct API orderbook failed:', e.message);
+      }
+    }
+    
     if (data && (data.bids?.length || data.asks?.length)) {
-      state.orderbook = { bids: data.bids || [], asks: data.asks || [] };
+      state.orderbook = {
+        bids: data.bids || [],
+        asks: data.asks || [],
+      };
       state.trades = data.recentTrades || [];
       updateTickerFromOrderbook();
       renderOrderbook();
       renderTrades();
+      console.log('[QDEX] Orderbook rendered:', state.orderbook.bids.length, 'bids,', state.orderbook.asks.length, 'asks');
       return;
     }
-
-    // No data from API - orderbook stays empty
+    
+    console.warn('[QDEX] No orderbook data available');
     renderOrderbook();
     renderTrades();
   }
@@ -980,17 +992,29 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
   }
 
   async function loadTrades() {
-    if (backendReady) {
-      const data = await sdkFetch(() => qdexClient.trades.list(state.market));
-      if (data) {
-        state.trades = data.trades || [];
-        renderTrades();
-        return;
+    let data = null;
+    
+    if (backendReady && qdexClient) {
+      try {
+        data = await qdexClient.trades.list(state.market);
+      } catch (e) {
+        console.warn('[QDEX] SDK trades failed:', e.message);
       }
     }
-
-    const data = await api(`/v1/trades/${state.market}`);
-    state.trades = (data?.trades && data.trades.length) ? data.trades : [];
+    
+    if (!data || !data.trades?.length) {
+      try {
+        const res = await fetch(`${API_BASE_URL}/v1/trades/${state.market}`);
+        if (res.ok) {
+          data = await res.json();
+          console.log('[QDEX] Fallback API trades:', data.trades?.length, 'trades');
+        }
+      } catch (e) {
+        console.warn('[QDEX] Direct API trades failed:', e.message);
+      }
+    }
+    
+    state.trades = data?.trades || [];
     renderTrades();
   }
 
@@ -999,7 +1023,10 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
   }
 
   async function refresh() {
-    await loadOrderbook();
+    await Promise.all([
+      loadOrderbook(),
+      loadTrades(),
+    ]);
     if (state.wallet) {
       loadBalances();
     }
@@ -1132,12 +1159,14 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
     $('tradesCount').textContent = state.trades.length;
 
     for (const trade of state.trades.slice(0, 50)) {
-      const time = trade.createdAt ? new Date(trade.createdAt).toLocaleTimeString('en-US', { hour12: false }) : '—';
+      const ts = trade.createdAt || trade.timestamp || trade.settlementStatus;
+      const time = ts ? (typeof ts === 'string' && ts.match(/\d{4}-/) ? new Date(ts).toLocaleTimeString('en-US', { hour12: false }) : ts) : '—';
+      const side = trade.side || (trade.maker && trade.taker ? 'buy' : 'buy');
       const total = (Number(trade.price) * Number(trade.amount)).toFixed(4);
       tbody.insertAdjacentHTML('beforeend', `
         <tr>
           <td>${time}</td>
-          <td class="qdex-trade-side ${trade.side || 'buy'}">${(trade.side || 'buy').toUpperCase()}</td>
+          <td class="qdex-trade-side ${side}">${side.toUpperCase()}</td>
           <td>${fmt(trade.price)}</td>
           <td>${fmtAmt(trade.amount)}</td>
           <td>${fmtAmt(total)}</td>
