@@ -1,5 +1,5 @@
 /* BitQuai Service Worker — PWA Offline Cache */
-const CACHE = 'bitquai-v1';
+const CACHE = 'bitquai-v2';  // bumped v1→v2 to bust cache after SDK fix
 const ASSETS = [
   '/',
   '/index.html',
@@ -40,8 +40,8 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  // Cache-first for assets, network-first for API
-  if (e.request.url.includes('/api/') || e.request.url.includes('/v1/')) {
+  // Cache-first for assets, network-first for API and SDK
+  if (e.request.url.includes('/api/') || e.request.url.includes('/v1/') || e.request.url.includes('qdex-sdk')) {
     return; // network only
   }
   e.respondWith(
