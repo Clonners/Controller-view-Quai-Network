@@ -538,8 +538,58 @@ input { font: inherit; }
   /* Mobile: trade history compact */
   .qdex-trades-table { font-size: 10px; min-width: 280px; }
   .qdex-trades-table th, .qdex-trades-table td { padding: 2px 8px; }
+
+  /* Mobile: larger touch targets for interactive elements */
+  .qdex-market-item { min-height: 44px; }
+  .qdex-tab-item { min-height: 44px; padding: 12px 10px; font-size: 11px; }
+  .qdex-cancel-btn { min-height: 32px; min-width: 32px; padding: 6px 12px; font-size: 11px; }
+  .qdex-pct-btn { min-height: 36px; padding: 8px; }
+  .qdex-submit-btn { min-height: 44px; padding: 12px; }
+  .qdex-ob-table tr { min-height: 28px; }
+
+  /* Mobile: orders table row height for touch */
+  .qdex-orders-table td { padding: 8px 10px; }
+  .qdex-orders-table th { padding: 6px 10px; }
+
+  /* Mobile: balance rows taller */
+  .qdex-balance-row { min-height: 40px; padding: 10px 12px; }
+
+  /* Mobile: bottom tab bar larger */
+  .qdex-tab-bar { padding: 0 8px; }
 }
-  </style>
+
+/* ── Deposit / Withdraw ────────────────────────── */
+.qdex-dw-tabs { display: flex; gap: 4px; margin-bottom: 10px; }
+.qdex-dw-tab {
+  flex: 1; padding: 7px; text-align: center;
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  border-radius: 5px; border: 1px solid var(--border);
+  background: none; color: var(--text-muted);
+  transition: all .15s;
+}
+.qdex-dw-tab.active { color: var(--text); background: var(--surface-3); border-color: var(--border-hi); }
+.qdex-dw-tab:hover { color: var(--text-dim); }
+.qdex-dw-pane { display: none; }
+.qdex-dw-pane.active { display: block; }
+.qdex-dw-form { padding: 8px 0; }
+.qdex-dw-form .qdex-form-group { margin-bottom: 10px; }
+.qdex-dw-balance { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; }
+.qdex-dw-balance span { color: var(--green); font-weight: 600; }
+.qdex-dw-submit {
+  width: 100%; padding: 10px; font-size: 12px; font-weight: 700;
+  text-transform: uppercase; border: none; border-radius: 5px;
+  transition: opacity .15s;
+}
+.qdex-dw-submit.deposit { background: var(--green); color: #fff; }
+.qdex-dw-submit.withdraw { background: var(--red); color: #fff; }
+.qdex-dw-submit:hover { opacity: .85; }
+.qdex-dw-submit:disabled { opacity: .4; cursor: not-allowed; }
+.qdex-dw-disclaimer {
+  font-size: 10px; color: var(--text-muted); margin-top: 6px;
+  padding: 5px 8px; background: var(--surface-2); border-radius: 4px;
+  line-height: 1.4;
+}
+</style>
 </head>
 <body>
 <!-- Shared Navigation Pill -->
@@ -702,6 +752,73 @@ input { font: inherit; }
           <div class="qdex-tab-pane active" id="walletPane">
             <div class="qdex-empty-state" id="walletEmpty"><div class="icon">🔐</div><p>Connect wallet to view balances</p></div>
             <div id="walletContent" style="display:none"></div>
+            <!-- Deposit / Withdraw Tabs -->
+            <div id="dwSection" style="display:none;padding:8px 12px">
+              <div class="qdex-dw-tabs">
+                <button class="qdex-dw-tab active" id="dwDepositTab" onclick="window.switchDWTab('deposit')">Deposit</button>
+                <button class="qdex-dw-tab" id="dwWithdrawTab" onclick="window.switchDWTab('withdraw')">Withdraw</button>
+              </div>
+              <!-- Deposit Form -->
+              <div class="qdex-dw-pane active" id="dwDepositPane">
+                <div class="qdex-dw-form">
+                  <div class="qdex-form-group">
+                    <label>Token</label>
+                    <div class="qdex-input-row">
+                      <select id="depositToken" style="flex:1;padding:8px 10px;background:none;border:none;color:var(--text);font-size:13px;outline:none;font-family:inherit" onchange="window.updateDepositBalance()">
+                        <option value="WQUAI">WQUAI</option>
+                        <option value="WQI">WQI</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="qdex-form-group">
+                    <label>Amount</label>
+                    <div class="qdex-input-row">
+                      <input type="number" id="depositAmount" placeholder="0.00" step="0.01" min="0">
+                      <span class="unit" id="depositUnit">WQUAI</span>
+                    </div>
+                    <div class="qdex-dw-balance">Available: <span id="depositBalance">—</span></div>
+                  </div>
+                  <div class="qdex-form-group">
+                    <label>Destination (Deposit Address)</label>
+                    <div class="qdex-input-row">
+                      <input type="text" id="depositAddress" placeholder="0x... (auto-filled)" readonly style="color:var(--text-muted)">
+                    </div>
+                  </div>
+                  <button class="qdex-dw-submit deposit" id="depositBtn" onclick="window.handleDeposit()">Deposit</button>
+                  <div class="qdex-dw-disclaimer">Deposits are sent to the QDEX vault contract. Use only Quai Network deposit addresses.</div>
+                </div>
+              </div>
+              <!-- Withdraw Form -->
+              <div class="qdex-dw-pane" id="dwWithdrawPane">
+                <div class="qdex-dw-form">
+                  <div class="qdex-form-group">
+                    <label>Token</label>
+                    <div class="qdex-input-row">
+                      <select id="withdrawToken" style="flex:1;padding:8px 10px;background:none;border:none;color:var(--text);font-size:13px;outline:none;font-family:inherit" onchange="window.updateWithdrawBalance()">
+                        <option value="WQUAI">WQUAI</option>
+                        <option value="WQI">WQI</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="qdex-form-group">
+                    <label>Amount</label>
+                    <div class="qdex-input-row">
+                      <input type="number" id="withdrawAmount" placeholder="0.00" step="0.01" min="0">
+                      <span class="unit" id="withdrawUnit">WQUAI</span>
+                    </div>
+                    <div class="qdex-dw-balance">Vault Balance: <span id="withdrawBalance">—</span></div>
+                  </div>
+                  <div class="qdex-form-group">
+                    <label>Withdraw Address</label>
+                    <div class="qdex-input-row">
+                      <input type="text" id="withdrawAddress" placeholder="0x...">
+                    </div>
+                  </div>
+                  <button class="qdex-dw-submit withdraw" id="withdrawBtn" onclick="window.handleWithdraw()">Withdraw</button>
+                  <div class="qdex-dw-disclaimer">Withdrawals are sent from your QDEX vault to your specified Quai Network address.</div>
+                </div>
+              </div>
+            </div>
           </div>
           <div class="qdex-tab-pane" id="activityPane">
             <div id="activityLog"></div>
@@ -1479,6 +1596,7 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
       }
       
       renderWalletUI();
+      window.onWalletConnected(state.wallet);
       logActivity(`Wallet connected ${shortAddress(state.wallet)}`, 'success');
     }
   });
@@ -1489,8 +1607,201 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
     state.walletProvider = null;
     state.balances = [];
     renderWalletUI();
+    window.onWalletDisconnected();
     if (old) logActivity(`Wallet disconnected ${shortAddress(old)}`, 'warn');
   });
+
+  // ── Deposit / Withdraw ────────────────────────
+  function switchDWTab(tab) {
+    $('dwDepositTab').classList.toggle('active', tab === 'deposit');
+    $('dwWithdrawTab').classList.toggle('active', tab === 'withdraw');
+    $('dwDepositPane').classList.toggle('active', tab === 'deposit');
+    $('dwWithdrawPane').classList.toggle('active', tab === 'withdraw');
+  }
+
+  function updateDepositBalance() {
+    const token = $('depositToken').value;
+    const bal = state.balances.find(b => b.token === token);
+    $('depositBalance').textContent = bal ? bal.available || '0' : '0';
+    $('depositUnit').textContent = token;
+  }
+
+  function updateWithdrawBalance() {
+    const token = $('withdrawToken').value;
+    const bal = state.balances.find(b => b.token === token);
+    $('withdrawBalance').textContent = bal ? bal.available || '0' : '0';
+    $('withdrawUnit').textContent = token;
+  }
+
+  async function handleDeposit() {
+    const btn = $('depositBtn');
+    const token = $('depositToken').value;
+    const amount = Number($('depositAmount').value || 0);
+    if (!amount || amount <= 0) {
+      logActivity('Deposit: please enter a valid amount', 'warn');
+      return;
+    }
+    if (!state.wallet) {
+      logActivity('Deposit: wallet not connected', 'error');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Processing...';
+    logActivity(`Deposit: ${amount} ${token} — preparing...`, 'info');
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/v1/deposits`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          owner: state.wallet,
+          token: token,
+          amount: amount.toFixed(4),
+        }),
+      });
+      const text = await res.text();
+      const body = text ? JSON.parse(text) : null;
+
+      if (!res.ok) {
+        throw new Error(body?.error || body?.message || `HTTP ${res.status}`);
+      }
+
+      logActivity(`Deposit ${amount} ${token} submitted: ${body?.txHash || body?.id || 'OK'}`, 'success');
+      $('depositAmount').value = '';
+    } catch (e) {
+      logActivity(`Deposit failed: ${e.message}`, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Deposit';
+    }
+  }
+
+  async function handleWithdraw() {
+    const btn = $('withdrawBtn');
+    const token = $('withdrawToken').value;
+    const amount = Number($('withdrawAmount').value || 0);
+    const address = $('withdrawAddress').value.trim();
+
+    if (!amount || amount <= 0) {
+      logActivity('Withdraw: please enter a valid amount', 'warn');
+      return;
+    }
+    if (!address || !address.startsWith('0x')) {
+      logActivity('Withdraw: please enter a valid Quai address', 'warn');
+      return;
+    }
+    if (!state.wallet) {
+      logActivity('Withdraw: wallet not connected', 'error');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Processing...';
+    logActivity(`Withdraw: ${amount} ${token} to ${shortAddress(address)} — preparing...`, 'info');
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/v1/withdrawals`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          owner: state.wallet,
+          token: token,
+          amount: amount.toFixed(4),
+          address: address,
+        }),
+      });
+      const text = await res.text();
+      const body = text ? JSON.parse(text) : null;
+
+      if (!res.ok) {
+        throw new Error(body?.error || body?.message || `HTTP ${res.status}`);
+      }
+
+      logActivity(`Withdrawal ${amount} ${token} submitted: ${body?.txHash || body?.id || 'OK'}`, 'success');
+      $('withdrawAmount').value = '';
+    } catch (e) {
+      logActivity(`Withdrawal failed: ${e.message}`, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Withdraw';
+    }
+  }
+
+  // ── Cancel Order ──────────────────────────────
+  async function cancelOrder(orderHash) {
+    if (!orderHash) {
+      logActivity('Cancel: no order hash provided', 'error');
+      return;
+    }
+
+    logActivity(`Cancelling order ${orderHash.slice(0, 12)}...`, 'info');
+
+    try {
+      // Try POST /v1/orders/:orderHash/cancel as specified
+      const res = await fetch(`${API_BASE_URL}/v1/orders/${encodeURIComponent(orderHash)}/cancel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const text = await res.text();
+      const body = text ? JSON.parse(text) : null;
+
+      if (!res.ok) {
+        throw new Error(body?.error || body?.message || `HTTP ${res.status}`);
+      }
+
+      // Remove from state
+      state.orders = state.orders.filter(o => o.id !== orderHash && o.id !== orderHash.slice(0, 12));
+      renderOrders();
+      logActivity(`Order ${orderHash.slice(0, 12)} cancelled: ${body?.status || 'OK'}`, 'success');
+    } catch (e) {
+      // Fallback to SDK's DELETE method
+      try {
+        if (qdexClient) {
+          await qdexClient.orders.cancel(orderHash);
+          state.orders = state.orders.filter(o => o.id !== orderHash && o.id !== orderHash.slice(0, 12));
+          renderOrders();
+          logActivity(`Order ${orderHash.slice(0, 12)} cancelled (via SDK)`, 'success');
+        }
+      } catch (sdkErr) {
+        logActivity(`Cancel failed: ${e.message} — SDK fallback: ${sdkErr.message}`, 'error');
+      }
+    }
+  }
+
+  // ── Wallet Connect / Disconnect Handlers ──────
+  function onWalletConnected(address) {
+    // Show deposit/withdraw section
+    const dwSection = $('dwSection');
+    if (dwSection) {
+      dwSection.style.display = 'block';
+    }
+    // Auto-fill deposit address
+    const depAddr = $('depositAddress');
+    if (depAddr) {
+      depAddr.value = address;
+    }
+    // Update balances in forms
+    updateDepositBalance();
+    updateWithdrawBalance();
+  }
+
+  function onWalletDisconnected() {
+    const dwSection = $('dwSection');
+    if (dwSection) {
+      dwSection.style.display = 'none';
+    }
+  }
+
+  // ── Global Exposure ───────────────────────────
+  window.switchDWTab = switchDWTab;
+  window.handleDeposit = handleDeposit;
+  window.handleWithdraw = handleWithdraw;
+  window.updateDepositBalance = updateDepositBalance;
+  window.updateWithdrawBalance = updateWithdrawBalance;
+  window.cancelOrder = cancelOrder;
+  window.onWalletConnected = onWalletConnected;
+  window.onWalletDisconnected = onWalletDisconnected;
 
   // ── Init ───────────────────────────────────────
   async function init() {
