@@ -1235,7 +1235,7 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
           <td>${fmtWei(order.price)}</td>
           <td>${fmtAmt(order.amount)}</td>
           <td>${order.filled}</td>
-          <td><button class="qdex-cancel-btn" onclick="cancelOrder('${order.id}')">Cancel</button></td>
+          <td>${order.idShort || order.id.slice(0,12)}</td>\n          <td><button class="qdex-cancel-btn" onclick="cancelOrder('${order.id}')">Cancel</button></td>
         </tr>
       `);
     }
@@ -1339,6 +1339,69 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
     renderPortfolioView();
     renderMarketsView();
   };
+
+
+  // ── Chart Toggle ──────────────────────────────
+  window.toggleChart = function() {
+    chartVisible = !chartVisible;
+    $('chartRow').style.display = chartVisible ? 'flex' : 'none';
+  };
+
+  // ── Cancel Order ───────────────────────────────
+  window.cancelOrder = async function(orderHash) {
+    // orderHash is the full hash
+    const order = state.orders.find(o => o.id === orderHash);
+    if (!order) { logActivity('Order not found', 'warn'); return; }
+
+    try {
+      const resp = await fetch(`${API_BASE_URL}/v1/orders/${orderId}`, {
+        method: 'DELETE',
+      });
+      const result = await resp.json();
+      if (result.cancelled || result.cancelledCount) {
+        logActivity(`Order cancelled: ${orderId}`, 'success');
+        order.status = 'cancelled';
+        renderOrders();
+      } else {
+        logActivity(`Cancel failed: ${result.error || result.reason || 'unknown'}`, 'warn');
+      }
+    } catch (e) {
+      logActivity(`Cancel error: ${e.message}`, 'error');
+    }
+  };
+
+  // ── Disconnect Wallet ──────────────────────────
+  window.disconnectWallet = function() {
+    state.wallet = null;
+    state.walletProvider = null;
+    state.balances = [];
+    renderWalletUI();
+    renderOrders();
+    logActivity('Wallet disconnected', 'warn');
+    const btn = $('submitBtn');
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Connect wallet to trade';
+    }
+    $('formBalance').textContent = '\u2014';
+  };
+
+  // ── Bottom Tab Switch ──────────────────────────
+  window.switchBottomTab = function(el, tabName) {
+    const parent = el.closest('.qdex-tab-bar')?.parentElement;
+    if (!parent) return;
+    parent.querySelectorAll('.qdex-tab-item').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+
+    // Toggle visibility of content panels
+    const panels = parent.querySelectorAll(':scope > div:last-child, :scope > .qdex-bottom-panel');
+    panels.forEach(p => p.style.display = 'none');
+    const target = $(tabName === 'orders' ? 'ordersTableContainer' :
+                     tabName === 'fills' ? 'fillsTableContainer' :
+                     tabName === 'wallet' ? 'walletContainer' : 'activityLog');
+    if (target) target.style.display = '';
+  };
+
 
   // ── Trade Form ─────────────────────────────────
   function setSide(side) {
@@ -1493,7 +1556,9 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
           if (result && result.orderHash) {
             logActivity(`Order submitted: ${result.orderHash.slice(0, 12)}... (${result.status || 'open'})`, 'success');
             state.orders.unshift({
-              id: result.orderHash.slice(0, 12),
+              id: result.orderHash,
+              idShort: result.orderHash.slice(0, 12),
+              orderHash: result.orderHash,
               pair: `${m.base}/${m.quote}`,
               side: state.side,
               type: state.orderType,
@@ -1524,7 +1589,8 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
 
   function createLocalOrder(order, m, price, amount, nonce) {
     const orderData = {
-      id: 'ord_' + nonce.slice(0, 7),
+      id: order.orderHash || 'ord_' + nonce,
+      idShort: (order.orderHash || 'ord_' + nonce).slice(0, 12),
       pair: `${m.base}/${m.quote}`,
       side: state.side,
       type: state.orderType,
