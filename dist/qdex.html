@@ -83,6 +83,18 @@ input { font: inherit; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
+/* ── Vault Cards ──────────────────────────────── */
+.qdex-vault-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+.qdex-vault-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; padding: 12px; }
+.qdex-vault-card h4 { color: var(--text-dim); font-size: 11px; margin-bottom: 8px; }
+.qdex-vault-input { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 6px 8px; border-radius: 4px; font: 12px var(--mono); margin-bottom: 6px; }
+.qdex-vault-select { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 6px 8px; border-radius: 4px; font: 12px var(--mono); margin-bottom: 6px; }
+.qdex-vault-btn { width: 100%; padding: 6px; border: 1px solid var(--border); border-radius: 4px; font: 12px var(--mono); cursor: pointer; background: var(--surface); color: var(--text); }
+.qdex-vault-btn.deposit { border-color: var(--green); color: var(--green); }
+.qdex-vault-btn.withdraw { border-color: var(--yellow); color: var(--yellow); }
+.qdex-vault-btn:hover { background: var(--surface-3); }
+.qdex-vault-status { font-size: 11px; color: var(--text-muted); margin-top: 4px; min-height: 16px; }
+
 /* ── QDEX Top Bar ──────────────────────────────── */
 .qdex-topbar {
   position: sticky; top: 0; z-index: 200;
@@ -746,6 +758,25 @@ input { font: inherit; }
         <div class="qdex-view-card-header"><span>Open Orders</span><span id="portfolioOrderCount">0</span></div>
         <div class="qdex-view-card-body" id="portfolioOrders"></div>
       </div>
+      <div class="qdex-view-card" style="grid-column: 1 / -1;">
+        <div class="qdex-view-card-header"><span>Vault</span><span id="vaultBadge">—</span></div>
+        <div class="qdex-vault-grid">
+          <div class="qdex-vault-card">
+            <h4>DEPOSIT</h4>
+            <select class="qdex-vault-select" id="depositToken"><option value="WQUAI">WQUAI</option><option value="WQI">WQI</option></select>
+            <input class="qdex-vault-input" id="depositAmount" type="text" placeholder="Amount">
+            <button class="qdex-vault-btn deposit" id="depositBtn" onclick="window._vaultDeposit()">Deposit</button>
+            <div class="qdex-vault-status" id="depositStatus"></div>
+          </div>
+          <div class="qdex-vault-card">
+            <h4>WITHDRAW</h4>
+            <select class="qdex-vault-select" id="withdrawToken"><option value="WQUAI">WQUAI</option><option value="WQI">WQI</option></select>
+            <input class="qdex-vault-input" id="withdrawAmount" type="text" placeholder="Amount">
+            <button class="qdex-vault-btn withdraw" id="withdrawBtn" onclick="window._vaultWithdraw()">Withdraw</button>
+            <div class="qdex-vault-status" id="withdrawStatus"></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -766,7 +797,13 @@ input { font: inherit; }
 </div>
 
 <script type="module">
-import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
+// Inline QDexClient (GitHub Pages compat - no external imports)
+class QDexClient {
+  constructor(opts = {}) { this.baseUrl = opts.baseUrl || ''; }
+  async markets() { try { const r=await fetch(this.baseUrl+'/v1/markets'); return await r.json(); } catch { return null; } }
+  async orderbook(m) { try { const r=await fetch(this.baseUrl+'/v1/orderbook/'+m); return await r.json(); } catch { return null; } }
+  async submitSignedOrder(o) { try { const r=await fetch(this.baseUrl+'/v1/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)}); return await r.json(); } catch { throw new Error('API unavailable'); } }
+}
 
 // ── Globals ──────────────────────────────────────
   const $ = (id) => document.getElementById(id);
@@ -1402,6 +1439,98 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
     if (target) target.style.display = '';
   };
 
+
+  // ── Vault Functions ────────────────────────────
+  const getTokenAddress = (symbol) => {
+    const tokens = { WQUAI: '0x005c46f661baef20671943f2b4c087df3e7ceb13', WQI: '0x002b2596ecf05c93a31ff916e8b456df6c77c750' };
+    return tokens[symbol] || '';
+  };
+
+  window._vaultDeposit = async () => {
+    if (!state.wallet) { $('depositStatus').textContent = 'Connect wallet first'; return; }
+    const token = $('depositToken')?.value;
+    const amount = $('depositAmount')?.value;
+    if (!amount || parseFloat(amount) <= 0) { $('depositStatus').textContent = 'Invalid amount'; return; }
+
+    $('depositStatus').textContent = 'Building approve tx...';
+    try {
+      // Step 1: Approve
+      const approveResp = await fetch(API_BASE_URL + '/v1/vault/approve', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tokenSymbol: token, amount }),
+      });
+      const approveData = await approveResp.json();
+      if (approveData.error) { $('depositStatus').textContent = `Error: ${approveData.message || approveData.error}`; return; }
+
+      // Step 2: Sign & send approve
+      const signer = await window.getWalletSigner();
+      if (!signer) { $('depositStatus').textContent = 'Wallet signer unavailable'; return; }
+      const approveTx = await signer.sendTransaction({
+        to: approveData.tx.to,
+        data: approveData.tx.data,
+        gasLimit: approveData.tx.gasLimit,
+      });
+      $('depositStatus').textContent = 'Approving... tx: ' + approveTx.hash?.slice(0, 10);
+      const approveReceipt = await approveTx.wait();
+      if (approveReceipt?.status !== 1) { $('depositStatus').textContent = 'Approve tx failed'; return; }
+
+      // Step 3: Deposit
+      $('depositStatus').textContent = 'Building deposit tx...';
+      const depositResp = await fetch(API_BASE_URL + '/v1/vault/deposit', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tokenSymbol: token, amount }),
+      });
+      const depositData = await depositResp.json();
+      if (depositData.error) { $('depositStatus').textContent = `Error: ${depositData.message || depositData.error}`; return; }
+
+      const depositTx = await signer.sendTransaction({
+        to: depositData.tx.to,
+        data: depositData.tx.data,
+        gasLimit: depositData.tx.gasLimit,
+      });
+      $('depositStatus').textContent = 'Depositing... tx: ' + depositTx.hash?.slice(0, 10);
+      const depositReceipt = await depositTx.wait();
+      $('depositStatus').textContent = '✓ Deposit confirmed!';
+      $('depositStatus').style.color = 'var(--green)';
+      logActivity(`Deposit ${amount} ${token} confirmed`, 'success');
+    } catch (err) {
+      $('depositStatus').textContent = 'Error: ' + err.message;
+      $('depositStatus').style.color = 'var(--red)';
+    }
+  };
+
+  window._vaultWithdraw = async () => {
+    if (!state.wallet) { $('withdrawStatus').textContent = 'Connect wallet first'; return; }
+    const token = $('withdrawToken')?.value;
+    const amount = $('withdrawAmount')?.value;
+    if (!amount || parseFloat(amount) <= 0) { $('withdrawStatus').textContent = 'Invalid amount'; return; }
+
+    $('withdrawStatus').textContent = 'Building withdraw tx...';
+    try {
+      const withdrawResp = await fetch(API_BASE_URL + '/v1/vault/withdraw', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tokenSymbol: token, amount }),
+      });
+      const withdrawData = await withdrawResp.json();
+      if (withdrawData.error) { $('withdrawStatus').textContent = `Error: ${withdrawData.message || withdrawData.error}`; return; }
+
+      const signer = await window.getWalletSigner();
+      if (!signer) { $('withdrawStatus').textContent = 'Wallet signer unavailable'; return; }
+      const withdrawTx = await signer.sendTransaction({
+        to: withdrawData.tx.to,
+        data: withdrawData.tx.data,
+        gasLimit: withdrawData.tx.gasLimit,
+      });
+      $('withdrawStatus').textContent = 'Withdrawing... tx: ' + withdrawTx.hash?.slice(0, 10);
+      const receipt = await withdrawTx.wait();
+      $('withdrawStatus').textContent = '✓ Withdraw confirmed!';
+      $('withdrawStatus').style.color = 'var(--green)';
+      logActivity(`Withdraw ${amount} ${token} confirmed`, 'success');
+    } catch (err) {
+      $('withdrawStatus').textContent = 'Error: ' + err.message;
+      $('withdrawStatus').style.color = 'var(--red)';
+    }
+  };
 
   // ── Trade Form ─────────────────────────────────
   function setSide(side) {
