@@ -1671,7 +1671,7 @@ class QDexClient {
       ]);
 
       order.signature = {
-        scheme: 'ethers-v4',
+        scheme: 'quais-v4',
         signer: state.wallet,
         value: signature,
         signedAt: Math.floor(Date.now() / 1000),
@@ -1734,28 +1734,34 @@ class QDexClient {
     logActivity(`Created local ${state.side} ${state.orderType} order: ${orderData.amount} ${m.base} @ ${orderData.price} ${m.quote}`, 'success');
   }
 
-  // ── Wallet Signer Polyfill ──
+  // ── Quais-native Wallet (NO ethers) ───────────────
   window.getWalletSigner = async () => {
     if (!state.wallet) return null;
-    if (window.quai) {
-      try {
-        const ethers = (await import('https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js')).ethers;
-        const provider = new ethers.providers.Web3Provider(window.quai);
-        const signer = provider.getSigner(state.wallet);
-        signer.provider = provider;
-        return signer;
-      } catch(e) {
-        console.warn('[QDEX] ethers signer fail, using direct:', e.message);
+    if (!window.quai) throw new Error('Quai wallet not detected');
+    const accounts = await window.quai.request({ method: 'eth_requestAccounts' });
+    if (!accounts || accounts.length === 0) return null;
+    return {
+      address: accounts[0],
+      sendTransaction: async (tx) => {
+        const txHash = await window.quai.request({ method: 'eth_sendTransaction', params: [tx] });
+        return {
+          hash: txHash,
+          wait: async () => {
+            for (let i = 0; i < 30; i++) {
+              const r = await window.quai.request({ method: 'eth_getTransactionReceipt', params: [txHash] });
+              if (r && r.blockHash) return r;
+              await new Promise(r => setTimeout(r, 2000));
+            }
+            return null;
+          }
+        };
+      },
+      provider: {
+        send: async (method, params) => {
+          return await window.quai.request({ method, params: Array.isArray(params) ? params : [params] });
+        }
       }
-    }
-    // Fallback: direct quai provider
-    if (window.quai) {
-      return {
-        provider: window.quai,
-        _address: state.wallet,
-      };
-    }
-    return null;
+    };
   };
 
   // ── Wallet Events ──────────────────────────────
