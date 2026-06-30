@@ -770,6 +770,16 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
 
 // ── Globals ──────────────────────────────────────
   const $ = (id) => document.getElementById(id);
+  const fmtWei = (v, decimals = 6) => {
+    if (v === undefined || v === null) return '—';
+    const big = BigInt(v);
+    if (big > 1000000000000000n) {
+      const intPart = big / 1000000000000000000n;
+      const decPart = (big % 1000000000000000000n) * BigInt(10 ** decimals) / 1000000000000000000n;
+      return intPart.toString() + '.' + decPart.toString().padStart(decimals, '0');
+    }
+    return Number(v).toFixed(decimals);
+  };
   const fmt = (v) => v === undefined || v === null ? '—' : Number(v).toFixed(6);
   const fmtAmt = (v) => {
     if (v === undefined || v === null) return '—';
@@ -1108,20 +1118,20 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
     $('obCount').textContent = `${bids.length + asks.length} levels`;
 
     const maxVol = Math.max(
-      ...asks.map(a => Number(a.amount) || 0),
-      ...bids.map(b => Number(b.amount) || 0),
+      ...asks.map(a => parseFloat(a.amount) || 0),
+      ...bids.map(b => parseFloat(b.amount) || 0),
       1
     );
 
     // Asks (reversed)
     for (let i = Math.min(asks.length, 15) - 1; i >= 0; i--) {
       const ask = asks[i];
-      const pct = Number(ask.amount) / maxVol * 100;
+      const pct = parseFloat(ask.amount) / maxVol * 100;
       tbody.insertAdjacentHTML('beforeend', `
         <tr class="ask">
-          <td>${fmt(ask.price)}</td>
-          <td>${fmtAmt(ask.amount)}</td>
-          <td>${fmtAmt(Number(ask.price) * Number(ask.amount))}</td>
+          <td>${fmtWei(ask.price)}</td>
+          <td>${fmtWei(ask.amount, 4)}</td>
+          <td>${fmtWei(ask.price, 0)}</td>
           <td style="position:relative">
             <div class="qdex-ob-depth-bar ask" style="width:${pct}%"></div>
           </td>
@@ -1131,23 +1141,21 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
 
     // Spread
     if (bids.length > 0 && asks.length > 0) {
-      const bestAsk = Number(asks[0].price);
-      const bestBid = Number(bids[0].price);
-      const spread = Math.max(0, bestAsk - bestBid).toFixed(6);
+      const spreadStr = `${fmtWei(asks[0].price)} / ${fmtWei(bids[0].price)}`;
       tbody.insertAdjacentHTML('beforeend', `
-        <tr class="spread"><td colspan="4">Spread: ${spread}</td></tr>
+        <tr class="spread"><td colspan="4">Spread: ${spreadStr}</td></tr>
       `);
     }
 
     // Bids
     for (let i = 0; i < Math.min(bids.length, 15); i++) {
       const bid = bids[i];
-      const pct = Number(bid.amount) / maxVol * 100;
+      const pct = parseFloat(bid.amount) / maxVol * 100;
       tbody.insertAdjacentHTML('beforeend', `
         <tr class="bid">
-          <td>${fmt(bid.price)}</td>
-          <td>${fmtAmt(bid.amount)}</td>
-          <td>${fmtAmt(Number(bid.price) * Number(bid.amount))}</td>
+          <td>${fmtWei(bid.price)}</td>
+          <td>${fmtWei(bid.amount, 4)}</td>
+          <td>${fmtWei(bid.price, 0)}</td>
           <td style="position:relative">
             <div class="qdex-ob-depth-bar bid" style="width:${pct}%"></div>
           </td>
@@ -1224,7 +1232,7 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
           <td>${order.pair}</td>
           <td class="qdex-trade-side ${order.side}">${order.side.toUpperCase()}</td>
           <td>${order.type}</td>
-          <td>${fmt(order.price)}</td>
+          <td>${fmtWei(order.price)}</td>
           <td>${fmtAmt(order.amount)}</td>
           <td>${order.filled}</td>
           <td><button class="qdex-cancel-btn" onclick="cancelOrder('${order.id}')">Cancel</button></td>
@@ -1295,9 +1303,9 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
               <tr onclick="window.switchMarket('${m.id}')" style="cursor:pointer">
                 <td class="pair" style="font-weight:600">${m.base}/${m.quote}</td>
                 <td><span class="qdex-status-badge">${m.status}</span></td>
-                <td>${fmt(t.lastPrice || demoMid(m.id))}</td>
-                <td class="qdex-trade-side buy">${fmt(t.bestBid || demoMid(m.id) * .998)}</td>
-                <td class="qdex-trade-side sell">${fmt(t.bestAsk || demoMid(m.id) * 1.002)}</td>
+                <td>${fmt(t.lastPrice || safeMidPrice())}</td>
+                <td class="qdex-trade-side buy">${fmt(t.bestBid || safeMidPrice() * .998)}</td>
+                <td class="qdex-trade-side sell">${fmt(t.bestAsk || safeMidPrice() * 1.002)}</td>
                 <td>${fmtAmt(t.volume24h || 0)}</td>
               </tr>
             `;
@@ -1376,7 +1384,10 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
 
   function updateFormTotal() {
     const price = Number($('priceInput').value || 0);
-    const amount = Number($('amtInput').value || 0);
+    // Amount: convert human to wei
+    const [intAmt, decAmt = ''] = ($('amtInput').value || '0').split('.');
+    const decAmtPadded = (decAmt + '000000000000000000').slice(0, 18);
+    const amount = (BigInt(intAmt || 0) * 1000000000000000000n + BigInt(decAmtPadded)).toString();
     const total = price * amount;
     $('formTotal').textContent = total ? total.toFixed(4) : '—';
     $('formBalance').textContent = state.balances.length ? 
@@ -1387,8 +1398,21 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
     const m = state.markets.find(x => x.id === state.market);
     if (!m) return;
 
-    const price = state.orderType === 'limit' ? Number($('priceInput').value || 0) : safeMidPrice();
-    const amount = Number($('amtInput').value || 0);
+    // Price: if limit, convert human price to wei. If market, use mid in wei.
+    let price;
+    if (state.orderType === 'limit') {
+      const humanPrice = $('priceInput').value || '0';
+      // Parse decimal: "0.5" -> "500000000000000000" (wei)
+      const [intPart, decPart = ''] = humanPrice.split('.');
+      const decPadded = (decPart + '000000000000000000').slice(0, 18);
+      price = (BigInt(intPart || 0) * 1000000000000000000n + BigInt(decPadded)).toString();
+    } else {
+      price = safeMidPrice();
+    }
+    // Amount: convert human to wei
+    const [intAmt, decAmt = ''] = ($('amtInput').value || '0').split('.');
+    const decAmtPadded = (decAmt + '000000000000000000').slice(0, 18);
+    const amount = (BigInt(intAmt || 0) * 1000000000000000000n + BigInt(decAmtPadded)).toString();
     if (!amount || (state.orderType === 'limit' && !price)) return;
 
     const btn = $('submitBtn');
@@ -1411,8 +1435,8 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
         type: state.orderType === 'market' ? 'market_ioc' : 'limit',
         baseToken: m.base,
         quoteToken: m.quote,
-        amount: amount.toFixed(4),
-        price: price.toFixed(6),
+        amount: fmtWei(amount, 4),
+        price: fmtWei(price),
         timeInForce: state.orderType === 'market' ? 'IOC' : 'GTC',
         maxSlippageBps: state.orderType === 'market' ? 50 : 0,
         owner: state.wallet,
@@ -1461,7 +1485,7 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
         signedAt: Math.floor(Date.now() / 1000),
       };
 
-      logActivity(`Signing ${state.side} ${state.orderType} order: ${amount} ${m.base} @ ${price.toFixed(6)} ${m.quote}`, 'info');
+      logActivity(`Signing ${state.side} ${state.orderType} order: ${fmtWei(amount, 4)} ${m.base} @ ${fmtWei(price)} ${m.quote}`, 'info');
 
       if (backendReady && qdexClient) {
         try {
@@ -1473,8 +1497,8 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
               pair: `${m.base}/${m.quote}`,
               side: state.side,
               type: state.orderType,
-              price: price.toFixed(6),
-              amount: amount.toFixed(4),
+              price: fmtWei(price),
+              amount: fmtWei(amount, 4),
               filled: '0%',
               status: result.status || 'open',
               timestamp: Date.now(),
@@ -1504,8 +1528,8 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
       pair: `${m.base}/${m.quote}`,
       side: state.side,
       type: state.orderType,
-      price: price.toFixed(6),
-      amount: amount.toFixed(4),
+      price: fmtWei(price),
+      amount: fmtWei(amount, 4),
       filled: '0%',
       status: 'open',
       timestamp: Date.now(),
@@ -1514,6 +1538,30 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
     renderOrders();
     logActivity(`Created local ${state.side} ${state.orderType} order: ${orderData.amount} ${m.base} @ ${orderData.price} ${m.quote}`, 'success');
   }
+
+  // ── Wallet Signer Polyfill ──
+  window.getWalletSigner = async () => {
+    if (!state.wallet) return null;
+    if (window.quai) {
+      try {
+        const ethers = (await import('https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js')).ethers;
+        const provider = new ethers.providers.Web3Provider(window.quai);
+        const signer = provider.getSigner(state.wallet);
+        signer.provider = provider;
+        return signer;
+      } catch(e) {
+        console.warn('[QDEX] ethers signer fail, using direct:', e.message);
+      }
+    }
+    // Fallback: direct quai provider
+    if (window.quai) {
+      return {
+        provider: window.quai,
+        _address: state.wallet,
+      };
+    }
+    return null;
+  };
 
   // ── Wallet Events ──────────────────────────────
   let qdexWallet;
