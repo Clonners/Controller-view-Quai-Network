@@ -1558,14 +1558,43 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
         nonce,
         expiresAt: Math.floor(Date.now() / 1000) + 86400,
         chainId: 15000,
-        settlementContract: '0x00497118fAA729aC1d981c680080d7428fE8a4Bd',
+        settlementContract: '0x004C1D112dB14611A16Bf1dA825Ee5C3F67adD22',
       };
 
-      const orderHash = JSON.stringify(order);
-      const signature = await signer.signMessage(orderHash);
+      // EIP-712 typed data for order signing
+      const EIP712_DOMAIN = {
+        name: 'QDEX',
+        version: '1',
+        chainId: 15000,
+        verifyingContract: order.settlementContract,
+      };
+      const ORDER_TYPE = [
+        { name: 'marketId', type: 'string' },
+        { name: 'side', type: 'string' },
+        { name: 'type', type: 'string' },
+        { name: 'amount', type: 'string' },
+        { name: 'price', type: 'string' },
+        { name: 'timeInForce', type: 'string' },
+        { name: 'maxSlippageBps', type: 'uint256' },
+        { name: 'owner', type: 'address' },
+        { name: 'delegate', type: 'address' },
+        { name: 'nonce', type: 'string' },
+        { name: 'expiresAt', type: 'uint256' },
+      ];
+      const typedData = {
+        domain: EIP712_DOMAIN,
+        types: { Order: ORDER_TYPE },
+        primaryType: 'Order',
+        message: order,
+      };
+      const signature = await signer._signTypedData(
+        EIP712_DOMAIN,
+        ORDER_TYPE,
+        order
+      );
 
       order.signature = {
-        scheme: 'mock',
+        scheme: 'ethers-v4',
         signer: state.wallet,
         value: signature,
         signedAt: Math.floor(Date.now() / 1000),
@@ -1575,7 +1604,13 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
 
       if (backendReady && qdexClient) {
         try {
-          const result = await qdexClient.orders.submitSignedOrder(order);
+          // Submit to real API
+          const apiResp = await fetch(API_BASE + '/v1/orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(order),
+          });
+          const result = await apiResp.json();
           if (result && result.orderHash) {
             logActivity(`Order submitted: ${result.orderHash.slice(0, 12)}... (${result.status || 'open'})`, 'success');
             state.orders.unshift({
@@ -1771,9 +1806,7 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
     init();
   }
   
-    // ═══ Vault Operations ═══
 
-    const handleDeposit = async () => {
       if (!state.wallet) { showStatus('Connect wallet first', 'error'); return; }
       const token = $('depositToken').value;
       const amount = $('depositAmount').value;
@@ -1880,9 +1913,7 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   }
 
-    // ═══ Vault Operations ═══
 
-    const handleDeposit = async () => {
       if (!state.wallet) { showStatus('Connect wallet first', 'error'); return; }
       const token = $('depositToken').value;
       const amount = $('depositAmount').value;
@@ -1984,9 +2015,7 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
 
 </script>
 <script src="js/quai-wallet.js">
-    // ═══ Vault Operations ═══
 
-    const handleDeposit = async () => {
       if (!state.wallet) { showStatus('Connect wallet first', 'error'); return; }
       const token = $('depositToken').value;
       const amount = $('depositAmount').value;
@@ -2088,9 +2117,7 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
 
 </script>
 <script src="js/wallet-pill.js">
-    // ═══ Vault Operations ═══
 
-    const handleDeposit = async () => {
       if (!state.wallet) { showStatus('Connect wallet first', 'error'); return; }
       const token = $('depositToken').value;
       const amount = $('depositAmount').value;
@@ -2192,9 +2219,7 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
 
 </script>
 <script src="js/wallet-integration.js">
-    // ═══ Vault Operations ═══
 
-    const handleDeposit = async () => {
       if (!state.wallet) { showStatus('Connect wallet first', 'error'); return; }
       const token = $('depositToken').value;
       const amount = $('depositAmount').value;
