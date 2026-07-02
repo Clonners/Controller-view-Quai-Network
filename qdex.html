@@ -911,15 +911,13 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
   };
   const shortAddress = (addr) => addr ? `${addr.slice(0, 6)}…${addr.slice(-4)}` : '';
 
-  const DEMO_MARKETS = [
+  const DEFAULT_MARKETS = [
     { id: 'WQUAI-WQI', base: 'WQUAI', quote: 'WQI', status: 'active' },
-    { id: 'WQUAI-USDT', base: 'WQUAI', quote: 'USDT', status: 'planned' },
-    { id: 'WQI-USDT', base: 'WQI', quote: 'USDT', status: 'planned' },
   ];
 
   let state = {
     market: 'WQUAI-WQI',
-    markets: [...DEMO_MARKETS],
+    markets: [...DEFAULT_MARKETS],
     tickers: {},
     orderbook: { bids: [], asks: [] },
     trades: [],
@@ -1068,6 +1066,22 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
     }
   }
 
+  // ── Status Indicator ───────────────────────────
+  function setStatus(mode) {
+    const dot = $('statusDot');
+    const label = $('apiState');
+    if (!dot || !label) return;
+    dot.className = 'qdex-status-dot';
+    if (mode === 'live') {
+      label.textContent = 'Live (on-chain)';
+    } else if (mode === 'standby') {
+      dot.classList.add('mock');
+      label.textContent = 'Standby';
+    } else {
+      label.textContent = mode || 'Connecting...';
+    }
+  }
+
   // ── QDexClient ─────────────────────────────────
   async function initQDexClient() {
     try {
@@ -1084,18 +1098,22 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
 
   // ── Data Loading ───────────────────────────────
   async function loadMarkets() {
+    // Try real network markets first
     if (backendReady) {
-      const data = await sdkFetch(() => qdexClient.markets.list());
+      const data = await sdkFetch(() => qdexClient.real.markets.list());
       if (data && data.length) {
         state.markets = data;
         renderMarkets();
+        setStatus('live');
         return;
       }
     }
 
+    // Fallback to mock engine markets
     const data = await api('/v1/markets');
-    state.markets = (data?.markets && data.markets.length) ? data.markets : [...DEMO_MARKETS];
+    state.markets = (data?.markets && data.markets.length) ? data.markets : [...DEFAULT_MARKETS];
     renderMarkets();
+    setStatus(data?.markets?.length ? 'live' : 'standby');
   }
 
   async function loadOrderbook() {
@@ -1149,17 +1167,25 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
   }
 
   async function loadTrades() {
+    // Try real network trades first
     if (backendReady) {
-      const data = await sdkFetch(() => qdexClient.trades.list(state.market));
-      if (data) {
-        state.trades = data.trades || [];
+      const data = await sdkFetch(() => qdexClient.real.trades.list(state.market, 20));
+      if (data && data.length) {
+        state.trades = data;
         renderTrades();
         return;
       }
     }
 
-    const data = await api(`/v1/trades/${state.market}`);
-    state.trades = (data?.trades && data.trades.length) ? data.trades : [];
+    // Fallback to mock engine trades
+    const mockData = await sdkFetch(() => qdexClient.trades.list(state.market));
+    if (mockData && mockData.trades?.length) {
+      state.trades = mockData.trades;
+      renderTrades();
+      return;
+    }
+
+    state.trades = [];
     renderTrades();
   }
 
