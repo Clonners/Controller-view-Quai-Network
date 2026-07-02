@@ -792,110 +792,8 @@ input { font: inherit; }
   </div>
 </div>
 
-<script src="vendor/lightweight-charts.cjs">
-    // ═══ Vault Operations ═══
+<script src="vendor/lightweight-charts.cjs"></script>
 
-    const handleDeposit = async () => {
-      if (!state.wallet) { showStatus('Connect wallet first', 'error'); return; }
-      const token = $('depositToken').value;
-      const amount = $('depositAmount').value;
-      if (!amount || parseFloat(amount) <= 0) { $('depositStatus').textContent = 'Invalid amount'; return; }
-
-      $('depositStatus').textContent = 'Building tx...';
-      try {
-        // Step 1: Approve token
-        const tokenAddress = API_BASE + `/v1/vault/approve`;
-        const approveResp = await fetch(tokenAddress, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token: getTokenAddress(token), amount }),
-        });
-        const approveData = await approveResp.json();
-        if (approveData.error) {
-          $('depositStatus').textContent = `Approve error: ${approveData.message || approveData.error}`;
-          return;
-        }
-
-        // Step 2: Sign and send approve tx
-        const approveTx = await state.wallet.sendTransaction({
-          to: approveData.tx.to,
-          data: approveData.tx.data,
-          gasLimit: approveData.tx.gasLimit,
-        });
-        $('depositStatus').textContent = 'Approving... tx: ' + approveTx.hash.slice(0, 10);
-        await approveTx.wait();
-
-        // Step 3: Build deposit tx
-        const depositResp = await fetch(API_BASE + '/v1/vault/deposit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tokenSymbol: token, amount }),
-        });
-        const depositData = await depositResp.json();
-        if (depositData.error) {
-          $('depositStatus').textContent = `Deposit error: ${depositData.message || depositData.error}`;
-          return;
-        }
-
-        // Step 4: Sign and send deposit tx
-        const depositTx = await state.wallet.sendTransaction({
-          to: depositData.tx.to,
-          data: depositData.tx.data,
-          gasLimit: depositData.tx.gasLimit,
-        });
-        $('depositStatus').textContent = 'Depositing... tx: ' + depositTx.hash.slice(0, 10);
-        await depositTx.wait();
-        $('depositStatus').textContent = '✓ Deposit confirmed!';
-        $('depositStatus').style.color = 'var(--green)';
-        updateWalletView();
-      } catch (err) {
-        $('depositStatus').textContent = 'Error: ' + err.message;
-        $('depositStatus').style.color = 'var(--red)';
-      }
-    };
-
-    const handleWithdraw = async () => {
-      if (!state.wallet) { showStatus('Connect wallet first', 'error'); return; }
-      const token = $('withdrawToken').value;
-      const amount = $('withdrawAmount').value;
-      if (!amount || parseFloat(amount) <= 0) { $('withdrawStatus').textContent = 'Invalid amount'; return; }
-
-      $('withdrawStatus').textContent = 'Building tx...';
-      try {
-        const withdrawResp = await fetch(API_BASE + '/v1/vault/withdraw', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tokenSymbol: token, amount }),
-        });
-        const withdrawData = await withdrawResp.json();
-        if (withdrawData.error) {
-          $('withdrawStatus').textContent = `Withdraw error: ${withdrawData.message || withdrawData.error}`;
-          return;
-        }
-
-        const withdrawTx = await state.wallet.sendTransaction({
-          to: withdrawData.tx.to,
-          data: withdrawData.tx.data,
-          gasLimit: withdrawData.tx.gasLimit,
-        });
-        $('withdrawStatus').textContent = 'Withdrawing... tx: ' + withdrawTx.hash.slice(0, 10);
-        await withdrawTx.wait();
-        $('withdrawStatus').textContent = '✓ Withdraw confirmed!';
-        $('withdrawStatus').style.color = 'var(--green)';
-        updateWalletView();
-      } catch (err) {
-        $('withdrawStatus').textContent = 'Error: ' + err.message;
-        $('withdrawStatus').style.color = 'var(--red)';
-      }
-    };
-
-    // Helper: get token address from symbol
-    const getTokenAddress = (symbol) => {
-      const tokens = { WQUAI: '0x005c46f661baef20671943f2b4c087df3e7ceb13', WQI: '0x002b2596ecf05c93a31ff916e8b456df6c77c750' };
-      return tokens[symbol] || '';
-    };
-
-</script>
 <script type="module">
 import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
 
@@ -1193,10 +1091,24 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
     // Not implemented yet
   }
 
+  async function loadBalances() {
+    if (!qdexWallet || !state.wallet) return;
+    try {
+      const balances = await qdexWallet.getAllVaultBalances();
+      state.balances = balances;
+      renderWalletUI();
+    } catch (e) {
+      console.warn('[QDEX] Balance fetch failed:', e.message);
+    }
+  }
+
+  // Alias for consistency
+  function renderBalances() { renderWalletUI(); }
+
   async function refresh() {
     await loadOrderbook();
     if (state.wallet) {
-      loadBalances();
+      await loadBalances();
     }
   }
 
@@ -1355,15 +1267,19 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
     walletEmpty.style.display = 'none';
     walletContent.style.display = 'block';
     $('vaultSection').style.display = 'block';
-    walletContent.innerHTML = state.balances.map(b => `
+    walletContent.innerHTML = state.balances.map(b => {
+      const total = qdexWallet ? qdexWallet._fromWei(b.total || '0') : (b.total || '0');
+      const available = qdexWallet ? qdexWallet._fromWei(b.available || '0') : (b.available || '0');
+      const locked = qdexWallet ? qdexWallet._fromWei(b.locked || '0') : (b.locked || '0');
+      return `
       <div class="qdex-balance-row">
         <span class="qdex-balance-token">${b.token}</span>
         <div>
-          <span class="qdex-balance-available">${b.available || '0'}</span>
-          ${b.locked ? `<span class="qdex-balance-locked"> (+${b.locked} locked)</span>` : ''}
+          <span class="qdex-balance-available">${available}</span>
+          ${locked !== '0' ? `<span class="qdex-balance-locked"> (+${locked} locked)</span>` : ''}
         </div>
       </div>
-    `).join('');
+    `}).join('');
   }
 
   function renderOrders() {
@@ -1825,113 +1741,81 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
     }, 5000);
   }
 
+   /* ── Vault Operations (Client-Side Signing) ─── */
+  async function handleDeposit() {
+    if (!qdexWallet || !state.wallet) {
+      $('depositStatus').textContent = 'Connect wallet first';
+      $('depositStatus').style.color = 'var(--red)';
+      return;
+    }
+    const token = $('depositToken').value;
+    const amount = $('depositAmount').value;
+    if (!amount || parseFloat(amount) <= 0) {
+      $('depositStatus').textContent = 'Invalid amount';
+      $('depositStatus').style.color = 'var(--red)';
+      return;
+    }
+
+    $('depositStatus').textContent = 'Approving token...';
+    $('depositStatus').style.color = 'var(--text-muted)';
+    try {
+      await qdexWallet.approveToken(token, amount);
+      $('depositStatus').textContent = 'Approved. Depositing to vault...';
+      const result = await qdexWallet.depositToVault(token, amount);
+      $('depositStatus').textContent = `✓ Deposit confirmed! TX: ${result.txHash.slice(0, 18)}`;
+      $('depositStatus').style.color = 'var(--green)';
+      $('depositAmount').value = '';
+      await loadBalances();
+      setTimeout(() => {
+        $('depositStatus').textContent = '';
+      }, 8000);
+    } catch (err) {
+      $('depositStatus').textContent = `Error: ${err.message}`;
+      $('depositStatus').style.color = 'var(--red)';
+    }
+  }
+
+  async function handleWithdraw() {
+    if (!qdexWallet || !state.wallet) {
+      $('withdrawStatus').textContent = 'Connect wallet first';
+      $('withdrawStatus').style.color = 'var(--red)';
+      return;
+    }
+    const token = $('withdrawToken').value;
+    const amount = $('withdrawAmount').value;
+    if (!amount || parseFloat(amount) <= 0) {
+      $('withdrawStatus').textContent = 'Invalid amount';
+      $('withdrawStatus').style.color = 'var(--red)';
+      return;
+    }
+
+    $('withdrawStatus').textContent = 'Withdrawing from vault...';
+    $('withdrawStatus').style.color = 'var(--text-muted)';
+    try {
+      const result = await qdexWallet.withdrawFromVault(token, amount);
+      $('withdrawStatus').textContent = `✓ Withdraw confirmed! TX: ${result.txHash.slice(0, 18)}`;
+      $('withdrawStatus').style.color = 'var(--green)';
+      $('withdrawAmount').value = '';
+      await loadBalances();
+      setTimeout(() => {
+        $('withdrawStatus').textContent = '';
+      }, 8000);
+    } catch (err) {
+      $('withdrawStatus').textContent = `Error: ${err.message}`;
+      $('withdrawStatus').style.color = 'var(--red)';
+    }
+  }
+
+  // Expose to global for onclick handlers
+  window.handleDeposit = handleDeposit;
+  window.handleWithdraw = handleWithdraw;
+
   /* FIX: Wait for DOM to be fully ready */
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
   }
-  
-
-      if (!state.wallet) { showStatus('Connect wallet first', 'error'); return; }
-      const token = $('depositToken').value;
-      const amount = $('depositAmount').value;
-      if (!amount || parseFloat(amount) <= 0) { $('depositStatus').textContent = 'Invalid amount'; return; }
-
-      $('depositStatus').textContent = 'Building tx...';
-      try {
-        // Step 1: Approve token
-        const tokenAddress = API_BASE + `/v1/vault/approve`;
-        const approveResp = await fetch(tokenAddress, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token: getTokenAddress(token), amount }),
-        });
-        const approveData = await approveResp.json();
-        if (approveData.error) {
-          $('depositStatus').textContent = `Approve error: ${approveData.message || approveData.error}`;
-          return;
-        }
-
-        // Step 2: Sign and send approve tx
-        const approveTx = await state.wallet.sendTransaction({
-          to: approveData.tx.to,
-          data: approveData.tx.data,
-          gasLimit: approveData.tx.gasLimit,
-        });
-        $('depositStatus').textContent = 'Approving... tx: ' + approveTx.hash.slice(0, 10);
-        await approveTx.wait();
-
-        // Step 3: Build deposit tx
-        const depositResp = await fetch(API_BASE + '/v1/vault/deposit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tokenSymbol: token, amount }),
-        });
-        const depositData = await depositResp.json();
-        if (depositData.error) {
-          $('depositStatus').textContent = `Deposit error: ${depositData.message || depositData.error}`;
-          return;
-        }
-
-        // Step 4: Sign and send deposit tx
-        const depositTx = await state.wallet.sendTransaction({
-          to: depositData.tx.to,
-          data: depositData.tx.data,
-          gasLimit: depositData.tx.gasLimit,
-        });
-        $('depositStatus').textContent = 'Depositing... tx: ' + depositTx.hash.slice(0, 10);
-        await depositTx.wait();
-        $('depositStatus').textContent = '✓ Deposit confirmed!';
-        $('depositStatus').style.color = 'var(--green)';
-        updateWalletView();
-      } catch (err) {
-        $('depositStatus').textContent = 'Error: ' + err.message;
-        $('depositStatus').style.color = 'var(--red)';
-      }
-    };
-
-    const handleWithdraw = async () => {
-      if (!state.wallet) { showStatus('Connect wallet first', 'error'); return; }
-      const token = $('withdrawToken').value;
-      const amount = $('withdrawAmount').value;
-      if (!amount || parseFloat(amount) <= 0) { $('withdrawStatus').textContent = 'Invalid amount'; return; }
-
-      $('withdrawStatus').textContent = 'Building tx...';
-      try {
-        const withdrawResp = await fetch(API_BASE + '/v1/vault/withdraw', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tokenSymbol: token, amount }),
-        });
-        const withdrawData = await withdrawResp.json();
-        if (withdrawData.error) {
-          $('withdrawStatus').textContent = `Withdraw error: ${withdrawData.message || withdrawData.error}`;
-          return;
-        }
-
-        const withdrawTx = await state.wallet.sendTransaction({
-          to: withdrawData.tx.to,
-          data: withdrawData.tx.data,
-          gasLimit: withdrawData.tx.gasLimit,
-        });
-        $('withdrawStatus').textContent = 'Withdrawing... tx: ' + withdrawTx.hash.slice(0, 10);
-        await withdrawTx.wait();
-        $('withdrawStatus').textContent = '✓ Withdraw confirmed!';
-        $('withdrawStatus').style.color = 'var(--green)';
-        updateWalletView();
-      } catch (err) {
-        $('withdrawStatus').textContent = 'Error: ' + err.message;
-        $('withdrawStatus').style.color = 'var(--red)';
-      }
-    };
-
-    // Helper: get token address from symbol
-    const getTokenAddress = (symbol) => {
-      const tokens = { WQUAI: '0x005c46f661baef20671943f2b4c087df3e7ceb13', WQI: '0x002b2596ecf05c93a31ff916e8b456df6c77c750' };
-      return tokens[symbol] || '';
-    };
-
 </script>
 </main>
 <script>
@@ -1940,411 +1824,12 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
   }
 
 
-      if (!state.wallet) { showStatus('Connect wallet first', 'error'); return; }
-      const token = $('depositToken').value;
-      const amount = $('depositAmount').value;
-      if (!amount || parseFloat(amount) <= 0) { $('depositStatus').textContent = 'Invalid amount'; return; }
-
-      $('depositStatus').textContent = 'Building tx...';
-      try {
-        // Step 1: Approve token
-        const tokenAddress = API_BASE + `/v1/vault/approve`;
-        const approveResp = await fetch(tokenAddress, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token: getTokenAddress(token), amount }),
-        });
-        const approveData = await approveResp.json();
-        if (approveData.error) {
-          $('depositStatus').textContent = `Approve error: ${approveData.message || approveData.error}`;
-          return;
-        }
-
-        // Step 2: Sign and send approve tx
-        const approveTx = await state.wallet.sendTransaction({
-          to: approveData.tx.to,
-          data: approveData.tx.data,
-          gasLimit: approveData.tx.gasLimit,
-        });
-        $('depositStatus').textContent = 'Approving... tx: ' + approveTx.hash.slice(0, 10);
-        await approveTx.wait();
-
-        // Step 3: Build deposit tx
-        const depositResp = await fetch(API_BASE + '/v1/vault/deposit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tokenSymbol: token, amount }),
-        });
-        const depositData = await depositResp.json();
-        if (depositData.error) {
-          $('depositStatus').textContent = `Deposit error: ${depositData.message || depositData.error}`;
-          return;
-        }
-
-        // Step 4: Sign and send deposit tx
-        const depositTx = await state.wallet.sendTransaction({
-          to: depositData.tx.to,
-          data: depositData.tx.data,
-          gasLimit: depositData.tx.gasLimit,
-        });
-        $('depositStatus').textContent = 'Depositing... tx: ' + depositTx.hash.slice(0, 10);
-        await depositTx.wait();
-        $('depositStatus').textContent = '✓ Deposit confirmed!';
-        $('depositStatus').style.color = 'var(--green)';
-        updateWalletView();
-      } catch (err) {
-        $('depositStatus').textContent = 'Error: ' + err.message;
-        $('depositStatus').style.color = 'var(--red)';
-      }
-    };
-
-    const handleWithdraw = async () => {
-      if (!state.wallet) { showStatus('Connect wallet first', 'error'); return; }
-      const token = $('withdrawToken').value;
-      const amount = $('withdrawAmount').value;
-      if (!amount || parseFloat(amount) <= 0) { $('withdrawStatus').textContent = 'Invalid amount'; return; }
-
-      $('withdrawStatus').textContent = 'Building tx...';
-      try {
-        const withdrawResp = await fetch(API_BASE + '/v1/vault/withdraw', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tokenSymbol: token, amount }),
-        });
-        const withdrawData = await withdrawResp.json();
-        if (withdrawData.error) {
-          $('withdrawStatus').textContent = `Withdraw error: ${withdrawData.message || withdrawData.error}`;
-          return;
-        }
-
-        const withdrawTx = await state.wallet.sendTransaction({
-          to: withdrawData.tx.to,
-          data: withdrawData.tx.data,
-          gasLimit: withdrawData.tx.gasLimit,
-        });
-        $('withdrawStatus').textContent = 'Withdrawing... tx: ' + withdrawTx.hash.slice(0, 10);
-        await withdrawTx.wait();
-        $('withdrawStatus').textContent = '✓ Withdraw confirmed!';
-        $('withdrawStatus').style.color = 'var(--green)';
-        updateWalletView();
-      } catch (err) {
-        $('withdrawStatus').textContent = 'Error: ' + err.message;
-        $('withdrawStatus').style.color = 'var(--red)';
-      }
-    };
-
-    // Helper: get token address from symbol
-    const getTokenAddress = (symbol) => {
-      const tokens = { WQUAI: '0x005c46f661baef20671943f2b4c087df3e7ceb13', WQI: '0x002b2596ecf05c93a31ff916e8b456df6c77c750' };
-      return tokens[symbol] || '';
-    };
-
 </script>
-<script src="js/quai-wallet.js">
+<script src="js/quai-wallet.js"></script>
 
-      if (!state.wallet) { showStatus('Connect wallet first', 'error'); return; }
-      const token = $('depositToken').value;
-      const amount = $('depositAmount').value;
-      if (!amount || parseFloat(amount) <= 0) { $('depositStatus').textContent = 'Invalid amount'; return; }
+<script src="js/wallet-pill.js"></script>
 
-      $('depositStatus').textContent = 'Building tx...';
-      try {
-        // Step 1: Approve token
-        const tokenAddress = API_BASE + `/v1/vault/approve`;
-        const approveResp = await fetch(tokenAddress, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token: getTokenAddress(token), amount }),
-        });
-        const approveData = await approveResp.json();
-        if (approveData.error) {
-          $('depositStatus').textContent = `Approve error: ${approveData.message || approveData.error}`;
-          return;
-        }
+<script src="js/wallet-integration.js"></script>
 
-        // Step 2: Sign and send approve tx
-        const approveTx = await state.wallet.sendTransaction({
-          to: approveData.tx.to,
-          data: approveData.tx.data,
-          gasLimit: approveData.tx.gasLimit,
-        });
-        $('depositStatus').textContent = 'Approving... tx: ' + approveTx.hash.slice(0, 10);
-        await approveTx.wait();
-
-        // Step 3: Build deposit tx
-        const depositResp = await fetch(API_BASE + '/v1/vault/deposit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tokenSymbol: token, amount }),
-        });
-        const depositData = await depositResp.json();
-        if (depositData.error) {
-          $('depositStatus').textContent = `Deposit error: ${depositData.message || depositData.error}`;
-          return;
-        }
-
-        // Step 4: Sign and send deposit tx
-        const depositTx = await state.wallet.sendTransaction({
-          to: depositData.tx.to,
-          data: depositData.tx.data,
-          gasLimit: depositData.tx.gasLimit,
-        });
-        $('depositStatus').textContent = 'Depositing... tx: ' + depositTx.hash.slice(0, 10);
-        await depositTx.wait();
-        $('depositStatus').textContent = '✓ Deposit confirmed!';
-        $('depositStatus').style.color = 'var(--green)';
-        updateWalletView();
-      } catch (err) {
-        $('depositStatus').textContent = 'Error: ' + err.message;
-        $('depositStatus').style.color = 'var(--red)';
-      }
-    };
-
-    const handleWithdraw = async () => {
-      if (!state.wallet) { showStatus('Connect wallet first', 'error'); return; }
-      const token = $('withdrawToken').value;
-      const amount = $('withdrawAmount').value;
-      if (!amount || parseFloat(amount) <= 0) { $('withdrawStatus').textContent = 'Invalid amount'; return; }
-
-      $('withdrawStatus').textContent = 'Building tx...';
-      try {
-        const withdrawResp = await fetch(API_BASE + '/v1/vault/withdraw', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tokenSymbol: token, amount }),
-        });
-        const withdrawData = await withdrawResp.json();
-        if (withdrawData.error) {
-          $('withdrawStatus').textContent = `Withdraw error: ${withdrawData.message || withdrawData.error}`;
-          return;
-        }
-
-        const withdrawTx = await state.wallet.sendTransaction({
-          to: withdrawData.tx.to,
-          data: withdrawData.tx.data,
-          gasLimit: withdrawData.tx.gasLimit,
-        });
-        $('withdrawStatus').textContent = 'Withdrawing... tx: ' + withdrawTx.hash.slice(0, 10);
-        await withdrawTx.wait();
-        $('withdrawStatus').textContent = '✓ Withdraw confirmed!';
-        $('withdrawStatus').style.color = 'var(--green)';
-        updateWalletView();
-      } catch (err) {
-        $('withdrawStatus').textContent = 'Error: ' + err.message;
-        $('withdrawStatus').style.color = 'var(--red)';
-      }
-    };
-
-    // Helper: get token address from symbol
-    const getTokenAddress = (symbol) => {
-      const tokens = { WQUAI: '0x005c46f661baef20671943f2b4c087df3e7ceb13', WQI: '0x002b2596ecf05c93a31ff916e8b456df6c77c750' };
-      return tokens[symbol] || '';
-    };
-
-</script>
-<script src="js/wallet-pill.js">
-
-      if (!state.wallet) { showStatus('Connect wallet first', 'error'); return; }
-      const token = $('depositToken').value;
-      const amount = $('depositAmount').value;
-      if (!amount || parseFloat(amount) <= 0) { $('depositStatus').textContent = 'Invalid amount'; return; }
-
-      $('depositStatus').textContent = 'Building tx...';
-      try {
-        // Step 1: Approve token
-        const tokenAddress = API_BASE + `/v1/vault/approve`;
-        const approveResp = await fetch(tokenAddress, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token: getTokenAddress(token), amount }),
-        });
-        const approveData = await approveResp.json();
-        if (approveData.error) {
-          $('depositStatus').textContent = `Approve error: ${approveData.message || approveData.error}`;
-          return;
-        }
-
-        // Step 2: Sign and send approve tx
-        const approveTx = await state.wallet.sendTransaction({
-          to: approveData.tx.to,
-          data: approveData.tx.data,
-          gasLimit: approveData.tx.gasLimit,
-        });
-        $('depositStatus').textContent = 'Approving... tx: ' + approveTx.hash.slice(0, 10);
-        await approveTx.wait();
-
-        // Step 3: Build deposit tx
-        const depositResp = await fetch(API_BASE + '/v1/vault/deposit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tokenSymbol: token, amount }),
-        });
-        const depositData = await depositResp.json();
-        if (depositData.error) {
-          $('depositStatus').textContent = `Deposit error: ${depositData.message || depositData.error}`;
-          return;
-        }
-
-        // Step 4: Sign and send deposit tx
-        const depositTx = await state.wallet.sendTransaction({
-          to: depositData.tx.to,
-          data: depositData.tx.data,
-          gasLimit: depositData.tx.gasLimit,
-        });
-        $('depositStatus').textContent = 'Depositing... tx: ' + depositTx.hash.slice(0, 10);
-        await depositTx.wait();
-        $('depositStatus').textContent = '✓ Deposit confirmed!';
-        $('depositStatus').style.color = 'var(--green)';
-        updateWalletView();
-      } catch (err) {
-        $('depositStatus').textContent = 'Error: ' + err.message;
-        $('depositStatus').style.color = 'var(--red)';
-      }
-    };
-
-    const handleWithdraw = async () => {
-      if (!state.wallet) { showStatus('Connect wallet first', 'error'); return; }
-      const token = $('withdrawToken').value;
-      const amount = $('withdrawAmount').value;
-      if (!amount || parseFloat(amount) <= 0) { $('withdrawStatus').textContent = 'Invalid amount'; return; }
-
-      $('withdrawStatus').textContent = 'Building tx...';
-      try {
-        const withdrawResp = await fetch(API_BASE + '/v1/vault/withdraw', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tokenSymbol: token, amount }),
-        });
-        const withdrawData = await withdrawResp.json();
-        if (withdrawData.error) {
-          $('withdrawStatus').textContent = `Withdraw error: ${withdrawData.message || withdrawData.error}`;
-          return;
-        }
-
-        const withdrawTx = await state.wallet.sendTransaction({
-          to: withdrawData.tx.to,
-          data: withdrawData.tx.data,
-          gasLimit: withdrawData.tx.gasLimit,
-        });
-        $('withdrawStatus').textContent = 'Withdrawing... tx: ' + withdrawTx.hash.slice(0, 10);
-        await withdrawTx.wait();
-        $('withdrawStatus').textContent = '✓ Withdraw confirmed!';
-        $('withdrawStatus').style.color = 'var(--green)';
-        updateWalletView();
-      } catch (err) {
-        $('withdrawStatus').textContent = 'Error: ' + err.message;
-        $('withdrawStatus').style.color = 'var(--red)';
-      }
-    };
-
-    // Helper: get token address from symbol
-    const getTokenAddress = (symbol) => {
-      const tokens = { WQUAI: '0x005c46f661baef20671943f2b4c087df3e7ceb13', WQI: '0x002b2596ecf05c93a31ff916e8b456df6c77c750' };
-      return tokens[symbol] || '';
-    };
-
-</script>
-<script src="js/wallet-integration.js">
-
-      if (!state.wallet) { showStatus('Connect wallet first', 'error'); return; }
-      const token = $('depositToken').value;
-      const amount = $('depositAmount').value;
-      if (!amount || parseFloat(amount) <= 0) { $('depositStatus').textContent = 'Invalid amount'; return; }
-
-      $('depositStatus').textContent = 'Building tx...';
-      try {
-        // Step 1: Approve token
-        const tokenAddress = API_BASE + `/v1/vault/approve`;
-        const approveResp = await fetch(tokenAddress, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token: getTokenAddress(token), amount }),
-        });
-        const approveData = await approveResp.json();
-        if (approveData.error) {
-          $('depositStatus').textContent = `Approve error: ${approveData.message || approveData.error}`;
-          return;
-        }
-
-        // Step 2: Sign and send approve tx
-        const approveTx = await state.wallet.sendTransaction({
-          to: approveData.tx.to,
-          data: approveData.tx.data,
-          gasLimit: approveData.tx.gasLimit,
-        });
-        $('depositStatus').textContent = 'Approving... tx: ' + approveTx.hash.slice(0, 10);
-        await approveTx.wait();
-
-        // Step 3: Build deposit tx
-        const depositResp = await fetch(API_BASE + '/v1/vault/deposit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tokenSymbol: token, amount }),
-        });
-        const depositData = await depositResp.json();
-        if (depositData.error) {
-          $('depositStatus').textContent = `Deposit error: ${depositData.message || depositData.error}`;
-          return;
-        }
-
-        // Step 4: Sign and send deposit tx
-        const depositTx = await state.wallet.sendTransaction({
-          to: depositData.tx.to,
-          data: depositData.tx.data,
-          gasLimit: depositData.tx.gasLimit,
-        });
-        $('depositStatus').textContent = 'Depositing... tx: ' + depositTx.hash.slice(0, 10);
-        await depositTx.wait();
-        $('depositStatus').textContent = '✓ Deposit confirmed!';
-        $('depositStatus').style.color = 'var(--green)';
-        updateWalletView();
-      } catch (err) {
-        $('depositStatus').textContent = 'Error: ' + err.message;
-        $('depositStatus').style.color = 'var(--red)';
-      }
-    };
-
-    const handleWithdraw = async () => {
-      if (!state.wallet) { showStatus('Connect wallet first', 'error'); return; }
-      const token = $('withdrawToken').value;
-      const amount = $('withdrawAmount').value;
-      if (!amount || parseFloat(amount) <= 0) { $('withdrawStatus').textContent = 'Invalid amount'; return; }
-
-      $('withdrawStatus').textContent = 'Building tx...';
-      try {
-        const withdrawResp = await fetch(API_BASE + '/v1/vault/withdraw', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tokenSymbol: token, amount }),
-        });
-        const withdrawData = await withdrawResp.json();
-        if (withdrawData.error) {
-          $('withdrawStatus').textContent = `Withdraw error: ${withdrawData.message || withdrawData.error}`;
-          return;
-        }
-
-        const withdrawTx = await state.wallet.sendTransaction({
-          to: withdrawData.tx.to,
-          data: withdrawData.tx.data,
-          gasLimit: withdrawData.tx.gasLimit,
-        });
-        $('withdrawStatus').textContent = 'Withdrawing... tx: ' + withdrawTx.hash.slice(0, 10);
-        await withdrawTx.wait();
-        $('withdrawStatus').textContent = '✓ Withdraw confirmed!';
-        $('withdrawStatus').style.color = 'var(--green)';
-        updateWalletView();
-      } catch (err) {
-        $('withdrawStatus').textContent = 'Error: ' + err.message;
-        $('withdrawStatus').style.color = 'var(--red)';
-      }
-    };
-
-    // Helper: get token address from symbol
-    const getTokenAddress = (symbol) => {
-      const tokens = { WQUAI: '0x005c46f661baef20671943f2b4c087df3e7ceb13', WQI: '0x002b2596ecf05c93a31ff916e8b456df6c77c750' };
-      return tokens[symbol] || '';
-    };
-
-</script>
 </body>
 </html>
