@@ -303,6 +303,73 @@ class QuaiSigner {
       params: [message, this.address],
     });
   }
+
+  /**
+   * Sign typed data (EIP-712).
+   * Tries quai_signTypedData_v4 first, falls back to eth_signTypedData_v4.
+   * Compatible with ethers.js _signTypedData interface:
+   *   _signTypedData(domain, types, message)
+   *
+   * Where `types` can be:
+   *   - An array of {name, type} (shorthand, primaryType='Order')
+   *   - An object {Order: [...]} (full ethers format)
+   */
+  async _signTypedData(domain, types, message) {
+    // Normalize `types`: array -> { Order: array }
+    let typesObject, primaryType;
+    if (Array.isArray(types)) {
+      // Shorthand: array of field definitions
+      primaryType = 'Order';
+      typesObject = { [primaryType]: types };
+    } else if (typeof types === 'object') {
+      // Full format: { Order: [...], EIP712Domain: [...] }
+      primaryType = 'Order';
+      typesObject = types;
+    } else {
+      throw new Error('_signTypedData: `types` must be an array or object');
+    }
+
+    // Ensure EIP712Domain type exists
+    if (!typesObject.EIP712Domain) {
+      typesObject = {
+        EIP712Domain: [
+          { name: 'name', type: 'string' },
+          { name: 'version', type: 'string' },
+          { name: 'chainId', type: 'uint256' },
+          { name: 'verifyingContract', type: 'address' },
+        ],
+        ...typesObject,
+      };
+    }
+
+    const typedData = {
+      domain,
+      types: typesObject,
+      primaryType,
+      message,
+    };
+
+    try {
+      const sig = await this.provider.request({
+        method: 'quai_signTypedData_v4',
+        params: [this.address, JSON.stringify(typedData)],
+      });
+      return sig;
+    } catch (e1) {
+      try {
+        const sig = await this.provider.request({
+          method: 'eth_signTypedData_v4',
+          params: [this.address, JSON.stringify(typedData)],
+        });
+        return sig;
+      } catch (e2) {
+        throw new Error(
+          'EIP-712 signing failed: wallet does not support signTypedData_v4. ' +
+          'Use Pelagus or a wallet with EIP-712 support on Quai Network.'
+        );
+      }
+    }
+  }
 }
 
 // Export for use in browser

@@ -429,31 +429,67 @@ class QDexWalletIntegration {
   }
 
   /**
-   * Sign order for submission
+   * Sign order for submission (EIP-712).
+   * Uses _signTypedData for proper typed data signing.
    */
   async signOrder(order) {
     await this.#assertQuaiNetwork();
 
-    const orderHash = JSON.stringify({
+    const settlementContract = order.settlementContract || '0x004C1D112dB14611A16Bf1dA825Ee5C3F67adD22';
+    const chainId = order.chainId || 15000;
+
+    // EIP-712 domain
+    const EIP712_DOMAIN = {
+      name: 'QDEX',
+      version: '1',
+      chainId: chainId,
+      verifyingContract: settlementContract,
+    };
+
+    // EIP-712 Order type
+    const ORDER_TYPE = [
+      { name: 'marketId', type: 'string' },
+      { name: 'side', type: 'string' },
+      { name: 'type', type: 'string' },
+      { name: 'amount', type: 'string' },
+      { name: 'price', type: 'string' },
+      { name: 'timeInForce', type: 'string' },
+      { name: 'maxSlippageBps', type: 'uint256' },
+      { name: 'owner', type: 'address' },
+      { name: 'delegate', type: 'address' },
+      { name: 'nonce', type: 'string' },
+      { name: 'expiresAt', type: 'uint256' },
+    ];
+
+    // The message to sign (order fields)
+    const typedMessage = {
       marketId: order.marketId,
       side: order.side,
       type: order.type,
       amount: order.amount,
       price: order.price,
+      timeInForce: order.timeInForce || 'GTC',
+      maxSlippageBps: order.maxSlippageBps || 0,
       owner: this.address,
+      delegate: order.delegate || '0x0000000000000000000000000000000000000000',
       nonce: order.nonce,
-      expiresAt: order.expiresAt,
-      chainId: order.chainId,
-      settlementContract: order.settlementContract,
-    });
+      expiresAt: order.expiresAt || Math.floor(Date.now() / 1000) + 86400,
+    };
 
-    const signature = await this.signer.signMessage(orderHash);
+    // Sign with EIP-712
+    const signature = await this.signer._signTypedData(
+      EIP712_DOMAIN,
+      ORDER_TYPE,
+      typedMessage
+    );
 
     return {
       ...order,
       owner: this.address,
+      chainId,
+      settlementContract,
       signature: {
-        scheme: 'wallet',
+        scheme: 'eip712',
         signer: this.address,
         value: signature,
         signedAt: Math.floor(Date.now() / 1000),
