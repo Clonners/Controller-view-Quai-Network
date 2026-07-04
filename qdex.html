@@ -556,6 +556,7 @@ input { font: inherit; }
     <a href="https://bitquai.live/mining.html">Mining</a>
     <a href="https://bitquai.live/controller_view.html">Controller</a>
     <span class="active">QDEX</span>
+    <a href="governance.html">Governance</a>
     <a href="#wallet" class="wallet-btn">Connect Wallet</a>
   </div>
 </nav>
@@ -1484,7 +1485,10 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
         return;
       }
 
-      const nonce = Math.floor(Math.random() * 100000).toString();
+      // Nonce must be positive (avoid 0)
+      const nonce = (Math.floor(Math.random() * 999999) + 1).toString();
+
+      // Build order — fields flat (backend expects them at top level)
       const order = {
         marketId: state.market,
         side: state.side,
@@ -1503,7 +1507,7 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
         settlementContract: '0x004C1D112dB14611A16Bf1dA825Ee5C3F67adD22',
       };
 
-      // EIP-712 typed data for order signing
+      // EIP-712 typed data — maxSlippageBps must be string for uint256
       const EIP712_DOMAIN = {
         name: 'QDEX',
         version: '1',
@@ -1523,62 +1527,70 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
         { name: 'nonce', type: 'string' },
         { name: 'expiresAt', type: 'uint256' },
       ];
-      const typedData = {
-        domain: EIP712_DOMAIN,
-        types: { Order: ORDER_TYPE },
-        primaryType: 'Order',
-        message: order,
+      const typedMessage = {
+        marketId: order.marketId,
+        side: order.side,
+        type: order.type,
+        amount: order.amount,
+        price: order.price,
+        timeInForce: order.timeInForce,
+        maxSlippageBps: String(order.maxSlippageBps),
+        owner: order.owner,
+        delegate: order.delegate,
+        nonce: order.nonce,
+        expiresAt: String(order.expiresAt),
       };
+
+      logActivity(`Signing ${state.side} ${state.orderType} order: ${amount} ${m.base} @ ${price.toFixed(6)} ${m.quote}`, 'info');
+
       const signature = await signer._signTypedData(
         EIP712_DOMAIN,
         ORDER_TYPE,
-        order
+        typedMessage
       );
 
       order.signature = {
-        scheme: 'ethers-v4',
+        scheme: 'eip712',
         signer: state.wallet,
         value: signature,
         signedAt: Math.floor(Date.now() / 1000),
       };
 
-      logActivity(`Signing ${state.side} ${state.orderType} order: ${amount} ${m.base} @ ${price.toFixed(6)} ${m.quote}`, 'info');
+      logActivity('Order signed with EIP-712 ✓', 'success');
+      logActivity(`Submitting order (nonce=${nonce})...`, 'info');
 
-      if (backendReady && qdexClient) {
-        try {
-          // Submit to real API
-          const apiResp = await fetch(API_BASE + '/v1/orders', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(order),
-          });
-          const result = await apiResp.json();
-          if (result && result.orderHash) {
-            logActivity(`Order submitted: ${result.orderHash.slice(0, 12)}... (${result.status || 'open'})`, 'success');
-            state.orders.unshift({
-              id: result.orderHash.slice(0, 12),
-              pair: `${m.base}/${m.quote}`,
-              side: state.side,
-              type: state.orderType,
-              price: price.toFixed(6),
-              amount: amount.toFixed(4),
-              filled: '0%',
-              status: result.status || 'open',
-              timestamp: Date.now(),
-            });
-            renderOrders();
-          }
-        } catch (e) {
-          console.warn('[QDEX] Order submission failed:', e.message);
-          logActivity(`Order submission failed: ${e.message}`, 'warn');
-          createLocalOrder(order, m, price, amount, nonce);
-        }
+      // Submit to QDEX API — fields flat at top level
+      const apiResp = await fetch(API_BASE_URL + '/v1/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(order),
+      });
+      const result = await apiResp.json();
+
+      if (result && result.orderHash) {
+        logActivity(`Order accepted: ${result.orderHash.slice(0, 16)}… (${result.status || 'open'})`, 'success');
+        state.orders.unshift({
+          id: result.orderHash.slice(0, 16),
+          pair: `${m.base}/${m.quote}`,
+          side: state.side,
+          type: state.orderType,
+          price: price.toFixed(6),
+          amount: amount.toFixed(4),
+          filled: '0%',
+          status: result.status || 'open',
+          timestamp: Date.now(),
+        });
+        renderOrders();
+        renderPortfolioView();
       } else {
-        createLocalOrder(order, m, price, amount, nonce);
+        // Backend returned error
+        const reason = result?.reason || result?.error || 'unknown';
+        const message = result?.message || JSON.stringify(result);
+        logActivity(`Order rejected [${reason}]: ${message}`, 'error');
       }
     } catch (e) {
-      console.error('[QDEX] Order signing failed:', e);
-      logActivity(`Order signing failed: ${e.message}`, 'error');
+      console.error('[QDEX] Order failed:', e);
+      logActivity(`Order failed: ${e.message}`, 'error');
     } finally {
       btn.disabled = false;
       btn.textContent = `Place ${state.side} ${state.orderType} order`;
@@ -1639,6 +1651,7 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
         btn.disabled = false;
         btn.textContent = `Place ${state.side} ${state.orderType} order`;
         btn.className = `qdex-submit-btn ${state.side}`;
+        btn.onclick = submitOrder;
       }
       updateFormTotal();
       logActivity(`Wallet connected ${shortAddress(state.wallet)} - ready to trade`, 'success');
@@ -1658,7 +1671,8 @@ import { QDexClient, createMockSignedOrder } from './js/qdex-sdk.js';
       btn.disabled = true;
       btn.textContent = 'Connect wallet to trade';
     }
-    $('formBalance').textContent = '\u2014';
+    $('formBalance').textContent = '—';
+  });
 
   // ── WebSocket ──────────────────────────────────
   let wsConnected = false;
