@@ -112,13 +112,17 @@
 
 @media (max-width: 560px) {
   .topnav .navlinks {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
     width: 100%;
   }
 
   .topnav .navlinks a,
   .topnav .navlinks span {
-    flex: 1 1 auto;
     justify-content: center;
-    padding-inline: 10px;
+    min-width: 0;
+    padding-inline: 6px;
+    white-space: nowrap;
   }
 }

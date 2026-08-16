@@ -96,11 +96,7 @@
     .metric-value{font-size:1.6rem;font-weight:700;color:#e5e7eb}
     .metric-unit{font-size:.8rem;color:var(--muted)}
     .metric-badge{font-size:.65rem;padding:2px 6px;border-radius:999px;background:rgba(255,37,58,.15);color:var(--accent)}
-    .metric-footer{display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:.72rem;color:var(--muted);flex-wrap:wrap;gap:4px}
-    .metric-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;background:rgba(7,3,7,.95);border:1px solid rgba(75,85,99,.7);font-size:.68rem}
-    .metric-footer .metric-pill .dot{display:none}
-    .metric-footer .metric-pill span{display:none}
-    .dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+    .metric-footer{display:flex;align-items:center;margin-top:6px;font-size:.72rem;color:var(--muted);flex-wrap:wrap;gap:4px;overflow-wrap:anywhere}
     .metric-title-exrate{display:flex;flex-direction:column;gap:2px}
     .metric-title-exrate-sub{font-size:.65rem;color:var(--muted)}
     .metric-main-exrate{display:flex;align-items:baseline;gap:6px}
@@ -119,17 +115,8 @@
     .result-details{font-size:.72rem;color:var(--muted);margin-top:4px}
     .calc-btn{background:linear-gradient(135deg,#ff253a,#ff7a3c);border:none;border-radius:999px;padding:10px;font-size:.85rem;font-weight:600;cursor:pointer;color:#050308;box-shadow:0 10px 24px rgba(255,37,58,.6)}
     .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-    @media(max-width:600px){.rpc-input{flex-basis:140px}.card-header.flex-between{align-items:flex-start}.pill{order:3}.header-actions-btns{order:2}.card-header .left{order:1}}
+    @media(max-width:600px){.rpc-input{flex:1 1 100%;width:100%;max-width:100%}.card-header.flex-between{align-items:flex-start}.card-header .left{order:1;width:100%}.header-actions-btns{order:2;width:100%;display:grid;grid-template-columns:1fr 1fr}.header-actions-btns button{justify-content:center}.pill{order:3}.card{padding:14px 12px}.chart-wrapper{min-width:0;overflow:hidden}.metric-footer{display:block;line-height:1.45}}
     @media(max-width:900px){body{padding:16px 10px 24px}header{align-items:flex-start}.grid{grid-template-columns:minmax(0,1fr)}#chart-card{width:100%;min-height:420px}.header-actions{margin-left:0}.github-pill,.donate-pill{width:100%;justify-content:center}#conversion-card{grid-column:1;grid-row:2}}
-    /* Install banner — non-critical, kept here for completeness */
-    @media(min-width:900px){#installBanner{display:none!important}}
-    #installBanner{display:none;position:fixed;bottom:calc(env(safe-area-inset-bottom,12px)+8px);left:50%;transform:translateX(-50%);z-index:10000;background:linear-gradient(180deg,rgba(28,6,8,.95),rgba(18,6,8,.92));color:#fff;padding:10px 14px;border-radius:28px;box-shadow:0 8px 28px rgba(0,0,0,.6);display:flex;align-items:center;gap:12px;max-width:640px;width:calc(100% - 36px);box-sizing:border-box;backdrop-filter:blur(6px)}
-    #installBanner img{width:34px;height:34px;border-radius:6px;flex:0 0 auto}
-    #installBanner .install-info{min-width:0;flex:1 1 auto}
-    #installBanner .install-info .title{font-weight:600;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    #installBanner .install-info .subtitle{font-size:.78rem;opacity:.92}
-    #installBanner .install-actions{display:flex;gap:8px;align-items:center;flex:0 0 auto}
-    @media(max-width:480px){#installBanner{width:calc(100% - 24px);max-width:420px;padding:8px 10px;border-radius:14px;gap:8px}#installBanner .install-info{width:calc(100% - 120px)}#installBanner .install-actions{gap:6px}#installBanner .install-actions button{padding:6px 10px;font-size:.82rem}}
   </style>
   <!-- Full page styles loaded above with a valid text/css MIME type. -->
 </head>
@@ -225,10 +212,6 @@
             </div>
             <div class="metric-footer">
               <span id="metric-ts">timestamp: –</span>
-              <span class="metric-pill">
-                <span class="dot" id="metric-side-dot"></span>
-                <span id="metric-side">no signal</span>
-              </span>
             </div>
           </div>
 
@@ -241,10 +224,6 @@
             </div>
             <div class="metric-footer">
               <span id="metric-ratio-text">Waiting for data...</span>
-              <span class="metric-pill">
-                <span class="dot" id="metric-ratio-dot"></span>
-                <span id="metric-ratio-side">–</span>
-              </span>
             </div>
           </div>
         </div>
@@ -260,16 +239,7 @@
               <div class="metric-value" id="metric-exrate">–</div>
               <span class="metric-unit">Quai</span>
             </div>
-            <div class="metric-footer">
-              
-              <span style="display:none;">
-                Prime exchangeRate: <code id="metric-exrate-hex">–</code>
-              </span>
-              <span class="metric-pill">
-                <span class="dot" style="background:#22c55e;"></span>
-                <span>From Prime RPC</span>
-              </span>
-            </div>
+            <code id="metric-exrate-hex" hidden>–</code>
           </div>
 
           <div class="metric-card">
@@ -280,10 +250,6 @@
             </div>
             <div class="metric-footer">
               <span id="metric-dk-text">Controller α = 0.001 (per spec)</span>
-              <span class="metric-pill">
-                <span class="dot" id="metric-dk-dot"></span>
-                <span id="metric-dk-side">–</span>
-              </span>
             </div>
           </div>
         </div>
@@ -306,9 +272,7 @@
               <div class="metric-value" id="metric-conversionflow">–</div>
               <div class="metric-unit">Quai</div>
             </div>
-            <div class="metric-footer">
-              <span class="metric-pill"><span class="dot" style="background:#22c55e"></span><span>From Prime RPC</span></span>
-            </div>
+
           </div>
 
           <div class="metric-card">
@@ -319,7 +283,6 @@
               </div>
             <div class="metric-footer">
               <span id="metric-kquai-direction">direction: –</span>
-              <span class="metric-pill"><span class="dot" style="background:#22c55e"></span><span>From Prime RPC</span></span>
             </div>
           </div>
 
@@ -382,64 +345,10 @@
     </footer>
   </main>
 
-  <!-- Diagnostic loader: prefer CDN, fallback to local vendor, then load controller_main.js -->
-  <!-- Install banner (moved outside .app so fixed positioning works correctly) -->
-  <div id="installBanner">
-    <img src="assets/brand/bitquai-icon-q-256.png" alt="BitQuai" fetchpriority="low" decoding="async" loading="lazy" width="34" height="34">
-    <div class="install-info">
-      <div class="title">Install BitQuai Dashboard</div>
-      <div class="subtitle">Add to your home screen</div>
-    </div>
-    <div class="install-actions">
-      <button id="installBtn" style="background:#fff;color:#cc1e32;border-radius:18px;border:none;font-weight:700">INSTALL</button>
-      <button id="installDismiss" style="background:transparent;color:#fff;border-radius:18px;border:1px solid rgba(255,255,255,0.5)">CLOSE</button>
-    </div>
-  </div>
-
   <!-- P2: Native deferred script loading -->
   <script src="vendor/decimal.min.js" defer></script>
   <script src="vendor/chart.min.js" defer></script>
   <script src="main.js" defer></script>
-  <script>
-    (function(){
-      let deferredPrompt = null;
-      const banner = document.getElementById('installBanner');
-      const installBtn = document.getElementById('installBtn');
-      const dismissBtn = document.getElementById('installDismiss');
-
-      function isMobileDevice(){
-        return /Mobi|Android|iPhone|iPad|iPod/.test(navigator.userAgent) || window.matchMedia('(max-width: 900px)').matches;
-      }
-
-      function isAppInstalled(){
-        try{
-          if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return true;
-          if (window.navigator && window.navigator.standalone) return true; // iOS
-        }catch(e){}
-        return false;
-      }
-
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        if (!isMobileDevice() || isAppInstalled()) return;
-        deferredPrompt = e;
-        if (banner) banner.style.display = 'flex';
-      });
-
-      if (installBtn) installBtn.addEventListener('click', async function(){
-        if (!deferredPrompt) return;
-        try{ await deferredPrompt.prompt(); const choice = await deferredPrompt.userChoice; deferredPrompt = null; }catch(e){}
-        if (banner) banner.style.display = 'none';
-      });
-
-      if (dismissBtn) dismissBtn.addEventListener('click', function(){ if (banner) banner.style.display = 'none'; });
-
-      window.addEventListener('appinstalled', function(){ if (banner) banner.style.display = 'none'; deferredPrompt = null; });
-
-      document.addEventListener('DOMContentLoaded', function(){ if (!isMobileDevice() || isAppInstalled()){ if (banner) banner.style.display = 'none'; } });
-    })();
-  </script>
-
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js').catch(() => {});

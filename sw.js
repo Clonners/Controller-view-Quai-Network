@@ -1,17 +1,33 @@
 /* BitQuai Service Worker — PWA Offline Cache */
-const CACHE = 'bitquai-v3';
+const CACHE = 'bitquai-v5';
 const ASSETS = [
   '/',
   '/index.html',
   '/mining.html',
   '/controller_view.html',
   '/404.html',
-  '/css/brand.css',
-  '/css/styles.css',
-  '/controller_styles.css',
+  '/site.webmanifest',
+  '/css/brand.min.css',
+  '/css/shared.css',
+  '/css/styles.min.css',
+  '/controller_styles.min.css',
   '/vendor/chart.min.js',
   '/vendor/decimal.min.js',
   '/main.js',
+  '/js/main.js',
+  '/js/state.js',
+  '/js/config.js',
+  '/js/api/poolApi.js',
+  '/js/utils/formatters.js',
+  '/js/utils/notifications.js',
+  '/js/utils/storage.js',
+  '/js/components/charts.js',
+  '/js/components/blocks.js',
+  '/js/components/workers.js',
+  '/js/components/modals.js',
+  '/js/components/diagnostics.js',
+  '/js/components/shares.js',
+  '/js/components/websocket.js',
   '/icons/android-chrome-192x192.png',
   '/icons/android-chrome-512x512.png',
   '/icons/favicon.ico',
@@ -38,14 +54,17 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  // Cache-first for assets; API responses always use the network.
-  if (e.request.url.includes('/api/') || e.request.url.includes('/v1/')) {
-    return; // network only
-  }
+  // Keep live pool/RPC requests network-only; cache only this site's static shell.
+  if (e.request.method !== 'GET') return;
+  const requestUrl = new URL(e.request.url);
+  if (requestUrl.origin !== self.location.origin) return;
+
   e.respondWith(
     caches.match(e.request).then((r) => r || fetch(e.request).then((res) => {
-      const clone = res.clone();
-      caches.open(CACHE).then((cache) => cache.put(e.request, clone));
+      if (res.ok) {
+        const clone = res.clone();
+        caches.open(CACHE).then((cache) => cache.put(e.request, clone));
+      }
       return res;
     }).catch(() => caches.match('/404.html')))
   );

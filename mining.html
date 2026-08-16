@@ -36,54 +36,6 @@
   <meta name="twitter:title" content="BitQuai Mining Dashboard">
   <meta name="twitter:description" content="Order inside entropy.">
   <meta name="twitter:image" content="https://bitquai.live/assets/brand/bitquai-og-1200x630.png">
-  <style>
-            /* Ensure install banner never shows on wide/desktop layouts */
-            @media (min-width: 900px) {
-                #installBanner {
-                content-visibility: auto; display: none !important; }
-            }
-
-            /* Responsive install banner for mobile devices (controller-view style)
-                 Centered pill at bottom similar to Controller View native-like prompt */
-            #installBanner {
-                content-visibility: auto;
-                display: none; /* shown by JS when appropriate */
-                position: fixed;
-                bottom: calc(env(safe-area-inset-bottom, 12px) + 8px);
-                left: 50%;
-                transform: translateX(-50%);
-                z-index: 10000;
-                background: linear-gradient(180deg, rgba(28,6,8,0.95), rgba(18,6,8,0.92));
-                color: #fff;
-                padding: 10px 14px;
-                border-radius: 28px;
-                box-shadow: 0 8px 28px rgba(0,0,0,0.6);
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                max-width: 640px;
-                width: calc(100% - 36px);
-                box-sizing: border-box;
-                backdrop-filter: blur(6px);
-            }
-
-            #installBanner img { width: 34px; height: 34px; border-radius:6px; flex: 0 0 auto; }
-            #installBanner .install-info { min-width: 0; flex: 1 1 auto; }
-            #installBanner .install-info .title { font-weight:600; font-size:0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-            #installBanner .install-info .subtitle { font-size:0.78rem; opacity:0.92; }
-            #installBanner .install-actions { display:flex; gap:8px; align-items:center; flex: 0 0 auto; }
-
-            /* Small screens: scale down and avoid clipping */
-            @media (max-width: 480px) {
-                #installBanner {
-                content-visibility: auto; width: calc(100% - 24px); max-width: 420px; padding: 8px 10px; border-radius: 14px; }
-                #installBanner {
-                content-visibility: auto; gap: 8px; }
-                #installBanner .install-info { width: calc(100% - 120px); }
-                #installBanner .install-actions { gap:6px; }
-                #installBanner .install-actions button { padding:6px 10px; font-size:0.82rem; }
-            }
-        </style>
 </head>
 <body>
     <main class="container">
@@ -101,19 +53,6 @@
             <a href="controller_view.html">Controller</a>
           </div>
         </nav>
-
-        <!-- Install banner (compact pill for mobile like Controller View) -->
-        <div id="installBanner">
-            <img src="assets/brand/bitquai-icon-q-256.png" alt="BitQuai" fetchpriority="low" decoding="async" loading="lazy" width="34" height="34">
-            <div class="install-info">
-                    <div class="title">Install BitQuai Dashboard</div>
-                    <div class="subtitle">Add to your home screen</div>
-            </div>
-            <div class="install-actions">
-                <button id="installBtn" style="background:#fff;color:#cc1e32;border-radius:18px;border:none;font-weight:700">INSTALL</button>
-                <button id="installDismiss" style="background:transparent;color:#fff;border-radius:18px;border:1px solid rgba(255,255,255,0.5)">CLOSE</button>
-            </div>
-        </div>
 
         <!-- Configuration Panel -->
         <div class="config-panel">
@@ -341,7 +280,9 @@
 
         <!-- Loading/Error State -->
         <div id="loadingState" class="loading-message">
-            Ready to connect. Press CONNECT to load mining telemetry.
+            <strong class="loading-message-title">Mining telemetry is ready</strong>
+            <span class="loading-message-text">Connect to the configured pool to load live hashrate, workers and blocks.</span>
+            <button type="button" class="loading-connect" onclick="connectToServer()">Connect now</button>
         </div>
     </div>
 
@@ -473,47 +414,6 @@
     </main>
 
     <!-- Load Modular JavaScript (ES6 Modules) -->
-        <script>
-            (function(){
-                let deferredPrompt = null;
-                const banner = document.getElementById('installBanner');
-                const installBtn = document.getElementById('installBtn');
-                const dismissBtn = document.getElementById('installDismiss');
-
-                function isMobileDevice(){
-                    return /Mobi|Android|iPhone|iPad|iPod/.test(navigator.userAgent) || window.matchMedia('(max-width: 900px)').matches;
-                }
-
-                function isAppInstalled(){
-                    try{
-                        if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return true;
-                        if (window.navigator && window.navigator.standalone) return true; // iOS
-                    }catch(e){}
-                    return false;
-                }
-
-                window.addEventListener('beforeinstallprompt', (e) => {
-                    e.preventDefault();
-                    // Only show the banner on mobile devices and when the app is not already installed
-                    if (!isMobileDevice() || isAppInstalled()) return;
-                    deferredPrompt = e;
-                    if (banner) banner.style.display = 'flex';
-                });
-
-                if (installBtn) installBtn.addEventListener('click', async function(){
-                    if (!deferredPrompt) return;
-                    try{ await deferredPrompt.prompt(); const choice = await deferredPrompt.userChoice; deferredPrompt = null; }catch(e){}
-                    if (banner) banner.style.display = 'none';
-                });
-
-                if (dismissBtn) dismissBtn.addEventListener('click', function(){ if (banner) banner.style.display = 'none'; });
-
-                window.addEventListener('appinstalled', function(){ if (banner) banner.style.display = 'none'; deferredPrompt = null; });
-
-                // Hide banner on load if installed or desktop
-                document.addEventListener('DOMContentLoaded', function(){ if (!isMobileDevice() || isAppInstalled()){ if (banner) banner.style.display = 'none'; } });
-            })();
-        </script>
         <script src="vendor/chart.min.js" defer></script>
         <script type="module" src="js/main.js"></script>
 

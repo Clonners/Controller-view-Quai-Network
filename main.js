@@ -15,14 +15,10 @@ const statusText    = document.getElementById("status-text");
 
 const metricBlock      = document.getElementById("metric-block");
 const metricTs         = document.getElementById("metric-ts");
-const metricSideDot    = document.getElementById("metric-side-dot");
-const metricSide       = document.getElementById("metric-side");
 
 const metricRatio      = document.getElementById("metric-ratio");
 const metricRatioBadge = document.getElementById("metric-ratio-badge");
 const metricRatioText  = document.getElementById("metric-ratio-text");
-const metricRatioDot   = document.getElementById("metric-ratio-dot");
-const metricRatioSide  = document.getElementById("metric-ratio-side");
 
 const metricExrate     = document.getElementById("metric-exrate");
 const metricConversionFlow = document.getElementById('metric-conversionflow');
@@ -36,8 +32,6 @@ const metricExrateHex  = document.getElementById("metric-exrate-hex");
 
 const metricDk         = document.getElementById("metric-dk");
 const metricDkText     = document.getElementById("metric-dk-text");
-const metricDkDot      = document.getElementById("metric-dk-dot");
-const metricDkSide     = document.getElementById("metric-dk-side");
 
 const chartSpinner     = document.getElementById("chart-loading-overlay");
 
@@ -110,8 +104,6 @@ async function updateUIFromSeries(series, chunkSizePrime, url) {
     const ratioOne = new Decimal(1);
     metricRatioBadge.textContent = lastRatio.gt(ratioOne) ? 'pro-Qi' : lastRatio.lt(ratioOne) ? 'pro-Quai' : 'neutral';
     metricRatioText.textContent = lastRatio.gt(ratioOne) ? 'FX (Prime) favors Qi (d* > d).' : lastRatio.lt(ratioOne) ? 'FX (Prime) favors Quai (d* < d).' : 'FX roughly neutral (d* ≈ d).';
-    metricRatioDot.style.background = lastRatio.gte(ratioOne) ? '#4ade80' : '#f97373';
-    metricRatioSide.textContent = lastRatio.gt(ratioOne) ? 'FX (Prime) pro-Qi' : lastRatio.lt(ratioOne) ? 'FX (Prime) pro-Quai' : 'Approximate equilibrium';
 
     // Exchange rate (prefer canonical RPC)
     let rate = null;
@@ -133,11 +125,6 @@ async function updateUIFromSeries(series, chunkSizePrime, url) {
     const deltaKPercent = lastDeltaK.times(100);
     metricDk.textContent = formatNumber(deltaKPercent, 4);
     metricDkText.textContent = 'Controller α = 0.001 (per spec), estimated from d*/d (per Prime block).';
-    metricDkDot.style.background = lastDeltaK.gte(0) ? '#4ade80' : '#f97373';
-    metricDkSide.textContent = lastDeltaK.gte(0) ? 'kQuai tends to increase ⇒ more Quai per 1 Qi' : 'kQuai tends to decrease ⇒ less Quai per 1 Qi';
-
-    metricSideDot.style.background = lastRatio.gte(ratioOne) ? '#4ade80' : '#f97373';
-    metricSide.textContent = lastRatio.gt(ratioOne) ? 'd* > d ⇒ pro-Qi (more Quai per 1 Qi).' : lastRatio.lt(ratioOne) ? 'd* < d ⇒ pro-Quai (less Quai per 1 Qi).' : 'Almost neutral (d* ≈ d).';
 
     statusDot.classList.remove('red');
     statusText.innerHTML = '<span class="em">OK</span> · ' + labels.length + ' points (' + series.length + ' Prime blocks). Last d*/d = ' + formatNumber(lastRatio, 4);

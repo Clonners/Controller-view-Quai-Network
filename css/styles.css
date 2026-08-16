@@ -697,10 +697,50 @@ display: block;
 }
 
 .loading-message {
+display: grid;
+justify-items: center;
+gap: 10px;
+max-width: 620px;
+margin: 24px auto 0;
+padding: 28px 24px;
 text-align: center;
 color: white;
-font-size: 1.2em;
-padding: 40px;
+font-size: 1rem;
+background: radial-gradient(circle at top, rgba(38, 8, 14, 0.9), rgba(8, 2, 8, 0.92));
+border: 1px solid rgba(148, 27, 49, 0.55);
+border-radius: var(--card-radius);
+box-shadow: var(--shadow-soft);
+}
+
+.loading-message-title {
+font-size: 1.05rem;
+letter-spacing: 0.02em;
+}
+
+.loading-message-text {
+max-width: 480px;
+color: var(--muted);
+line-height: 1.55;
+}
+
+.loading-connect {
+margin-top: 4px;
+padding-inline: 22px;
+background: linear-gradient(135deg, #ff253a, #ff7a3c);
+color: #050308;
+box-shadow: 0 10px 24px rgba(255, 37, 58, 0.45);
+}
+
+@media (max-width: 640px) {
+    .config-grid { grid-template-columns: minmax(0, 1fr); }
+    .button-group {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+        width: 100%;
+        gap: 8px;
+    }
+    .button-group button { min-width: 0; padding-inline: 10px; }
+    .loading-message { margin-top: 18px; padding: 24px 18px; }
 }
 
 .error-message {
