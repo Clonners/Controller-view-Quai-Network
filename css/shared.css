@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════
    BitQuai — Shared Topnav Pill
-   Used across: index.html, mining.html, controller_view.html, qdex.html
+   Used across: index.html, mining.html, controller_view.html
    ═══════════════════════════════════════════════════ */
 
 .topnav {
@@ -96,34 +96,6 @@
   font-weight: 700;
 }
 
-.topnav .navlinks .wallet-btn {
-  background: linear-gradient(135deg, #ff253a, #cc1e32);
-  color: #fff;
-  font-weight: 700;
-  border: none;
-  box-shadow: 0 4px 16px rgba(255, 37, 58, 0.3);
-}
-
-.topnav .navlinks .wallet-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 24px rgba(255, 37, 58, 0.45);
-  background: linear-gradient(135deg, #ff3a50, #e62040);
-}
-
-.topnav .navlinks .wallet-btn.connected {
-  background: rgba(255, 37, 58, 0.12);
-  border: 1px solid rgba(255, 37, 58, 0.24);
-  color: #ff253a;
-  box-shadow: none;
-  cursor: pointer;
-}
-
-.topnav .navlinks .wallet-btn.connected:hover {
-  background: rgba(255, 37, 58, 0.18);
-  border-color: rgba(255, 37, 58, 0.34);
-  box-shadow: none;
-  transform: none;
-}
 
 @media (max-width: 900px) {
   .topnav {

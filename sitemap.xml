@@ -6,22 +6,12 @@
     <changefreq>weekly</changefreq>
   </url>
   <url>
-    <loc>https://bitquai.live/qdex.html</loc>
-    <priority>0.9</priority>
-    <changefreq>weekly</changefreq>
-  </url>
-  <url>
     <loc>https://bitquai.live/mining.html</loc>
     <priority>0.8</priority>
     <changefreq>weekly</changefreq>
   </url>
   <url>
     <loc>https://bitquai.live/controller_view.html</loc>
-    <priority>0.7</priority>
-    <changefreq>weekly</changefreq>
-  </url>
-  <url>
-    <loc>https://bitquai.live/governance.html</loc>
     <priority>0.7</priority>
     <changefreq>weekly</changefreq>
   </url>

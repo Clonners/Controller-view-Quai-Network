@@ -1,7 +1,7 @@
 {
   "name": "BitQuai",
   "short_name": "BitQuai",
-  "description": "BitQuai — Mining, controller analytics, and QDEX terminal exchange UI.",
+  "description": "BitQuai — Mining telemetry and controller analytics for Quai Network.",
   "icons": [
     {
       "src": "icons/android-chrome-192x192.png",
@@ -25,12 +25,6 @@
       "name": "Controller",
       "short_name": "Controller",
       "url": "/controller_view.html",
-      "icons": [{ "src": "icons/android-chrome-192x192.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "QDEX Terminal",
-      "short_name": "QDEX",
-      "url": "/qdex.html",
       "icons": [{ "src": "icons/android-chrome-192x192.png", "sizes": "192x192" }]
     }
   ],

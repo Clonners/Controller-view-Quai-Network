@@ -14,7 +14,7 @@
   <link rel="dns-prefetch" href="https://prime.bitquai.live">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BitQuai — Order Inside Entropy</title>
-  <meta name="description" content="BitQuai — Mining telemetry, controller analytics, and QDEX terminal exchange UI for Quai.">
+  <meta name="description" content="BitQuai — Mining telemetry and controller analytics for Quai Network.">
   <meta name="theme-color" content="#ff253a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
@@ -145,7 +145,7 @@
 
     .surfaces {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 16px;
       margin-top: 8px;
     }
@@ -248,7 +248,6 @@
     }
 
     .dot { width: 7px; height: 7px; border-radius: 999px; background: var(--green); box-shadow: 0 0 16px rgba(74,222,128,.5); }
-    .dot.demo { background: #f59e0b; box-shadow: 0 0 16px rgba(245,158,11,.5); }
 
     .footer {
       display: flex;
@@ -293,9 +292,6 @@
         <span class="active">Home</span>
         <a href="mining.html">Mining</a>
         <a href="controller_view.html">Controller</a>
-        <a href="qdex.html">QDEX</a>
-        <a href="governance.html">Governance</a>
-        <a href="qdex.html" class="wallet-btn">Connect Wallet</a>
       </div>
     </nav>
 
@@ -353,37 +349,6 @@
           <div class="surface-top"><span>02 / Controller</span><span class="status"><span class="dot"></span>Analytics</span></div>
           <h2>Controller view</h2>
         </a>
-
-        <a class="surface-card" href="qdex.html">
-          <div class="preview" style="background:linear-gradient(135deg, #1a060b, #0a0408);display:flex;align-items:center;justify-content:center;border-radius:14px;">
-            <svg viewBox="0 0 320 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:85%;opacity:.7">
-              <rect x="10" y="10" width="300" height="24" rx="6" fill="rgba(255,37,58,0.08)" stroke="rgba(255,37,58,0.15)" stroke-width="1"/>
-              <text x="20" y="26" fill="#ff253a" font-size="10" font-family="monospace">QDEX</text>
-              <text x="200" y="26" fill="#9ca3af" font-size="9" font-family="monospace">Trade</text>
-              <text x="250" y="26" fill="#9ca3af" font-size="9" font-family="monospace">Portfolio</text>
-              <rect x="10" y="44" width="200" height="146" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,37,58,0.12)" stroke-width="1"/>
-              <rect x="220" y="44" width="90" height="146" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,37,58,0.12)" stroke-width="1"/>
-              <rect x="20" y="54" width="80" height="20" rx="4" fill="rgba(74,222,128,0.1)" stroke="rgba(74,222,128,0.2)" stroke-width="1"/>
-              <text x="28" y="68" fill="#4ade80" font-size="9" font-family="monospace">BUY</text>
-              <rect x="110" y="54" width="80" height="20" rx="4" fill="rgba(255,75,75,0.1)" stroke="rgba(255,75,75,0.2)" stroke-width="1"/>
-              <text x="120" y="68" fill="#ff4b4b" font-size="9" font-family="monospace">SELL</text>
-              <line x1="20" y1="90" x2="190" y2="90" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
-              <line x1="20" y1="100" x2="180" y2="100" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
-              <line x1="20" y1="110" x2="170" y2="110" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
-              <line x1="20" y1="120" x2="185" y2="120" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
-              <line x1="20" y1="130" x2="175" y2="130" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
-              <line x1="20" y1="140" x2="190" y2="140" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
-              <line x1="20" y1="150" x2="180" y2="150" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
-              <rect x="230" y="54" width="70" height="120" rx="6" fill="rgba(255,37,58,0.08)"/>
-              <text x="235" y="70" fill="#9ca3af" font-size="7" font-family="monospace">Order</text>
-              <text x="235" y="80" fill="#9ca3af" font-size="7" font-family="monospace">Book</text>
-              <text x="235" y="100" fill="#4ade80" font-size="8" font-family="monospace">12.5</text>
-              <text x="235" y="116" fill="#ff4b4b" font-size="8" font-family="monospace">8.3</text>
-            </svg>
-          </div>
-          <div class="surface-top"><span>03 / QDEX</span><span class="status"><span class="dot demo"></span>Static demo</span></div>
-          <h2>Exchange terminal</h2>
-        </a>
       </div>
     </section>
 
@@ -398,6 +363,5 @@
       navigator.serviceWorker.register('./sw.js').catch(() => {});
     }
   </script>
-  <script src="js/wallet-pill.js"></script>
 </body>
 </html>

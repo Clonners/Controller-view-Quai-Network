@@ -1,17 +1,15 @@
 /* BitQuai Service Worker — PWA Offline Cache */
-const CACHE = 'bitquai-v2';  // bumped v1→v2 to bust cache after SDK fix
+const CACHE = 'bitquai-v3';
 const ASSETS = [
   '/',
   '/index.html',
   '/mining.html',
   '/controller_view.html',
-  '/qdex.html',
   '/404.html',
   '/css/brand.css',
   '/css/styles.css',
   '/controller_styles.css',
   '/vendor/chart.min.js',
-  '/vendor/lightweight-charts.cjs.js',
   '/vendor/decimal.min.js',
   '/main.js',
   '/icons/android-chrome-192x192.png',
@@ -40,8 +38,8 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  // Cache-first for assets, network-first for API and SDK
-  if (e.request.url.includes('/api/') || e.request.url.includes('/v1/') || e.request.url.includes('qdex-sdk')) {
+  // Cache-first for assets; API responses always use the network.
+  if (e.request.url.includes('/api/') || e.request.url.includes('/v1/')) {
     return; // network only
   }
   e.respondWith(
