@@ -1,5 +1,5 @@
 /* BitQuai Service Worker — PWA Offline Cache */
-const CACHE = 'bitquai-v5';
+const CACHE = 'bitquai-v6';
 const ASSETS = [
   '/',
   '/index.html',

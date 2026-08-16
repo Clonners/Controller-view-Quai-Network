@@ -76,7 +76,7 @@
     input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 1px rgba(255,37,58,.32);background:rgba(10,2,10,1)}
     button{border-radius:999px;border:none;padding:7px 14px;font-size:.8rem;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#ff253a,#ff7a3c);color:#050308;box-shadow:0 10px 24px rgba(255,37,58,.6);white-space:nowrap}
     button.secondary{background:transparent;color:var(--muted);border:1px solid rgba(75,85,99,.8);box-shadow:none}
-    #conversion-card{grid-column:2;grid-row:1}
+    #conversion-card{grid-column:2;grid-row:1;align-self:start}
     .chart-wrapper{position:relative;min-height:300px;width:100%}
     canvas{position:relative;z-index:1;width:100%!important;max-height:360px}
     .legend{position:relative;z-index:1;margin-top:6px;font-size:.72rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:10px;align-items:center}
@@ -101,19 +101,22 @@
     .metric-title-exrate-sub{font-size:.65rem;color:var(--muted)}
     .metric-main-exrate{display:flex;align-items:baseline;gap:6px}
     .metric-prefix{font-size:.85rem;color:var(--muted)}
-    .conversion-container{display:flex;flex-direction:column;gap:12px;position:relative;z-index:1}
-    .conversion-input-group{display:flex;flex-direction:column;gap:4px}
-    .conversion-input-group label{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
-    .conversion-input{background:rgba(10,2,9,.95);border-radius:999px;border:1px solid rgba(148,27,49,.8);padding:8px 14px;color:var(--text);font-size:.85rem;outline:none;width:100%}
-    .conversion-direction{display:flex;align-items:center;justify-content:center;gap:8px}
-    .swap-btn{background:rgba(255,37,58,.15);border:1px solid rgba(255,37,58,.3);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--accent)}
-    .direction-labels{display:flex;align-items:center;gap:6px;font-weight:600;font-size:.9rem}
-    .direction-labels .arrow{color:var(--accent)}
-    .conversion-result{text-align:center;padding:12px;border-radius:12px;background:rgba(6,1,6,.5);border:1px solid rgba(56,12,24,.7)}
-    .result-label{font-size:.75rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
-    .result-value{font-size:1.6rem;font-weight:700;color:#e5e7eb}
-    .result-details{font-size:.72rem;color:var(--muted);margin-top:4px}
-    .calc-btn{background:linear-gradient(135deg,#ff253a,#ff7a3c);border:none;border-radius:999px;padding:10px;font-size:.85rem;font-weight:600;cursor:pointer;color:#050308;box-shadow:0 10px 24px rgba(255,37,58,.6)}
+    .conversion-container{display:flex;flex-direction:column;gap:12px;padding:0;position:relative;z-index:1}
+    .conversion-input-group{display:flex;flex-direction:column;gap:6px}
+    .conversion-input-group label,.direction-caption{font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+    #conversion-card .conversion-input{width:100%;min-height:42px;padding:10px 12px;background:rgba(10,2,9,.95);border-radius:10px;border:1px solid rgba(148,27,49,.8);color:var(--text);font-size:.9rem;outline:none}
+    .conversion-direction{min-height:54px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 10px 9px 12px;background:rgba(6,1,6,.72);border-radius:10px;border:1px solid rgba(56,12,24,.75)}
+    .direction-copy{display:flex;flex-direction:column;gap:3px;min-width:0}
+    .direction-labels{display:flex;align-items:center;gap:7px;font-weight:650;font-size:.92rem;line-height:1.2}
+    .direction-labels .arrow{color:var(--accent);font-size:1rem}
+    .swap-btn{flex:0 0 36px;width:36px;height:36px;padding:0;background:rgba(255,37,58,.1);border:1px solid rgba(255,37,58,.36);border-radius:10px;box-shadow:none;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:#ff5a6b}
+    .swap-btn svg{width:18px;height:18px}
+    .conversion-result{min-height:68px;padding:11px 12px;border-radius:10px;background:rgba(6,1,6,.58);border:1px solid rgba(56,12,24,.75);display:grid;grid-template-columns:minmax(0,1fr) minmax(72px,auto);align-items:center;gap:4px 12px}
+    .result-label{margin:0;font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+    .result-value{min-width:0;font-size:1.3rem;line-height:1.2;font-weight:700;color:var(--text);text-align:right;overflow-wrap:anywhere}
+    .result-details{grid-column:1/-1;min-width:0;max-width:100%;font-size:.7rem;line-height:1.4;color:var(--muted);margin-top:1px;overflow-wrap:anywhere}
+    .calc-btn{width:100%;min-height:42px;padding:10px 16px;justify-content:center;background:linear-gradient(135deg,#ff253a,#ff6b3d);border:none;border-radius:10px;font-size:.82rem;font-weight:700;cursor:pointer;color:#130206;box-shadow:0 8px 20px rgba(255,37,58,.34);text-transform:none;letter-spacing:.025em}
+    @media(pointer:coarse){#conversion-card .conversion-input,#conversion-card .calc-btn{min-height:44px}.swap-btn{flex:0 0 44px!important;width:44px!important;height:44px!important;min-height:44px!important;padding:0!important}}
     .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
     @media(max-width:600px){.rpc-input{flex:1 1 100%;width:100%;max-width:100%}.card-header.flex-between{align-items:flex-start}.card-header .left{order:1;width:100%}.header-actions-btns{order:2;width:100%;display:grid;grid-template-columns:1fr 1fr}.header-actions-btns button{justify-content:center}.pill{order:3}.card{padding:14px 12px}.chart-wrapper{min-width:0;overflow:hidden}.metric-footer{display:block;line-height:1.45}}
     @media(max-width:900px){body{padding:16px 10px 24px}header{align-items:flex-start}.grid{grid-template-columns:minmax(0,1fr)}#chart-card{width:100%;min-height:420px}.header-actions{margin-left:0}.github-pill,.donate-pill{width:100%;justify-content:center}#conversion-card{grid-column:1;grid-row:2}}
@@ -313,29 +316,32 @@
         <div class="conversion-container">
           <div class="conversion-input-group">
             <label for="conversion-amount">Amount</label>
-            <input type="text" id="conversion-amount" class="conversion-input" placeholder="Enter amount" />
+            <input type="text" id="conversion-amount" class="conversion-input" placeholder="0.00" inputmode="decimal" autocomplete="off" spellcheck="false" />
           </div>
           
           <div class="conversion-direction">
-            <button id="swap-direction-btn" class="swap-btn" title="Swap direction" aria-label="Swap conversion direction">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <div class="direction-copy">
+              <span class="direction-caption">Direction</span>
+              <div class="direction-labels">
+                <span id="from-currency">Qi</span>
+                <span class="arrow">→</span>
+                <span id="to-currency">Quai</span>
+              </div>
+            </div>
+            <button id="swap-direction-btn" class="swap-btn" type="button" title="Swap direction" aria-label="Swap conversion direction">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <path d="M7 16V4M7 4L3 8M7 4L11 8M17 8V20M17 20L21 16M17 20L13 16"/>
               </svg>
             </button>
-            <div class="direction-labels">
-              <span id="from-currency">Qi</span>
-              <span class="arrow">→</span>
-              <span id="to-currency">Quai</span>
-            </div>
           </div>
 
           <div class="conversion-result">
-            <div class="result-label">You will receive:</div>
+            <div class="result-label">You receive</div>
             <div class="result-value" id="conversion-result">–</div>
             <div class="result-details" id="conversion-details"></div>
           </div>
 
-          <button id="calculate-btn" class="calc-btn">Calculate</button>
+          <button id="calculate-btn" class="calc-btn" type="button">Calculate conversion</button>
         </div>
       </section>
     </div>
