@@ -76,7 +76,7 @@
     input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 1px rgba(255,37,58,.32);background:rgba(10,2,10,1)}
     button{border-radius:999px;border:none;padding:7px 14px;font-size:.8rem;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#ff253a,#ff7a3c);color:#050308;box-shadow:0 10px 24px rgba(255,37,58,.6);white-space:nowrap}
     button.secondary{background:transparent;color:var(--muted);border:1px solid rgba(75,85,99,.8);box-shadow:none}
-    #conversion-card{grid-column:2;grid-row:1;align-self:start}
+    #conversion-card{grid-column:2;grid-row:1;align-self:stretch}
     .chart-wrapper{position:relative;min-height:300px;width:100%}
     canvas{position:relative;z-index:1;width:100%!important;max-height:360px}
     .legend{position:relative;z-index:1;margin-top:6px;font-size:.72rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:10px;align-items:center}
@@ -119,7 +119,7 @@
     @media(pointer:coarse){#conversion-card .conversion-input,#conversion-card .calc-btn{min-height:44px}.swap-btn{flex:0 0 44px!important;width:44px!important;height:44px!important;min-height:44px!important;padding:0!important}}
     .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
     @media(max-width:600px){.rpc-input{flex:1 1 100%;width:100%;max-width:100%}.card-header.flex-between{align-items:flex-start}.card-header .left{order:1;width:100%}.header-actions-btns{order:2;width:100%;display:grid;grid-template-columns:1fr 1fr}.header-actions-btns button{justify-content:center}.pill{order:3}.card{padding:14px 12px}.chart-wrapper{min-width:0;overflow:hidden}.metric-footer{display:block;line-height:1.45}}
-    @media(max-width:900px){body{padding:16px 10px 24px}header{align-items:flex-start}.grid{grid-template-columns:minmax(0,1fr)}#chart-card{width:100%;min-height:420px}.header-actions{margin-left:0}.github-pill,.donate-pill{width:100%;justify-content:center}#conversion-card{grid-column:1;grid-row:2}}
+    @media(max-width:900px){body{padding:16px 10px 24px}header{align-items:flex-start}.grid{grid-template-columns:minmax(0,1fr)}#chart-card{width:100%;min-height:420px}.header-actions{margin-left:0}.github-pill,.donate-pill{width:100%;justify-content:center}#conversion-card{grid-column:1;grid-row:2;align-self:start}}
   </style>
   <!-- Full page styles loaded above with a valid text/css MIME type. -->
 </head>
