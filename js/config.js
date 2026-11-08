@@ -71,7 +71,7 @@ export const Config = {
     
     // Default values
     defaults: {
-        serverIp: 'dpool.bitquai.live',
+        serverIp: 'dpool.kataribe.org',
         serverPort: '3336',
         chartPeriod: '1h'
     }
@@ -80,7 +80,7 @@ export const Config = {
 // Proxy configuration (optional)
 // Default configured to use the existing node proxy at /api/proxy?ip=...&port=...&path=...
 Config.proxy = {
-    base: 'https://proxy.bitquai.live',
+    base: 'https://proxy.kataribe.org',
     // endpoint can be either '/getdata?target=' (single-arg) or '/api/proxy' (ip/port/path)
     endpoint: '/api/proxy',
     // wsEndpoint should point to the proxy path that accepts websocket upgrades

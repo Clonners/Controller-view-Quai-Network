@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://bitquai.live/sitemap.xml
+Sitemap: https://kataribe.org/sitemap.xml
