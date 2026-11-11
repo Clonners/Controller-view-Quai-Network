@@ -5,44 +5,70 @@
 
    Grid: a column is 1ch, a row is --row. Phone = 40 columns (cord on column 1,
    text from column 4). Desktop = 100 columns (cord on column 16, text from 19).
+   Everything sits on that grid: widths in ch, heights in rows, two sizes of
+   type (1x and 2x), and lines drawn with box characters, one per cell.
    ========================================================================== */
 
+/* JetBrains Mono (OFL) with its em square set to 1200 units instead of 1000
+   (tools/fuente-em.mjs; the drawings are untouched). A character then advances
+   exactly half an em, so font-size = 2 columns is always whole pixels and the
+   column is exact on every screen. With the usual 0.6 em advance a 10 px column
+   needs a 16.666… px font, which no browser keeps exact. */
 @font-face {
   font-family: "Kataribe Mono";
-  src: url("../fonts/jetbrains-mono-kataribe.woff2") format("woff2");
+  src: url("../fonts/jetbrains-mono-kataribe-em1200.woff2") format("woff2");
   font-weight: 100 800;
   font-style: normal;
   font-display: swap;
 }
 
-/* ---------- colours ---------- */
+/* While the font loads (or if it fails): a local monospace scaled to the same
+   half-em column, so the page keeps its 40 / 100 columns. */
+@font-face {
+  font-family: "Kataribe Mono Respaldo";
+  src: local("Menlo"), local("Consolas"), local("DejaVu Sans Mono"), local("Liberation Mono"),
+       local("Roboto Mono"), local("Noto Sans Mono"), local("Droid Sans Mono"), local("Courier New");
+  size-adjust: 83.3333%;
+}
+
+/* ---------- colours ----------
+   Four and no more: paper, ink, a secondary grey and ONE amber.
+   A state is said with a mark, a word and weight, never with green or red.
+
+   Each theme sets only those four. The names under "kept names" stay so the
+   rest of the sheet and the scripts keep working; each points to one of the
+   four. To bring a colour back, give its name a value of its own again:
+     --ink-2        was #34363c (light) / #cfccc4 (dark)
+     --accent       was #b9801c in light (decoration only: 3.2:1 on paper)
+     --accent-text  was #855a0a (light) / #e6b655 (dark)
+     --ok           was #2d6a3e (light) / #8fd19e (dark)
+     --bad          was #a3352a (light) / #f0907f (dark)
+     --rule         was color-mix(in srgb, var(--muted) 45%, var(--paper)) */
 
 :root {
   color-scheme: light dark;
   --paper: #f5f2ea;
   --ink: #15171c;
-  --ink-2: #34363c;
   --muted: #5d5f66;
-  --accent: #b9801c;
-  --accent-text: #855a0a;
-  --ok: #2d6a3e;
-  --bad: #a3352a;
-  --rule: color-mix(in srgb, var(--muted) 45%, var(--paper));
-  --veil: color-mix(in srgb, var(--paper) 88%, transparent);
+  --accent: #855a0a;
+
+  /* kept names */
+  --ink-2: var(--ink);
+  --accent-text: var(--accent);
+  --ok: var(--ink);
+  --bad: var(--ink);
+  --rule: var(--muted);
   --danger: var(--bad);
   --success: var(--ok);
+  --veil: color-mix(in srgb, var(--paper) 88%, transparent);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --paper: #0e0f12;
     --ink: #f1ede4;
-    --ink-2: #cfccc4;
     --muted: #a5a39c;
     --accent: #e6b655;
-    --accent-text: #e6b655;
-    --ok: #8fd19e;
-    --bad: #f0907f;
   }
 }
 
@@ -50,24 +76,16 @@
   color-scheme: dark;
   --paper: #0e0f12;
   --ink: #f1ede4;
-  --ink-2: #cfccc4;
   --muted: #a5a39c;
   --accent: #e6b655;
-  --accent-text: #e6b655;
-  --ok: #8fd19e;
-  --bad: #f0907f;
 }
 
 :root[data-theme="light"] {
   color-scheme: light;
   --paper: #f5f2ea;
   --ink: #15171c;
-  --ink-2: #34363c;
   --muted: #5d5f66;
-  --accent: #b9801c;
-  --accent-text: #855a0a;
-  --ok: #2d6a3e;
-  --bad: #a3352a;
+  --accent: #855a0a;
 }
 
 /* ---------- base ---------- */
@@ -97,15 +115,18 @@ body {
   --cols: 40;
   --spine: 1;
   --text: 4;
+  /* --u0 is the size the type would have with a 0.6 em column; the column
+     (--col) comes from it and the font-size (--u) is two columns. */
   --u0: min(1.25rem, calc((100vw - 1rem) / 24));
-  --u: var(--u0);
-  --row: calc(var(--u) * 1.45);
+  --col: calc(var(--u0) * 0.6);
+  --u: calc(var(--col) * 2);
+  --row: calc(var(--col) * 2.41667);
 
   position: relative;
   width: calc(var(--cols) * 1ch);
   margin-inline: auto;
   padding-top: var(--row);
-  font-family: "Kataribe Mono", ui-monospace, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+  font-family: "Kataribe Mono", "Kataribe Mono Respaldo", ui-monospace, monospace;
   font-size: var(--u);
   line-height: var(--row);
   font-weight: 400;
@@ -133,8 +154,7 @@ body {
 @supports (width: round(down, 1px, 1px)) {
   .page {
     --col: round(down, calc(var(--u0) * 0.6 + 0.01px), 1px);
-    --u: calc(var(--col) / 0.6);
-    --row: round(calc(var(--u) * 1.45), 1px);
+    --row: round(calc(var(--col) * 2.41667), 1px);
   }
 }
 
@@ -149,7 +169,7 @@ a {
   color: inherit;
   text-decoration: underline;
   text-decoration-thickness: 1px;
-  text-underline-offset: 0.2em;
+  text-underline-offset: 0.17em;
 }
 a:hover,
 a:focus-visible { color: var(--accent-text); }
@@ -159,7 +179,9 @@ a:focus-visible { color: var(--accent-text); }
   outline-offset: 2px;
 }
 
-.sr {
+/* (.sec h2.sr: a section title kept only for screen readers must not take a row) */
+.sr,
+.sec h2.sr {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -173,7 +195,7 @@ a:focus-visible { color: var(--accent-text); }
 
 .muted { color: var(--muted); }
 .ok { color: var(--ok); }
-.bad { color: var(--bad); }
+.bad { color: var(--bad); font-weight: 700; }
 .em { color: var(--ok); font-weight: 700; }
 .r { text-align: right; }
 
@@ -205,9 +227,9 @@ a:focus-visible { color: var(--accent-text); }
 
 .cord {
   position: absolute;
-  top: calc(3 * var(--row) - 0.25em);
-  bottom: calc(var(--row) - 0.25em);
-  padding-top: 0.25em;
+  top: calc(3 * var(--row) - 0.2em);
+  bottom: calc(var(--row) - 0.2em);
+  padding-top: 0.2em;
   left: calc(var(--spine) * 1ch);
   width: 1.5ch;
   overflow: hidden;
@@ -365,7 +387,6 @@ h4 { color: var(--muted); font-weight: 400; }
   font-size: 2em;
   line-height: calc(2 * var(--row));
   font-weight: 300;
-  letter-spacing: 0.5ch;
   white-space: nowrap;
 }
 .entry .gloss { margin-top: var(--row); }
@@ -440,6 +461,15 @@ h4 { color: var(--muted); font-weight: 400; }
   cursor: default;
 }
 
+/* Every line is exactly one row tall, so "top" and "baseline" land on the same place. Buttons take
+   "top": Chromium can report a button's baseline one pixel off its text when the font metrics are
+   whole pixels, and that pixel would push the rest of the page off the rows. */
+.btn,
+button.link {
+  vertical-align: top;
+  align-self: flex-start;
+}
+
 /* a switch says its state with a mark, not only with weight */
 .btn[aria-pressed="false"]::before { content: "[ ○ "; content: "[ ○ " / ""; }
 .btn[aria-pressed="true"]::before { content: "[ ● "; content: "[ ● " / ""; }
@@ -461,7 +491,7 @@ button.link {
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-decoration-color: var(--rule);
-  text-underline-offset: 0.2em;
+  text-underline-offset: 0.17em;
   overflow-wrap: anywhere;
   cursor: pointer;
 }
@@ -499,12 +529,13 @@ button.link:focus-visible {
   margin: 0;
   padding: 0;
   border: 0;
-  border-bottom: 1px solid var(--muted);
   border-radius: 0;
+  /* the line below is drawn inside the row, so the text keeps a whole row */
+  box-shadow: inset 0 -1px 0 var(--muted);
   background: var(--paper);
   color: var(--ink);
   font: inherit;
-  line-height: calc(var(--row) - 1px);
+  line-height: var(--row);
 }
 .input::placeholder,
 .field input::placeholder { color: var(--muted); opacity: 1; }
@@ -514,7 +545,7 @@ button.link:focus-visible {
 .field select:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-  border-bottom-color: var(--accent);
+  box-shadow: inset 0 -1px 0 var(--accent);
 }
 
 .select {
@@ -593,22 +624,23 @@ button.link:focus-visible {
 .pill-dot::before { content: "●"; content: "●" / ""; }
 .pill-dot.fetching { color: var(--accent); }
 .pill-dot.fetching::before { content: "█"; content: "█" / ""; }
-.pill-dot.red { color: var(--bad); }
+.pill-dot.red { color: var(--bad); font-weight: 700; }
 .pill-dot.red::before { content: "✗"; content: "✗" / ""; }
 
 #status-dot { color: var(--ok); }
 #status-dot::before { content: "●"; content: "●" / ""; }
 #status-dot.idle { color: var(--muted); }
 #status-dot.idle::before { content: "○"; content: "○" / ""; }
-#status-dot.red { color: var(--bad); }
+#status-dot.red { color: var(--bad); font-weight: 700; }
 #status-dot.red::before { content: "✗"; content: "✗" / ""; }
 
 .pill,
 .status-bar { overflow-wrap: anywhere; }
 
+/* good: plain; to watch: amber; wrong: heavier (and each one has its mark) */
 .state.ok { color: var(--ok); }
 .state.warn { color: var(--accent-text); }
-.state.bad { color: var(--bad); }
+.state.bad { color: var(--bad); font-weight: 700; }
 
 /* ---------- label ..... value ---------- */
 
@@ -684,13 +716,27 @@ button.link:focus-visible {
 }
 .tbl th:last-child,
 .tbl td:last-child { padding-right: 0; }
+/* the rule under the header is a row of ─ : one row, one sign per column */
 .tbl th {
-  padding-bottom: calc(var(--row) / 2 - 1px);
-  border-bottom: 1px solid var(--rule);
+  position: relative;
+  padding-bottom: var(--row);
   color: var(--muted);
   font-weight: 400;
 }
-.tbl tbody tr:first-child td { padding-top: calc(var(--row) / 2); }
+.tbl th::after {
+  content: "────────────────────────────────────────────────────────────────────────────────────────────────────";
+  content: "────────────────────────────────────────────────────────────────────────────────────────────────────" / "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: var(--row);
+  overflow: hidden;
+  white-space: nowrap;
+  text-align: left;
+  color: var(--rule);
+  pointer-events: none;
+}
 .tbl .r { text-align: right; }
 
 .tbl .w-9 { width: 9ch; }
@@ -707,7 +753,7 @@ button.link:focus-visible {
 .tbl .w-44 { width: 44ch; }
 
 .tbl td.empty { color: var(--muted); }
-.tbl td.empty.bad { color: var(--bad); }
+.tbl td.empty.bad { color: var(--bad); font-weight: 700; }
 .skeleton-text { color: var(--rule); }
 
 .tbl.keep { max-width: 45ch; }
@@ -752,7 +798,6 @@ button.link:focus-visible {
     white-space: nowrap;
   }
 
-  .tbl:not(.keep) tbody tr:first-child td { padding-top: 0; }
   .tbl:not(.keep) tr + tr { margin-top: var(--row); }
   .tbl:not(.keep) td { padding: 0; }
 
@@ -822,7 +867,7 @@ button.link:focus-visible {
 .share-item.no-shares { color: var(--muted); }
 .share-type.valid { color: var(--ok); }
 .share-type.stale { color: var(--accent-text); }
-.share-type.invalid { color: var(--bad); }
+.share-type.invalid { color: var(--bad); font-weight: 700; }
 
 /* ---------- waiting and notes ---------- */
 
@@ -833,10 +878,10 @@ button.link:focus-visible {
 .loading-title { position: relative; font-weight: 700; }
 .loading-title .bead { left: calc((var(--spine) - var(--text)) * 1ch); }
 .loading-message .loading-text { color: var(--ink-2); margin-bottom: var(--row); }
-.loading-message .loading-text.bad { color: var(--bad); }
+.loading-message .loading-text.bad { color: var(--bad); font-weight: 700; }
 
 .note { color: var(--muted); }
-.note.bad { color: var(--bad); }
+.note.bad { color: var(--bad); font-weight: 700; }
 
 .loading-cursor { color: var(--accent); }
 .loading-indicator,
@@ -859,17 +904,34 @@ button.link:focus-visible {
   color: var(--accent);
 }
 
-/* ---------- boxes that float: dialogs ---------- */
+/* ---------- boxes that float: dialogs ----------
+   A floating box is as wide as a whole number of columns and is centred like
+   the page, so its text falls on the same columns; top and height are whole
+   rows of the window. Its frame is drawn with box characters, one per cell:
+
+     ┌─ title ─────────────── [ close ] ─┐
+     │                                   │
+     │  text                             │
+     │                                   │
+     └───────────────────────────────────┘
+
+   Four strings do it (left side, right side, top line, bottom line); they are
+   decoration (empty for a screen reader) and take no clicks. The sides stack
+   one sign every half row: the sign is a little shorter than the row, and this
+   way the line comes out whole instead of dashed. */
 
 .dialog,
 .data-view-modal {
+  --box: var(--cols);   /* columns of the box: phone, the whole page */
+  --gap: 1;             /* free rows above and below */
+  --pad: 1;             /* free columns between the frame and the text */
   position: fixed;
   inset: 0;
   z-index: 50;
   display: none;
   align-items: flex-start;
   justify-content: center;
-  padding: calc(2 * var(--row)) 2ch;
+  padding: calc(var(--gap) * var(--row)) 0;
   background: var(--veil);
   overflow: hidden;
 }
@@ -877,19 +939,122 @@ button.link:focus-visible {
   display: flex;
   z-index: 60;
 }
+@media (min-width: 60em) {
+  .dialog,
+  .data-view-modal { --box: 76; --gap: 2; --pad: 2; }
+}
+
+.dialog-box,
+.data-view-content,
+.notification,
+.block-notification {
+  position: relative;
+  background: var(--paper);
+  color: var(--ink);
+}
 
 .dialog-box,
 .data-view-content {
   display: flex;
+  flex: none;
   flex-direction: column;
-  width: min(76ch, 100%);
+  width: calc(var(--box) * 1ch);
   max-height: 100%;
+  max-height: round(down, calc(100dvh - 2 * var(--gap) * var(--row)), var(--row));
   min-height: 0;
-  border: 1px solid var(--ink);
-  background: var(--paper);
+  padding-bottom: var(--row);
 }
 
-/* the title sits on the top line of the box */
+/* the frame */
+.dialog-box::before,
+.dialog-box::after,
+.data-view-content::before,
+.data-view-content::after,
+.notification::before,
+.notification::after,
+.block-notification::before,
+.block-notification::after,
+.dialog-head::before,
+.dialog-head::after,
+.data-view-header::before,
+.data-view-header::after,
+.notification-icon::before,
+.notification-icon::after,
+.block-notification-title::before,
+.block-notification-title::after {
+  position: absolute;
+  overflow: hidden;
+  color: var(--ink);
+  font-weight: 400;
+  pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+/* left side, from the top corner down */
+.dialog-box::before,
+.data-view-content::before,
+.notification::before,
+.block-notification::before {
+  content: "┌││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││";
+  content: "┌││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││" / "";
+  top: calc(var(--row) / 4);
+  bottom: calc(var(--row) / 2);
+  left: 0;
+  width: 1ch;
+  line-height: calc(var(--row) / 2);
+  white-space: normal;
+  word-break: break-all;
+  overflow-wrap: anywhere;
+}
+/* right side, from the bottom corner up */
+.dialog-box::after,
+.data-view-content::after,
+.notification::after,
+.block-notification::after {
+  content: "││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││┘";
+  content: "││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││┘" / "";
+  top: calc(var(--row) / 2);
+  right: 0;
+  bottom: calc(var(--row) / 4);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  width: 1ch;
+  line-height: calc(var(--row) / 2);
+  white-space: normal;
+  word-break: break-all;
+  overflow-wrap: anywhere;
+}
+/* top line, from the right corner to the left */
+.dialog-head::before,
+.data-view-header::before,
+.notification-icon::before,
+.block-notification-title::before {
+  content: "────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐";
+  content: "────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐" / "";
+  top: 0;
+  right: 0;
+  left: 1ch;
+  display: flex;
+  justify-content: flex-end;
+  height: var(--row);
+  white-space: nowrap;
+}
+/* bottom line, from the left corner to the right */
+.dialog-head::after,
+.data-view-header::after,
+.notification-icon::after,
+.block-notification-title::after {
+  content: "└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────";
+  content: "└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────" / "";
+  right: 1ch;
+  bottom: 0;
+  left: 0;
+  height: var(--row);
+  white-space: nowrap;
+}
+
+/* the title and the button sit on the top line of the frame */
 .dialog-head,
 .data-view-header {
   display: flex;
@@ -897,13 +1062,12 @@ button.link:focus-visible {
   align-items: baseline;
   justify-content: space-between;
   gap: 2ch;
-  position: relative;
-  top: calc(var(--row) / -2 - 1px);
-  padding: 0 1ch;
+  padding: 0 calc(var(--pad) * 1ch);
 }
 .dialog-head > *,
 .data-view-header > * {
-  padding: 0 1ch;
+  position: relative;
+  padding-inline: 1ch;
   background: var(--paper);
 }
 .dialog-head h3,
@@ -919,9 +1083,10 @@ button.link:focus-visible {
 .data-view-json {
   flex: 1 1 auto;
   min-height: 0;
+  margin: 0 1ch;
+  padding: var(--row) calc(var(--pad) * 1ch);
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 0 2ch var(--row);
 }
 .dialog-body > * + * { margin-top: var(--row); }
 .dialog-body h4 { margin-bottom: 0; }
@@ -932,6 +1097,35 @@ button.link:focus-visible {
   color: var(--ink-2);
   -webkit-user-select: text;
   user-select: text;
+}
+
+/* a scroll bar inside a box takes exactly one column (and one row when it
+   lies down), so the text beside it stays on its columns */
+.dialog-body::-webkit-scrollbar,
+.data-view-json::-webkit-scrollbar,
+.endpoint-preview::-webkit-scrollbar {
+  width: 1ch;
+  height: var(--row);
+}
+.dialog-body::-webkit-scrollbar-track,
+.data-view-json::-webkit-scrollbar-track,
+.endpoint-preview::-webkit-scrollbar-track,
+.dialog-body::-webkit-scrollbar-corner,
+.data-view-json::-webkit-scrollbar-corner,
+.endpoint-preview::-webkit-scrollbar-corner { background: var(--paper); }
+.dialog-body::-webkit-scrollbar-thumb,
+.data-view-json::-webkit-scrollbar-thumb,
+.endpoint-preview::-webkit-scrollbar-thumb {
+  border: 0.25ch solid var(--paper);
+  background: var(--muted);
+}
+@supports not selector(::-webkit-scrollbar) {
+  .dialog-body,
+  .data-view-json,
+  .endpoint-preview {
+    scrollbar-width: thin;
+    scrollbar-color: var(--muted) var(--paper);
+  }
 }
 
 .modal-address {
@@ -987,7 +1181,7 @@ button.search-result-item:focus-visible .result-address { color: var(--accent-te
 
 .diagnostic-results > * + * { margin-top: var(--row); }
 .diagnostic-loading { color: var(--muted); }
-.diagnostic-error { color: var(--bad); }
+.diagnostic-error { color: var(--bad); font-weight: 700; }
 
 .diagnostic-actions,
 .endpoint-buttons {
@@ -1037,11 +1231,11 @@ button.endpoint-header:focus-visible .endpoint-path { color: var(--accent-text);
 .endpoint-desc,
 .endpoint-error { margin-left: 1ch; }
 .endpoint-item.available .endpoint-status { color: var(--ok); }
-.endpoint-item.unavailable .endpoint-status { color: var(--bad); }
+.endpoint-item.unavailable .endpoint-status { color: var(--bad); font-weight: 700; }
 .endpoint-item.unavailable .endpoint-path { color: var(--muted); }
 .endpoint-path { overflow-wrap: anywhere; }
 .endpoint-desc { color: var(--muted); }
-.endpoint-error { color: var(--bad); }
+.endpoint-error { color: var(--bad); font-weight: 700; }
 .endpoint-details { padding-left: 2ch; }
 .endpoint-preview {
   max-height: calc(8 * var(--row));
@@ -1055,17 +1249,18 @@ button.endpoint-header:focus-visible .endpoint-path { color: var(--accent-text);
 .diagnostic-info li::before { content: "· "; content: "· " / ""; color: var(--muted); }
 .diagnostic-info strong { color: var(--ink); }
 
-/* ---------- notices ---------- */
+/* ---------- notices ----------
+   They float too: same frame, right edge on the last column of the page. */
 
 .notification-container {
   position: fixed;
-  right: 2ch;
+  right: calc(50% - var(--cols) * 0.5ch);
   bottom: var(--row);
+  bottom: calc(var(--row) + mod(100dvh, var(--row)));   /* whole rows from the top of the window */
   z-index: 80;
   display: flex;
   flex-direction: column;
-  gap: calc(var(--row) / 2);
-  width: min(46ch, calc(100vw - 4ch));
+  width: 46ch;
   pointer-events: none;
 }
 
@@ -1074,28 +1269,26 @@ button.endpoint-header:focus-visible .endpoint-path { color: var(--accent-text);
   display: flex;
   align-items: baseline;
   gap: 1ch;
-  padding: calc(var(--row) / 2 - 1px) 1ch;
-  border: 1px solid var(--ink);
-  background: var(--paper);
-  color: var(--ink);
+  padding: var(--row) 2ch;
   pointer-events: auto;
 }
 .notification-icon { flex: none; }
 .notification-message { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
 .notification-close { flex: none; color: var(--muted); }
 .notification-success .notification-icon { color: var(--ok); }
-.notification-error .notification-icon { color: var(--bad); }
+.notification-error .notification-icon { color: var(--bad); font-weight: 700; }
 .notification-warning .notification-icon { color: var(--accent-text); }
 .notification-info .notification-icon { color: var(--accent); }
 
 .block-notification {
   position: fixed;
   top: var(--row);
-  right: 2ch;
+  right: calc(50% - var(--cols) * 0.5ch);
   z-index: 80;
   flex-direction: column;
+  align-items: stretch;
   gap: 0;
-  width: min(46ch, calc(100vw - 4ch));
+  width: 46ch;
 }
 .block-notification-title { font-weight: 700; }
 .block-notification-title > span { color: var(--accent); }
@@ -1131,6 +1324,10 @@ button.endpoint-header:focus-visible .endpoint-path { color: var(--accent-text);
 .chart-data > summary:hover,
 .chart-data > summary:focus-visible { color: var(--accent-text); }
 .chart-data > .tbl { margin-top: var(--row); }
+@media (min-width: 60em) {
+  /* four equal columns of whole characters (the block is 81 wide) */
+  .chart-table { width: 80ch; }
+}
 
 .legend { margin-top: var(--row); color: var(--ink-2); }
 .legend .mark { display: inline-block; width: 2ch; color: var(--ink); }
@@ -1179,14 +1376,17 @@ button.endpoint-header:focus-visible .endpoint-path { color: var(--accent-text);
   .brand { display: inline-block; }
 
   /* 16 px keeps phones from zooming into a field */
+  /* a field is two rows tall for the finger; what is typed goes on the second,
+     right above its line (16 px or more keeps phones from zooming in) */
   .input,
   .field input,
   .field select {
     height: calc(2 * var(--row));
+    padding-top: var(--row);
     font-size: max(1em, 16px);
-    line-height: calc(2 * var(--row) - 1px);
+    line-height: var(--row);
   }
-  .select::after { top: calc(var(--row) / 2); }
+  .select::after { top: var(--row); }
 
   .actions,
   .diagnostic-actions,
@@ -1195,27 +1395,23 @@ button.endpoint-header:focus-visible .endpoint-path { color: var(--accent-text);
   .sec > .actions,
   .dialog-body .actions { margin-top: var(--row); }
 
-  .dialog,
-  .data-view-modal { padding: var(--row) 1ch; }
-  .dialog-body,
-  .data-view-json { padding-inline: 1ch; }
-
   .notification-container,
-  .block-notification {
-    right: 1ch;
-    width: calc(100vw - 2ch);
-  }
+  .block-notification { width: calc(var(--cols) * 1ch); }
 }
 
-/* ---------- motion: only the block that blinks, and only if allowed ---------- */
+/* ---------- motion: only the block that blinks, and only if allowed ----------
+   A mark that says "working" blinks while the work lasts. The cursor at the end
+   of the cord and the live mark blink four times when they appear and then stay
+   lit. Nothing fades and nothing moves. */
 
 @media (prefers-reduced-motion: no-preference) {
-  .cursor,
   .loading-cursor,
   .status.loading .status-dot,
-  .ws-indicator:not(.disconnected) .ws-dot,
   .pill-dot.fetching,
   #chart-loading-overlay::before { animation: blink 1.2s steps(1, end) infinite; }
+
+  .cursor,
+  .ws-indicator:not(.disconnected) .ws-dot { animation: blink 1.2s steps(1, end) 4; }
 }
 
 @keyframes blink {
@@ -1224,10 +1420,12 @@ button.endpoint-header:focus-visible .endpoint-path { color: var(--accent-text);
 }
 
 @media print {
-  .page { --u: 9pt; --row: 13pt; }
+  .page { --col: 5.4pt; --u: 10.8pt; --row: 13pt; }
   .cursor,
   .loading-cursor { animation: none; }
   .theme-switch,
   .notification-container,
-  .dialog { display: none !important; }
+  .block-notification,
+  .dialog,
+  .data-view-modal { display: none !important; }
 }

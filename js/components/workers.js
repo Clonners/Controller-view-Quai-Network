@@ -3,10 +3,10 @@
  * Handles worker table display and updates
  */
 
-import { AppState } from '../state.js?v=f42ee70fa0';
-import { formatHashrate } from '../utils/formatters.js?v=f42ee70fa0';
-import { fetchAllMiners } from '../api/poolApi.js?v=f42ee70fa0';
-import { el, cell, row, messageRow, isNarrow, shortAddress } from '../utils/dom.js?v=f42ee70fa0';
+import { AppState } from '../state.js?v=9aae65bfe0';
+import { formatHashrate } from '../utils/formatters.js?v=9aae65bfe0';
+import { fetchAllMiners } from '../api/poolApi.js?v=9aae65bfe0';
+import { el, cell, row, messageRow, isNarrow, shortAddress } from '../utils/dom.js?v=9aae65bfe0';
 
 const WORKER_COLS = 4;
 const MINER_COLS = 4;

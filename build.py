@@ -44,7 +44,7 @@ SW_END = "/* build:assets:end */"
 # Extra files the service worker keeps for offline use (besides pages, css and js).
 SHELL_EXTRA = [
     "site.webmanifest",
-    "fonts/jetbrains-mono-kataribe.woff2",
+    "fonts/jetbrains-mono-kataribe-em1200.woff2",
     "brand/favicon.svg",
     "brand/favicon-32.png",
     "brand/icon-180.png",
