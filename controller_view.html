@@ -28,8 +28,8 @@
 <link rel="manifest" href="site.webmanifest">
 <link rel="dns-prefetch" href="https://prime.kataribe.org">
 <link rel="preload" href="fonts/jetbrains-mono-kataribe-em1200.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/panel.css?v=9aae65bfe0">
-<script src="js/theme.js?v=9aae65bfe0"></script>
+<link rel="stylesheet" href="css/panel.css?v=d689eb0615">
+<script src="js/theme.js?v=d689eb0615"></script>
 </head>
 <body>
 <div class="page">
@@ -47,10 +47,10 @@
   <button class="theme-switch" type="button" hidden></button>
 </header>
 
-<main>
+<main class="boxes two">
 <h1 class="sr">controller dashboard</h1>
 
-<section class="sec" id="chart-card" aria-labelledby="h-chart">
+<section class="sec cell" id="chart-card" aria-labelledby="h-chart">
   <h2 id="h-chart"><span class="bead" aria-hidden="true">●</span><span class="num" aria-hidden="true">01</span>chart</h2>
   <p class="gloss">d and d* over the latest Prime blocks</p>
   <div class="form-row">
@@ -85,10 +85,10 @@
   </p>
 </section>
 
-<section class="sec" aria-labelledby="h-state">
+<section class="sec cell" aria-labelledby="h-state">
   <h2 id="h-state"><span class="bead" aria-hidden="true">●</span><span class="num" aria-hidden="true">02</span>state</h2>
   <p class="gloss">current state (Prime) · metrics from the latest Prime blocks (via Prime RPC).</p>
-  <div class="narrow">
+  <div class="narrow quad">
     <div class="metric">
       <div class="metric-line"><span class="metric-label">latest Prime block</span><span class="metric-value"><span class="unit"># </span><span id="metric-block">–</span></span></div>
       <div class="metric-note"><span id="metric-ts">timestamp: –</span></div>
@@ -108,8 +108,34 @@
   </div>
 </section>
 
-<section class="sec" aria-labelledby="h-conversion">
-  <h2 id="h-conversion"><span class="bead" aria-hidden="true">●</span><span class="num" aria-hidden="true">03</span>conversion</h2>
+<section class="sec cell" id="conversion-card" aria-labelledby="h-calculator">
+  <h2 id="h-calculator"><span class="bead" aria-hidden="true">●</span><span class="num" aria-hidden="true">03</span>calculator</h2>
+  <p class="gloss">conversion calculator</p>
+  <div class="narrow">
+    <div class="field">
+      <label for="conversion-amount">amount</label>
+      <input type="text" id="conversion-amount" class="conversion-input" placeholder="0.00" inputmode="decimal" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="block-gap">
+      <span class="label">direction</span>
+      <div class="direction">
+        <span id="from-currency">Qi</span>
+        <span class="arrow" aria-hidden="true">→</span>
+        <span id="to-currency">Quai</span>
+        <button id="swap-direction-btn" class="btn swap-btn" type="button" title="Swap direction" aria-label="Swap conversion direction">↔ swap</button>
+      </div>
+    </div>
+    <div class="block-gap">
+      <span class="label">you receive</span>
+      <div id="conversion-result" class="result" role="status">–</div>
+      <div id="conversion-details" class="details"></div>
+    </div>
+    <p class="block-gap"><button id="calculate-btn" class="btn btn-primary calc-btn" type="button">calculate conversion</button></p>
+  </div>
+</section>
+
+<section class="sec cell" aria-labelledby="h-conversion">
+  <h2 id="h-conversion"><span class="bead" aria-hidden="true">●</span><span class="num" aria-hidden="true">04</span>conversion</h2>
   <p class="gloss">conversion &amp; discounts · live conversion flow, kQuai discount and cubic preview</p>
   <div class="narrow">
     <div class="metric">
@@ -142,35 +168,8 @@
   </div>
 </section>
 
-<section class="sec" id="conversion-card" aria-labelledby="h-calculator">
-  <h2 id="h-calculator"><span class="bead" aria-hidden="true">●</span><span class="num" aria-hidden="true">04</span>calculator</h2>
-  <p class="gloss">conversion calculator</p>
-  <div class="narrow">
-    <div class="field">
-      <label for="conversion-amount">amount</label>
-      <input type="text" id="conversion-amount" class="conversion-input" placeholder="0.00" inputmode="decimal" autocomplete="off" spellcheck="false">
-    </div>
-    <div class="block-gap">
-      <span class="label">direction</span>
-      <div class="direction">
-        <span id="from-currency">Qi</span>
-        <span class="arrow" aria-hidden="true">→</span>
-        <span id="to-currency">Quai</span>
-        <button id="swap-direction-btn" class="btn swap-btn" type="button" title="Swap direction" aria-label="Swap conversion direction">↔ swap</button>
-      </div>
-    </div>
-    <div class="block-gap">
-      <span class="label">you receive</span>
-      <div id="conversion-result" class="result" role="status">–</div>
-      <div id="conversion-details" class="details"></div>
-    </div>
-    <p class="block-gap"><button id="calculate-btn" class="btn btn-primary calc-btn" type="button">calculate conversion</button></p>
-  </div>
-</section>
-
 </main>
 
-<span class="cord" aria-hidden="true">││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││</span>
 <span class="cursor" aria-hidden="true">█</span>
 </div>
 
@@ -182,9 +181,9 @@
 
 </div>
 
-<script src="js/cord.js?v=9aae65bfe0" defer></script>
-<script src="vendor/decimal.min.js?v=9aae65bfe0" defer></script>
-<script src="main.js?v=9aae65bfe0" defer></script>
+<script src="js/frame.js?v=d689eb0615" defer></script>
+<script src="vendor/decimal.min.js?v=d689eb0615" defer></script>
+<script src="main.js?v=d689eb0615" defer></script>
 <script>
 if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js').catch(() => {}); }
 </script>

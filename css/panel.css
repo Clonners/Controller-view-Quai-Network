@@ -1,12 +1,16 @@
 /* ==========================================================================
    kataribe panel — one stylesheet for every page (mining, controller, home).
    Same language as kataribe.org: one monospaced font, a character grid,
-   a cord with knots, light and dark. Tools first: legible, almost no motion.
+   the logo of threads with knots, light and dark. Tools first: legible, almost
+   no motion.
 
-   Grid: a column is 1ch, a row is --row. Phone = 40 columns (cord on column 1,
-   text from column 4). Desktop = 100 columns (cord on column 16, text from 19).
-   Everything sits on that grid: widths in ch, heights in rows, two sizes of
-   type (1x and 2x), and lines drawn with box characters, one per cell.
+   Grid: a column is 1ch, a row is --row. Phone = 40 columns. Desktop = 100
+   columns, 120 on a wide screen. Everything sits on that grid: widths in ch,
+   heights in rows, two sizes of type (1x and 2x), and lines drawn with box
+   characters, one per cell.
+
+   Order: every section is a box with its frame. On a phone the boxes go one
+   under the other; on a wide screen they go side by side (see "boxes").
    ========================================================================== */
 
 /* JetBrains Mono (OFL) with its em square set to 1200 units instead of 1000
@@ -113,8 +117,9 @@ body {
 
 .page {
   --cols: 40;
-  --spine: 1;
-  --text: 4;
+  --pad: 1;                              /* free columns between a frame and its text */
+  --air: 0;                              /* free rows between a frame and its text */
+  --inset: calc(1 + var(--pad));         /* columns from the edge of a box to its text */
   /* --u0 is the size the type would have with a 0.6 em column; the column
      (--col) comes from it and the font-size (--u) is two columns. */
   --u0: min(1.25rem, calc((100vw - 1rem) / 24));
@@ -144,10 +149,14 @@ body {
 @media (min-width: 60em) {
   .page {
     --cols: 100;
-    --spine: 16;
-    --text: 19;
+    --pad: 2;
+    --air: 1;
     --u0: min(1.125rem, calc((100vw - 2rem) / 60));
   }
+}
+
+@media (min-width: 80em) {
+  .page { --cols: 120; }
 }
 
 /* Whole-pixel columns and rows, so text columns and drawings never drift. */
@@ -218,48 +227,20 @@ a:focus-visible { color: var(--accent-text); }
 .art .l-dust { color: var(--muted); }
 .art .l-cursor { color: var(--accent-text); }
 
-/* ---------- the cord ---------- */
+/* ---------- the run of the page ---------- */
 
 .run {
   position: relative;
   padding-bottom: calc(3 * var(--row));
 }
 
-.cord {
-  position: absolute;
-  top: calc(3 * var(--row) - 0.2em);
-  bottom: calc(var(--row) - 0.2em);
-  padding-top: 0.2em;
-  left: calc(var(--spine) * 1ch);
-  width: 1.5ch;
-  overflow: hidden;
-  white-space: normal;
-  word-break: break-all;
-  overflow-wrap: anywhere;
-  color: var(--ink);
-  pointer-events: none;
-  -webkit-user-select: none;
-  user-select: none;
-}
-
-.bead {
-  position: absolute;
-  top: 0;
-  left: calc((var(--spine) - var(--text)) * 1ch);
-  z-index: 2;
-  width: 1ch;
-  background: var(--paper);
-  color: var(--accent);
-  font-weight: 400;
-  -webkit-user-select: none;
-  user-select: none;
-}
-.bead.open { color: var(--ink); }
+/* the knot that marked a section on the cord; a box carries its title on its frame */
+.bead { display: none; }
 
 .cursor {
   position: absolute;
   bottom: 0;
-  left: calc(var(--spine) * 1ch);
+  left: calc(var(--inset) * 1ch);
   color: var(--accent);
   -webkit-user-select: none;
   user-select: none;
@@ -317,21 +298,123 @@ a:focus-visible { color: var(--accent-text); }
 .theme-switch:hover,
 .theme-switch:focus-visible { color: var(--accent-text); }
 
-@media (min-width: 60em) {
-  .top { padding-left: calc(var(--text) * 1ch); }
-  .logo { left: calc((var(--spine) - 7) * 1ch); }
-  .nav { left: calc(var(--text) * 1ch); }
+main { padding-top: var(--row); }
+
+/* ---------- boxes ----------
+   Every section is a box, and its title sits on the top line of the frame:
+
+     ┌─ 01 server ───────────────────────┐
+     │                                   │
+     │  text                             │
+     │                                   │
+     └───────────────────────────────────┘
+
+   The frame is the one the dialogs use (four strings of box characters, one
+   sign per cell: see "boxes that float"), in grey. A box is a whole number of
+   columns wide and of rows tall. Boxes touch each other, so their lines end up
+   one row and one column apart.
+
+   The two sides come from --frame-left and --frame-right: enough signs for a
+   box of 150 rows; js/frame.js gives a longer one to a box that outgrows it. */
+
+.page {
+  --frame-left: "┌││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││";
+  --frame-right: "││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││┘";
 }
 
-/* ---------- sections ---------- */
-
-.sec {
+.sec,
+.strand,
+.loading-message {
   position: relative;
-  padding: calc(2 * var(--row)) 0 0 calc(var(--text) * 1ch);
+  z-index: 0;                 /* a layer of its own: the frame goes under the text */
+  min-width: 0;
+  padding: 0 calc(var(--inset) * 1ch) calc((1 + var(--air)) * var(--row));
+}
+.sec.untitled { padding-top: calc((1 + var(--air)) * var(--row)); }
+/* a section that only groups boxes has no frame of its own */
+.sec.bare { padding: 0; }
+
+/* the frame */
+:is(.sec:not(.bare), .strand, .loading-message)::before,
+:is(.sec:not(.bare), .strand, .loading-message)::after,
+:is(.sec:not(.bare), .strand, .loading-message) > :first-child::before,
+:is(.sec:not(.bare), .strand, .loading-message) > :first-child::after {
+  position: absolute;
+  z-index: -1;
+  overflow: hidden;
+  color: var(--rule);
+  font-weight: 400;
+  line-height: var(--row);
+  pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+/* left side, from the top corner down */
+:is(.sec:not(.bare), .strand, .loading-message)::before {
+  content: var(--frame-left);
+  content: var(--frame-left) / "";
+  top: calc(var(--row) / 4);
+  bottom: calc(var(--row) / 2);
+  left: 0;
+  width: 1ch;
+  line-height: calc(var(--row) / 2);
+  white-space: normal;
+  word-break: break-all;
+  overflow-wrap: anywhere;
+}
+/* right side, from the bottom corner up */
+:is(.sec:not(.bare), .strand, .loading-message)::after {
+  content: var(--frame-right);
+  content: var(--frame-right) / "";
+  top: calc(var(--row) / 2);
+  right: 0;
+  bottom: calc(var(--row) / 4);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  width: 1ch;
+  line-height: calc(var(--row) / 2);
+  white-space: normal;
+  word-break: break-all;
+  overflow-wrap: anywhere;
+}
+/* top line, from the right corner to the left */
+:is(.sec:not(.bare), .strand, .loading-message) > :first-child::before {
+  content: "────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐";
+  content: "────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐" / "";
+  top: 0;
+  right: 0;
+  left: 1ch;
+  display: flex;
+  justify-content: flex-end;
+  height: var(--row);
+  white-space: nowrap;
+}
+/* bottom line, from the left corner to the right */
+:is(.sec:not(.bare), .strand, .loading-message) > :first-child::after {
+  content: "└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────";
+  content: "└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────" / "";
+  right: 1ch;
+  bottom: 0;
+  left: 0;
+  height: var(--row);
+  white-space: nowrap;
 }
 
-.sec h2 {
-  position: relative;
+/* the title, on the top line */
+.sec > h2,
+.strand > dt,
+.loading-title {
+  position: static;
+  width: -moz-fit-content;
+  width: fit-content;
+  max-width: calc(100% + (var(--pad) - 1) * 2ch);
+  margin: 0 0 calc(var(--air) * var(--row)) calc((1 - var(--pad)) * 1ch);
+  padding-inline: 1ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: var(--paper);
   color: var(--muted);
   font-weight: 400;
 }
@@ -362,26 +445,42 @@ a:focus-visible { color: var(--accent-text); }
 h3 { font-weight: 700; }
 h4 { color: var(--muted); font-weight: 400; }
 
+/* boxes side by side: every column is a whole number of characters */
 @media (min-width: 60em) {
-  .sec h2 {
-    position: absolute;
-    top: calc(2 * var(--row));
-    left: 0;
-    width: calc((var(--spine) - 1) * 1ch);
-    text-align: right;
-    white-space: nowrap;
+  .boxes:not(.content),
+  .boxes.content.active {
+    display: grid;
+    grid-template-columns: 50ch 49ch;
+    column-gap: 1ch;
   }
-  .sec h2 .bead {
-    left: calc(var(--spine) * 1ch);
-    text-align: left;
+  .boxes > * { grid-column: 1 / -1; }
+  .boxes > .cell { grid-column: auto; }
+  .boxes > .cell-rest,
+  .boxes.two > .cell { grid-column: 1 / -1; }
+  /* of the four of "two", the last two share a row */
+  .boxes.two > .cell:nth-last-child(-n+2) { grid-column: auto; }
+}
+
+@media (min-width: 80em) {
+  /* three in a row */
+  .boxes.three:not(.content),
+  .boxes.three.content.active { grid-template-columns: 39ch 40ch 39ch; }
+  .boxes.three > .cell-rest { grid-column: auto; }
+
+  /* two columns of two: the first two boxes on the left, the next two on the right */
+  .boxes.two:not(.content) {
+    grid-template-columns: 80ch 39ch;
+    grid-template-rows: auto auto;
+    grid-auto-flow: column;
   }
+  .boxes.two > .cell { grid-column: auto; }
 }
 
 /* ---------- home ---------- */
 
 .entry {
   position: relative;
-  padding: calc(2 * var(--row)) 0 0 calc(var(--text) * 1ch);
+  padding: var(--row) calc(var(--inset) * 1ch);
 }
 .entry h1 {
   font-size: 2em;
@@ -392,28 +491,21 @@ h4 { color: var(--muted); font-weight: 400; }
 .entry .gloss { margin-top: var(--row); }
 .entry .gloss + .gloss { margin-top: 0; }
 
-.strands { position: relative; }
-.strand { position: relative; }
-.strand + .strand { margin-top: var(--row); }
-.strand dt { color: var(--ink); font-weight: 700; }
+.strand > dt { color: var(--ink); font-weight: 700; }
 .strand dd { color: var(--ink-2); }
 .strand dt a { text-decoration: none; }
 .strand dt a:hover,
 .strand dt a:focus-visible { text-decoration: underline; text-decoration-thickness: 1px; }
 
 @media (min-width: 60em) {
-  .strand dt {
-    position: absolute;
-    top: 0;
-    left: calc(var(--text) * -1ch);
-    width: calc((var(--spine) - 1) * 1ch);
-    text-align: right;
-    white-space: nowrap;
+  .strands {
+    display: grid;
+    grid-template-columns: 50ch 49ch;
+    column-gap: 1ch;
   }
-  .strand dt .bead {
-    left: calc(var(--spine) * 1ch);
-    text-align: left;
-  }
+}
+@media (min-width: 80em) {
+  .strands { grid-template-columns: 60ch 59ch; }
 }
 
 /* ---------- footer ---------- */
@@ -423,7 +515,7 @@ h4 { color: var(--muted); font-weight: 400; }
   flex-wrap: wrap;
   align-items: flex-start;
   gap: 0 2ch;
-  padding: calc(2 * var(--row)) 0 calc(3 * var(--row)) calc(var(--text) * 1ch);
+  padding: calc(2 * var(--row)) calc(var(--inset) * 1ch) calc(3 * var(--row));
   color: var(--muted);
 }
 .foot .name { color: var(--ink); }
@@ -691,12 +783,22 @@ button.link:focus-visible {
 .metric-note code { color: var(--ink-2); }
 
 @media (min-width: 60em) {
-  .kv.two {
-    display: grid;
-    grid-template-columns: 39ch 39ch;
-    column-gap: 3ch;
-  }
   .narrow { max-width: 60ch; }
+
+  /* four metrics as two and two */
+  .narrow.quad {
+    display: grid;
+    grid-template-columns: 45ch 45ch;
+    gap: var(--row) 4ch;
+    max-width: none;
+  }
+  .quad > .metric + .metric { margin-top: 0; }
+}
+@media (min-width: 80em) {
+  .narrow.quad {
+    grid-template-columns: 35ch 35ch;
+    column-gap: 4ch;
+  }
 }
 
 /* ---------- tables: columns of text ---------- */
@@ -850,12 +952,11 @@ button.link:focus-visible {
 .share-row.dim .bar-on,
 .share-row.dim .share-pct { color: var(--muted); font-weight: 400; }
 
-@media (min-width: 60em) {
-  .share-row { flex-wrap: nowrap; gap: 0 2ch; }
-  .share-row .share-label { flex-basis: 8ch; }
-  .share-row .share-pct { flex-basis: 9ch; }
-  .share-row .share-count { flex: 1 1 0; min-width: 0; }
-}
+/* a box with room for it keeps the count on the same line (charts.js says when) */
+.shares.wide .share-row { flex-wrap: nowrap; gap: 0 2ch; }
+.shares.wide .share-row .share-label { flex-basis: 8ch; }
+.shares.wide .share-row .share-pct { flex-basis: 9ch; }
+.shares.wide .share-row .share-count { flex: 1 1 0; min-width: 0; }
 
 /* summary lists (only drawn when the page has a place for them) */
 .share-item {
@@ -874,9 +975,9 @@ button.link:focus-visible {
 .content { display: none; }
 .content.active { display: block; }
 
-.loading-message { padding-left: calc(var(--text) * 1ch); margin-top: calc(2 * var(--row)); }
-.loading-title { position: relative; font-weight: 700; }
-.loading-title .bead { left: calc((var(--spine) - var(--text)) * 1ch); }
+.loading-title { color: var(--ink); font-weight: 700; }
+.loading-title .bead { display: inline-block; width: 2ch; color: var(--accent); font-weight: 400; }
+.loading-title .bead.open { color: var(--ink); }
 .loading-message .loading-text { color: var(--ink-2); margin-bottom: var(--row); }
 .loading-message .loading-text.bad { color: var(--bad); font-weight: 700; }
 
@@ -1325,8 +1426,11 @@ button.endpoint-header:focus-visible .endpoint-path { color: var(--accent-text);
 .chart-data > summary:focus-visible { color: var(--accent-text); }
 .chart-data > .tbl { margin-top: var(--row); }
 @media (min-width: 60em) {
-  /* four equal columns of whole characters (the block is 81 wide) */
+  /* four equal columns of whole characters */
   .chart-table { width: 80ch; }
+}
+@media (min-width: 80em) {
+  .chart-table { width: 72ch; }
 }
 
 .legend { margin-top: var(--row); color: var(--ink-2); }
@@ -1401,7 +1505,7 @@ button.endpoint-header:focus-visible .endpoint-path { color: var(--accent-text);
 
 /* ---------- motion: only the block that blinks, and only if allowed ----------
    A mark that says "working" blinks while the work lasts. The cursor at the end
-   of the cord and the live mark blink four times when they appear and then stay
+   of the page and the live mark blink four times when they appear and then stay
    lit. Nothing fades and nothing moves. */
 
 @media (prefers-reduced-motion: no-preference) {

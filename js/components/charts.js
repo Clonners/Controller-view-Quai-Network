@@ -4,9 +4,9 @@
  * (no canvas, no chart library).
  */
 
-import { AppState } from '../state.js?v=9aae65bfe0';
-import { formatLabel, formatNumber } from '../utils/formatters.js?v=9aae65bfe0';
-import { el, isNarrow } from '../utils/dom.js?v=9aae65bfe0';
+import { AppState } from '../state.js?v=d689eb0615';
+import { formatLabel, formatNumber } from '../utils/formatters.js?v=d689eb0615';
+import { el, isNarrow } from '../utils/dom.js?v=d689eb0615';
 
 /**
  * Get period window in milliseconds
@@ -195,9 +195,20 @@ const SHARE_TYPES = [
 let lastSharesStats = null;
 let sharesResizeBound = false;
 
-/** Cells of the bar: the 40-column grid has room for a shorter one. */
-function sharesBarCells() {
-    return isNarrow() ? 18 : 40;
+// Columns one row needs to keep name, a 40-cell bar, percentage and count on a line.
+const SHARES_WIDE_COLS = 72;
+let lastSharesCols = 0;
+
+/** Columns of text the shares block has (a character is half an em wide). */
+function sharesColumns(target) {
+    const size = parseFloat(getComputedStyle(target).fontSize);
+    if (!size || !target.clientWidth) return isNarrow() ? 36 : 81;
+    return Math.floor(target.clientWidth / (size / 2) + 0.01);
+}
+
+/** Cells of the bar: 40 where the box is wide; in a narrow box, what is left beside name and percentage. */
+function sharesBarCells(cols) {
+    return cols >= SHARES_WIDE_COLS ? 40 : Math.max(8, Math.min(40, cols - 18));
 }
 
 /**
@@ -217,12 +228,20 @@ function updateSharesChart(stats) {
         createSharesControls();
     }
 
-    if (!sharesResizeBound && typeof window !== 'undefined' && window.matchMedia) {
-        sharesResizeBound = true;
-        const mq = window.matchMedia('(max-width: 59.99em)');
-        const onChange = () => renderSharesRows();
-        if (mq.addEventListener) mq.addEventListener('change', onChange);
-        else if (mq.addListener) mq.addListener(onChange);
+    // The bar follows the width of its box, so it is drawn again when that changes.
+    if (!sharesResizeBound && typeof window !== 'undefined') {
+        if (typeof ResizeObserver === 'function') {
+            sharesResizeBound = true;
+            new ResizeObserver(() => {
+                if (sharesColumns(target) !== lastSharesCols) renderSharesRows();
+            }).observe(target);
+        } else if (window.matchMedia) {
+            sharesResizeBound = true;
+            const mq = window.matchMedia('(max-width: 59.99em)');
+            const onChange = () => renderSharesRows();
+            if (mq.addEventListener) mq.addEventListener('change', onChange);
+            else if (mq.addListener) mq.addListener(onChange);
+        }
     }
 }
 
@@ -234,7 +253,10 @@ function renderSharesRows() {
     const values = SHARE_TYPES.map(t => Number(lastSharesStats[t.field]) || 0);
     const total = values.reduce((a, b) => a + b, 0);
     const filter = AppState.ui.currentSharesFilter;
-    const cells = sharesBarCells();
+    const cols = sharesColumns(target);
+    const cells = sharesBarCells(cols);
+    lastSharesCols = cols;
+    target.classList.toggle('wide', cols >= SHARES_WIDE_COLS);
 
     const rows = SHARE_TYPES.map((t, i) => {
         const value = values[i];

@@ -29,8 +29,8 @@
 <link rel="dns-prefetch" href="https://proxy.kataribe.org">
 <link rel="dns-prefetch" href="https://prime.kataribe.org">
 <link rel="preload" href="fonts/jetbrains-mono-kataribe-em1200.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/panel.css?v=9aae65bfe0">
-<script src="js/theme.js?v=9aae65bfe0"></script>
+<link rel="stylesheet" href="css/panel.css?v=d689eb0615">
+<script src="js/theme.js?v=d689eb0615"></script>
 </head>
 <body>
 <div class="page">
@@ -73,9 +73,9 @@
 
 <noscript><p class="loading-message">This page needs JavaScript to read the pool.</p></noscript>
 
-<div id="mainContent" class="content">
+<div id="mainContent" class="content boxes three">
 
-<section class="sec" aria-labelledby="h-node">
+<section class="sec cell" aria-labelledby="h-node">
   <h2 id="h-node"><span class="bead" aria-hidden="true">●</span><span class="num" aria-hidden="true">02</span>node</h2>
   <p class="gloss">node statistics · real-time performance metrics</p>
   <dl class="kv two">
@@ -89,7 +89,7 @@
   </dl>
 </section>
 
-<section class="sec" aria-labelledby="h-algorithms">
+<section class="sec cell" aria-labelledby="h-algorithms">
   <h2 id="h-algorithms"><span class="bead" aria-hidden="true">●</span><span class="num" aria-hidden="true">03</span>algorithms</h2>
   <p class="gloss">algorithm statistics</p>
   <table class="tbl keep">
@@ -104,7 +104,7 @@
   </table>
 </section>
 
-<section class="sec" aria-labelledby="h-shares">
+<section class="sec cell cell-rest" aria-labelledby="h-shares">
   <h2 id="h-shares"><span class="bead" aria-hidden="true">●</span><span class="num" aria-hidden="true">04</span>shares</h2>
   <p class="gloss">share distribution</p>
   <div id="sharesChart" class="shares" role="list" aria-label="Share distribution"></div>
@@ -119,7 +119,7 @@
   </div>
   <table class="tbl" id="workersTable" role="table">
     <thead role="rowgroup">
-      <tr role="row"><th role="columnheader" scope="col" class="w-44">address</th><th role="columnheader" scope="col" class="w-14">worker name</th><th role="columnheader" scope="col" class="w-11">algorithm</th><th role="columnheader" scope="col" class="r w-12">hashrate</th></tr>
+      <tr role="row"><th role="columnheader" scope="col" class="w-44">address</th><th role="columnheader" scope="col">worker name</th><th role="columnheader" scope="col" class="w-11">algorithm</th><th role="columnheader" scope="col" class="r w-12">hashrate</th></tr>
     </thead>
     <tbody id="workersBody" role="rowgroup">
       <tr role="row" class="message-row"><td role="cell" class="empty" colspan="4">Loading...</td></tr>
@@ -135,7 +135,7 @@
   </div>
   <table class="tbl" id="minersTable" role="table">
     <thead role="rowgroup">
-      <tr role="row"><th role="columnheader" scope="col" class="w-44">address</th><th role="columnheader" scope="col" class="r w-13">hashrate</th><th role="columnheader" scope="col" class="r w-9">workers</th><th role="columnheader" scope="col" class="w-15">last seen</th></tr>
+      <tr role="row"><th role="columnheader" scope="col">address</th><th role="columnheader" scope="col" class="r w-13">hashrate</th><th role="columnheader" scope="col" class="r w-9">workers</th><th role="columnheader" scope="col" class="w-15">last seen</th></tr>
     </thead>
     <tbody id="minersBody" role="rowgroup">
       <tr role="row" class="message-row"><td role="cell" class="empty" colspan="4">Loading miners...</td></tr>
@@ -152,7 +152,7 @@
   <div id="blockFilterIndicator" style="display: none;"></div>
   <table class="tbl" id="blocksTable" role="table">
     <thead role="rowgroup">
-      <tr role="row"><th role="columnheader" scope="col" class="w-12">height</th><th role="columnheader" scope="col" class="w-21">hash</th><th role="columnheader" scope="col" class="w-25">found by</th><th role="columnheader" scope="col" class="w-23">found at</th></tr>
+      <tr role="row"><th role="columnheader" scope="col" class="w-12">height</th><th role="columnheader" scope="col" class="w-21">hash</th><th role="columnheader" scope="col">found by</th><th role="columnheader" scope="col" class="w-23">found at</th></tr>
     </thead>
     <tbody id="blocksTableBody" role="rowgroup">
       <tr role="row" class="message-row"><td role="cell" class="empty" colspan="4">Loading blocks...</td></tr>
@@ -170,7 +170,6 @@
 
 </main>
 
-<span class="cord" aria-hidden="true">││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││</span>
 <span class="cursor" aria-hidden="true">█</span>
 </div>
 
@@ -252,8 +251,8 @@
 
 </div>
 
-<script src="js/cord.js?v=9aae65bfe0" defer></script>
-<script type="module" src="js/main.js?v=9aae65bfe0"></script>
+<script src="js/frame.js?v=d689eb0615" defer></script>
+<script type="module" src="js/main.js?v=d689eb0615"></script>
 <script>
 if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js').catch(() => {}); }
 </script>
