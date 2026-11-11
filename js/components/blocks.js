@@ -3,8 +3,8 @@
  * Handles blocks table display and updates
  */
 
-import { AppState } from '../state.js?v=e05cb9a8bd';
-import { el, cell, row, messageRow, button, shortAddress, copyWithFeedback } from '../utils/dom.js?v=e05cb9a8bd';
+import { AppState } from '../state.js?v=f42ee70fa0';
+import { el, cell, row, messageRow, button, shortAddress, copyWithFeedback } from '../utils/dom.js?v=f42ee70fa0';
 
 const BLOCK_COLS = 4;
 

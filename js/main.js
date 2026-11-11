@@ -3,28 +3,28 @@
  * Quai Mining Dashboard - Modular Version
  */
 
-import { AppState, setUpdateInterval, clearUpdateInterval } from './state.js?v=e05cb9a8bd';
-import { Config } from './config.js?v=e05cb9a8bd';
-import { formatHashrate, formatNumber, formatUptime, hashStats } from './utils/formatters.js?v=e05cb9a8bd';
-import { initHistory, recordHistory, saveServerConfig, saveServerHost, loadServerConfig, clearServerConfig } from './utils/storage.js?v=e05cb9a8bd';
+import { AppState, setUpdateInterval, clearUpdateInterval } from './state.js?v=f42ee70fa0';
+import { Config } from './config.js?v=f42ee70fa0';
+import { formatHashrate, formatNumber, formatUptime, hashStats, shownNodeName } from './utils/formatters.js?v=f42ee70fa0';
+import { initHistory, recordHistory, saveServerConfig, saveServerHost, loadServerConfig, clearServerConfig } from './utils/storage.js?v=f42ee70fa0';
 import { 
     initNotifications, showSuccess, showError, showWarning, showInfo,
     showLoading, hideLoading, showTableSkeleton 
-} from './utils/notifications.js?v=e05cb9a8bd';
-import { isValidIP, testConnection, fetchPoolStats, fetchWorkers, fetchShareHistory, fetchPoolBlocksEndpoint, fetchMinerWorkers, fetchAllMiners } from './api/poolApi.js?v=e05cb9a8bd';
-import { updateCharts, updateChartPeriod } from './components/charts.js?v=e05cb9a8bd';
-import { updateWorkers, generateMinersFromAPI } from './components/workers.js?v=e05cb9a8bd';
-import { updateBlocks, updateQuickStats, setStatsPeriod } from './components/blocks.js?v=e05cb9a8bd';
-import { updateShareSectionFromPoolStats, updateShareStats } from './components/shares.js?v=e05cb9a8bd';
+} from './utils/notifications.js?v=f42ee70fa0';
+import { isValidIP, testConnection, fetchPoolStats, fetchWorkers, fetchShareHistory, fetchPoolBlocksEndpoint, fetchMinerWorkers, fetchAllMiners } from './api/poolApi.js?v=f42ee70fa0';
+import { updateCharts, updateChartPeriod } from './components/charts.js?v=f42ee70fa0';
+import { updateWorkers, generateMinersFromAPI } from './components/workers.js?v=f42ee70fa0';
+import { updateBlocks, updateQuickStats, setStatsPeriod } from './components/blocks.js?v=f42ee70fa0';
+import { updateShareSectionFromPoolStats, updateShareStats } from './components/shares.js?v=f42ee70fa0';
 import { 
     openMinerModal, closeMinerModal, 
     openSearchModal, closeSearchModal, searchAddressInModal,
     openBlockSearchModal, closeBlockSearchModal, searchBlocksByAddress, selectBlockAddressFilter,
     initModalEventListeners 
-} from './components/modals.js?v=e05cb9a8bd';
-import { initWebSocket, closeWebSocket } from './components/websocket.js?v=e05cb9a8bd';
-import { openApiDiagnostic, closeApiDiagnostic, initDiagnosticGlobals } from './components/diagnostics.js?v=e05cb9a8bd';
-import { messageRow } from './utils/dom.js?v=e05cb9a8bd';
+} from './components/modals.js?v=f42ee70fa0';
+import { initWebSocket, closeWebSocket } from './components/websocket.js?v=f42ee70fa0';
+import { openApiDiagnostic, closeApiDiagnostic, initDiagnosticGlobals } from './components/diagnostics.js?v=f42ee70fa0';
+import { messageRow } from './utils/dom.js?v=f42ee70fa0';
 
 // =====================
 // Global Exports (Immediate-Binding)
@@ -532,7 +532,7 @@ function updatePoolStats(stats) {
     AppState.cache.poolStats = stats;
     
     // Basic stats
-    document.getElementById('nodeName').textContent = stats.nodeName || '-';
+    document.getElementById('nodeName').textContent = shownNodeName(stats.nodeName);
     document.getElementById('workersConnected').textContent = stats.workersConnected || 0;
     
     const totalHashEl = document.getElementById('totalHashrate');

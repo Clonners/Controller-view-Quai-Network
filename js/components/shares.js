@@ -3,8 +3,8 @@
  * Handles share statistics display and updates
  */
 
-import { AppState } from '../state.js?v=e05cb9a8bd';
-import { formatNumber } from '../utils/formatters.js?v=e05cb9a8bd';
+import { AppState } from '../state.js?v=f42ee70fa0';
+import { formatNumber } from '../utils/formatters.js?v=f42ee70fa0';
 
 /**
  * Update share section from pool stats

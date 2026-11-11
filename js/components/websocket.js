@@ -3,9 +3,9 @@
  * Handles real-time updates via WebSocket connection
  */
 
-import { AppState } from '../state.js?v=e05cb9a8bd';
-import { Config } from '../config.js?v=e05cb9a8bd';
-import { el, layerRoot } from '../utils/dom.js?v=e05cb9a8bd';
+import { AppState } from '../state.js?v=f42ee70fa0';
+import { Config } from '../config.js?v=f42ee70fa0';
+import { el, layerRoot } from '../utils/dom.js?v=f42ee70fa0';
 
 let wsReconnectTimeout = null;
 

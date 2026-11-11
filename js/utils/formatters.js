@@ -96,3 +96,19 @@ export function hashStats(stats) {
         b: stats.blocksFound
     });
 }
+
+/**
+ * Node name as shown on screen.
+ * The node still reports its old name ("bitquai-cyprus1"). Renaming it is a
+ * change on the node itself, so until that happens the panel leaves the
+ * retired prefix out and shows the rest ("cyprus1"). Once the node is renamed
+ * this function returns the name untouched.
+ * @param {string} name - Name reported by the node
+ * @returns {string} Name to display
+ */
+export function shownNodeName(name) {
+    const text = String(name ?? '').trim();
+    if (!text) return '-';
+    const rest = text.replace(/^bitquai[\s._-]*/i, '');
+    return rest || '-';
+}
