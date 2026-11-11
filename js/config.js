@@ -71,8 +71,10 @@ export const Config = {
     
     // Default values
     defaults: {
-        serverIp: 'dpool.kataribe.org',
-        serverPort: '3336',
+        // Pool stats API (port 3336 on the node), reached through proxy.kataribe.org.
+        // No default port here: the old dpool name (stats on 443) is gone, so "host:3336" must be kept as typed.
+        serverIp: 'prime.kataribe.org',
+        serverPort: '',
         chartPeriod: '1h'
     }
 };

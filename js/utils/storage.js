@@ -18,7 +18,7 @@ export function saveServerConfig(ip, port) {
 
 /**
  * Save combined server host/url to localStorage (preferred)
- * @param {string} hostValue - domain or full url (e.g. dpool.kataribe.org or https://host:3336)
+ * @param {string} hostValue - domain or full url (e.g. prime.kataribe.org:3336 or https://host:3336)
  */
 export function saveServerHost(hostValue) {
     try {
