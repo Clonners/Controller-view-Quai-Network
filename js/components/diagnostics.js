@@ -6,12 +6,12 @@
  * with textContent, never as HTML.
  */
 
-import { AppState, Constants } from '../state.js?v=d689eb0615';
-import { testWebSocket } from './websocket.js?v=d689eb0615';
-import { fetchWithProxyFallback } from '../api/poolApi.js?v=d689eb0615';
-import { Config } from '../config.js?v=d689eb0615';
-import { el, button, note, shortAddress, copyWithFeedback, showDialog, hideDialog, layerRoot } from '../utils/dom.js?v=d689eb0615';
-import { showError, showWarning } from '../utils/notifications.js?v=d689eb0615';
+import { AppState, Constants } from '../state.js?v=3f5e57cd54';
+import { testWebSocket } from './websocket.js?v=3f5e57cd54';
+import { fetchWithProxyFallback } from '../api/poolApi.js?v=3f5e57cd54';
+import { Config } from '../config.js?v=3f5e57cd54';
+import { el, button, note, shortAddress, copyWithFeedback, showDialog, hideDialog, layerRoot } from '../utils/dom.js?v=3f5e57cd54';
+import { showError, showWarning } from '../utils/notifications.js?v=3f5e57cd54';
 
 // Store last diagnostic results for download
 let lastDiagnosticResults = null;

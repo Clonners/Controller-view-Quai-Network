@@ -4,9 +4,9 @@
  * (no canvas, no chart library).
  */
 
-import { AppState } from '../state.js?v=d689eb0615';
-import { formatLabel, formatNumber } from '../utils/formatters.js?v=d689eb0615';
-import { el, isNarrow } from '../utils/dom.js?v=d689eb0615';
+import { AppState } from '../state.js?v=3f5e57cd54';
+import { formatLabel, formatNumber } from '../utils/formatters.js?v=3f5e57cd54';
+import { el, isNarrow } from '../utils/dom.js?v=3f5e57cd54';
 
 /**
  * Get period window in milliseconds

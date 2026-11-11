@@ -831,14 +831,16 @@ async function fetchWindowData() {
 
 // ---------------------------------------------------------------------------
 // Text chart. Same call as before (labels + three series), drawn with
-// characters of the page font instead of a canvas:
-//   panel A: d (●) and d* (○); ◆ where both fall on the same cell
-//   panel B: ∆kQuai/kQuai in % (■), on its own scale
+// characters of the page font instead of a canvas. It is ONE plot with two
+// scales, as the canvas chart was:
+//   left axis:  d (●) and d* (○), normalized difficulty
+//   right axis: ∆kQuai/kQuai in % (■), in the accent colour like its axis
+//   ◆ where two series fall on the same cell
 // The drawing is hidden from screen readers: the readout under it and the
 // data table say the same in words and numbers.
 // ---------------------------------------------------------------------------
-const CHART_GUTTER = 10; // columns kept for the y labels and the axis
-let chartState = null;   // what is drawn now (kept to redraw on resize)
+const CHART_MAX_STEP = 4; // columns from one point to the next, at most
+let chartState = null;    // what is drawn now (kept to redraw on resize)
 
 function chartEl(tag, className, text) {
   const node = document.createElement(tag);
@@ -871,11 +873,31 @@ function chartScale(values, rows) {
   };
 }
 
-// One panel as a grid of { ch, layer } cells. Later writes win: a marker
-// replaces the cursor line, and the cursor line replaces the zero line.
-function chartPanel(opts) {
-  const { rows, plotW, colOf, series, scale, tickLabel, cursor, zeroLine } = opts;
-  const width = CHART_GUTTER + plotW;
+// Rows that carry a label on both axes.
+function chartTickRows(rows) {
+  const ticks = rows >= 9 ? 4 : 3;
+  const list = [];
+  for (let k = 0; k < ticks; k++) {
+    const r = Math.round(k * (rows - 1) / (ticks - 1));
+    if (list.indexOf(r) === -1) list.push(r);
+  }
+  return list;
+}
+
+function chartPctTick(v) {
+  const text = formatNumber(v, 4);
+  return text.length > 8 ? formatNumber(v, 2) : text;
+}
+
+// The plot as a grid of { ch, layer } cells: labels and axis on the left for
+// d and d*, the points, and axis and labels on the right for ∆kQuai/kQuai.
+// Later writes win: a marker replaces the cursor line, and the cursor line
+// replaces the zero line.
+function chartPanel(lay, st) {
+  const { rows, plotW, colOf, gutterL, gutterR, tickRows, leftLabels, rightLabels, scaleL, scaleR } = lay;
+  const width = gutterL + plotW + gutterR;
+  const axisL = gutterL - 1;
+  const axisR = gutterL + plotW;
   const grid = [];
   for (let r = 0; r <= rows; r++) {
     const line = [];
@@ -883,42 +905,52 @@ function chartPanel(opts) {
     grid.push(line);
   }
   const put = (r, c, ch, layer) => { if (grid[r] && grid[r][c]) grid[r][c] = { ch, layer }; };
+  const write = (r, c, text, layer) => { for (let i = 0; i < text.length; i++) put(r, c + i, text[i], layer); };
 
-  // y labels and axis
-  const ticks = rows >= 9 ? 4 : 3;
-  const tickRows = new Set();
-  for (let k = 0; k < ticks; k++) tickRows.add(Math.round(k * (rows - 1) / (ticks - 1)));
+  // the two axes
   for (let r = 0; r < rows; r++) {
-    if (tickRows.has(r)) {
-      const label = String(tickLabel(scale.valueAt(r))).slice(0, CHART_GUTTER - 2).padStart(CHART_GUTTER - 2);
-      for (let i = 0; i < label.length; i++) put(r, i, label[i], 'frame');
-      put(r, CHART_GUTTER - 1, '┤', 'frame');
-    } else {
-      put(r, CHART_GUTTER - 1, '│', 'frame');
-    }
+    put(r, axisL, '│', 'frame');
+    put(r, axisR, '│', 'frame');
   }
-  put(rows, CHART_GUTTER - 1, '╰', 'frame');
-  for (let c = 0; c < plotW; c++) put(rows, CHART_GUTTER + c, '─', 'frame');
+  put(rows, axisL, '╰', 'frame');
+  put(rows, axisR, '╯', 'frame');
+  for (let c = 0; c < plotW; c++) put(rows, gutterL + c, '─', 'frame');
 
-  // zero line, only when zero is inside the scale
-  if (zeroLine && scale.min < 0 && scale.max > 0) {
-    const zr = scale.rowOf(0);
-    for (let c = 0; c < plotW; c++) put(zr, CHART_GUTTER + c, '╌', 'frame');
+  // zero of the right scale, only when it is inside
+  const zeroRow = scaleR.min < 0 && scaleR.max > 0 ? scaleR.rowOf(0) : -1;
+  if (zeroRow >= 0) {
+    for (let c = 0; c < plotW; c++) put(zeroRow, gutterL + c, '╌', 'frame');
+    put(zeroRow, axisR, '├', 'frame');
+    write(zeroRow, axisR + 2, '0', 'amber');
   }
+
+  // labels: left in grey, right in the colour of its series
+  tickRows.forEach((r, k) => {
+    put(r, axisL, '┤', 'frame');
+    write(r, 0, leftLabels[k].slice(0, gutterL - 2).padStart(gutterL - 2), 'frame');
+    if (r === zeroRow) return;
+    put(r, axisR, '├', 'frame');
+    write(r, axisR + 2, rightLabels[k].slice(0, gutterR - 2), 'amber');
+  });
 
   // column of the point being read
-  if (cursor >= 0) {
-    const cc = CHART_GUTTER + colOf(cursor);
+  if (st.cursor >= 0) {
+    const cc = gutterL + colOf(st.cursor);
     for (let r = 0; r < rows; r++) put(r, cc, '╎', 'cursor');
     put(rows, cc, '┴', 'cursor');
   }
 
   // markers
+  const series = [
+    { values: st.d, glyph: '●', layer: 'ink', scale: scaleL },
+    { values: st.dStar, glyph: '○', layer: 'ink', scale: scaleL },
+    { values: st.dk, glyph: '■', layer: 'amber', scale: scaleR },
+  ];
   series.forEach((s) => {
     s.values.forEach((v, i) => {
       if (typeof v !== 'number' || !isFinite(v)) return;
-      const r = scale.rowOf(v);
-      const c = CHART_GUTTER + colOf(i);
+      const r = s.scale.rowOf(v);
+      const c = gutterL + colOf(i);
       const there = grid[r][c].marker;
       if (there && there !== s.glyph) {
         put(r, c, '◆', 'amber');
@@ -936,21 +968,16 @@ function chartLayerText(grid, layer) {
   return grid.map((line) => line.map((cell) => (cell.layer === layer ? cell.ch : ' ')).join('')).join('\n');
 }
 
-function chartPctTick(v) {
-  const text = formatNumber(v, 4);
-  return text.length > CHART_GUTTER - 2 ? formatNumber(v, 2) : text;
-}
-
 // First and last Prime block of the window, under the ends of the axis.
-function chartAxisText(labels, plotW) {
+function chartAxisText(labels, lay) {
   const first = String(labels[0]).split('–')[0];
   const lastParts = String(labels[labels.length - 1]).split('–');
   const last = lastParts[lastParts.length - 1];
-  const pad = ' '.repeat(CHART_GUTTER);
-  if (first.length + last.length + 2 <= plotW) {
-    return pad + first + ' '.repeat(plotW - first.length - last.length) + last;
+  const pad = ' '.repeat(lay.gutterL);
+  if (first.length + last.length + 2 <= lay.plotW) {
+    return pad + first + ' '.repeat(lay.plotW - first.length - last.length) + last;
   }
-  return pad + last.padStart(plotW);
+  return pad + last.padStart(lay.plotW);
 }
 
 // All the points as a table (the chart in numbers).
@@ -1002,25 +1029,9 @@ function chartTable(st, open) {
 function chartPaint() {
   const st = chartState;
   if (!st || !st.dom) return;
-  const lay = st.layout;
-  const a = chartPanel({
-    rows: st.rowsA, plotW: lay.plotW, colOf: lay.colOf, cursor: st.cursor,
-    scale: chartScale(st.d.concat(st.dStar), st.rowsA),
-    tickLabel: (v) => formatNormalizedDifficultyTick(v).trim(),
-    series: [
-      { values: st.d, glyph: '●', layer: 'ink' },
-      { values: st.dStar, glyph: '○', layer: 'amber' },
-    ],
-  });
-  const b = chartPanel({
-    rows: st.rowsB, plotW: lay.plotW, colOf: lay.colOf, cursor: st.cursor, zeroLine: true,
-    scale: chartScale(st.dk, st.rowsB),
-    tickLabel: chartPctTick,
-    series: [{ values: st.dk, glyph: '■', layer: 'amber' }],
-  });
+  const grid = chartPanel(st.layout, st);
   ['frame', 'cursor', 'ink', 'amber'].forEach((layer) => {
-    st.dom.a[layer].textContent = chartLayerText(a, layer);
-    st.dom.b[layer].textContent = chartLayerText(b, layer);
+    st.dom.plot[layer].textContent = chartLayerText(grid, layer);
   });
 
   // Same text the old tooltip gave, for the point under the cursor.
@@ -1052,6 +1063,46 @@ function chartSetCursor(index, announce) {
   }
 }
 
+// Scales, labels and widths for the room there is now.
+function chartLayout(st, cols) {
+  const n = st.labels.length;
+  const rows = cols >= 60 ? 14 : 11;
+  const scaleL = chartScale(st.d.concat(st.dStar), rows);
+  const scaleR = chartScale(st.dk, rows);
+  const tickRows = chartTickRows(rows);
+
+  // Left labels: when they all share the unit (GnD, MnD...) it goes to the
+  // caption once and the axis keeps only the numbers.
+  let leftLabels = tickRows.map((r) => formatNormalizedDifficultyTick(scaleL.valueAt(r)).trim());
+  const units = leftLabels.map((text) => text.slice(text.lastIndexOf(' ') + 1));
+  let unit = 'nD';
+  if (units.every((u) => u === units[0])) {
+    unit = units[0];
+    leftLabels = leftLabels.map((text) => text.slice(0, text.lastIndexOf(' ')));
+  }
+  const rightLabels = tickRows.map((r) => chartPctTick(scaleR.valueAt(r)));
+  const longest = (list) => list.reduce((m, text) => Math.max(m, text.length), 1);
+  const gutterL = longest(leftLabels) + 2;
+  const gutterR = longest(rightLabels) + 2;
+
+  const plotMax = Math.max(8, cols - gutterL - gutterR);
+  const step = n > 1 ? Math.max(1, Math.min(CHART_MAX_STEP, Math.floor((plotMax - 1) / (n - 1)))) : 1;
+  const spread = (n - 1) * step + 1 <= plotMax; // false: more points than columns
+  // A free column between the last point and the right axis, and between the
+  // left axis and the first one, when there is room for them.
+  const spare = spread ? plotMax - ((n - 1) * step + 1) : 0;
+  const padR = spare >= 1 ? 1 : 0;
+  const padL = spare >= 2 ? 1 : 0;
+  const plotW = spread ? (n - 1) * step + 1 + padL + padR : plotMax;
+  return {
+    cols, rows, plotW, gutterL, gutterR, tickRows, leftLabels, rightLabels, scaleL, scaleR,
+    width: gutterL + plotW + gutterR,
+    capLeft: 'd, d* (Prime, chunk averages, ' + unit + ')',
+    colOf: (i) => (spread ? padL + i * step : Math.min(plotW - 1, Math.floor(i * plotW / n))),
+    indexAt: (col) => Math.max(0, Math.min(n - 1, spread ? Math.round((col - padL) / step) : Math.floor(col * n / plotW))),
+  };
+}
+
 // Build the chart for the width available now.
 function chartBuild(host) {
   const st = chartState;
@@ -1065,50 +1116,38 @@ function chartBuild(host) {
     return;
   }
 
-  const cols = chartColumns(host);
-  const plotMax = Math.max(8, cols - CHART_GUTTER);
-  const step = Math.max(1, Math.min(3, Math.floor(plotMax / n)));
-  const spread = n * step <= plotMax; // false: more points than columns
-  const plotW = spread ? n * step : plotMax;
-  st.layout = {
-    cols,
-    plotW,
-    colOf: (i) => (spread ? i * step + Math.floor(step / 2) : Math.min(plotW - 1, Math.floor(i * plotW / n))),
-    indexAt: (col) => Math.max(0, Math.min(n - 1, spread ? Math.floor(col / step) : Math.floor(col * n / plotW))),
-  };
-  st.rowsA = cols >= 60 ? 10 : 8;
-  st.rowsB = 5;
+  const lay = chartLayout(st, chartColumns(host));
+  st.layout = lay;
 
-  const makePlot = () => {
-    const pre = chartEl('pre', 'art chart-plot');
-    pre.setAttribute('aria-hidden', 'true');
-    const layers = {};
-    [['frame', 'l l-dust'], ['cursor', 'l l-cursor'], ['ink', 'l'], ['amber', 'l l-amber']].forEach((pair) => {
-      layers[pair[0]] = chartEl('span', pair[1]);
-      pre.appendChild(layers[pair[0]]);
-    });
-    return { pre, layers };
-  };
-  const a = makePlot();
-  const b = makePlot();
-  const axis = chartEl('pre', 'art chart-axis', chartAxisText(st.labels, plotW));
+  // the name of each scale over its own axis
+  const caps = chartEl('p', 'chart-caps');
+  caps.style.maxWidth = lay.width + 'ch';
+  caps.appendChild(chartEl('span', 'chart-cap', lay.capLeft));
+  caps.appendChild(chartEl('span', 'chart-cap chart-cap-right', '∆kQuai/kQuai (%)'));
+
+  const pre = chartEl('pre', 'art chart-plot');
+  pre.setAttribute('aria-hidden', 'true');
+  const plot = {};
+  [['frame', 'l l-dust'], ['cursor', 'l l-cursor'], ['ink', 'l'], ['amber', 'l l-amber']].forEach((pair) => {
+    plot[pair[0]] = chartEl('span', pair[1]);
+    pre.appendChild(plot[pair[0]]);
+  });
+  const axis = chartEl('pre', 'art chart-axis', chartAxisText(st.labels, lay));
   axis.setAttribute('aria-hidden', 'true');
   const readout = chartEl('dl', 'kv chart-readout');
   const live = chartEl('span', 'sr');
   live.setAttribute('aria-live', 'polite');
 
   host.replaceChildren(
-    chartEl('p', 'chart-cap', 'd, d* (Prime, chunk averages, nD)'),
-    a.pre,
-    chartEl('p', 'chart-cap', '∆kQuai/kQuai (%)'),
-    b.pre,
+    caps,
+    pre,
     axis,
     chartEl('p', 'chart-cap chart-cap-x', 'Prime block range (chunked)'),
     readout,
     live,
     chartTable(st, wasOpen)
   );
-  st.dom = { a: a.layers, b: b.layers, readout, live };
+  st.dom = { plot, readout, live };
   chartPaint();
 }
 
@@ -1122,7 +1161,7 @@ function chartPointer(ev) {
   const rect = pre.getBoundingClientRect();
   const chW = rect.width / st.layout.cols;
   if (!chW) return;
-  const col = Math.floor((ev.clientX - rect.left) / chW) - CHART_GUTTER;
+  const col = Math.floor((ev.clientX - rect.left) / chW) - st.layout.gutterL;
   if (col < 0 || col >= st.layout.plotW) return;
   chartSetCursor(st.layout.indexAt(col), false);
 }

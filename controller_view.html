@@ -28,8 +28,8 @@
 <link rel="manifest" href="site.webmanifest">
 <link rel="dns-prefetch" href="https://prime.kataribe.org">
 <link rel="preload" href="fonts/jetbrains-mono-kataribe-em1200.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/panel.css?v=d689eb0615">
-<script src="js/theme.js?v=d689eb0615"></script>
+<link rel="stylesheet" href="css/panel.css?v=3f5e57cd54">
+<script src="js/theme.js?v=3f5e57cd54"></script>
 </head>
 <body>
 <div class="page">
@@ -71,11 +71,11 @@
   <div id="ddstar-chart" class="chart" tabindex="0" role="group" aria-label="d and d* chart. Use the left and right arrow keys to read each point."></div>
   <noscript><p class="note bad">This page needs JavaScript to read the node.</p></noscript>
 
-  <ul class="legend" aria-label="Chart legend">
+  <ul class="legend tile" aria-label="Chart legend">
     <li><span class="mark" aria-hidden="true">●</span>d (normalized difficulty, Prime)</li>
-    <li><span class="mark amber" aria-hidden="true">○</span>d* (window average)</li>
-    <li><span class="mark" aria-hidden="true">◆</span>d and d* on the same cell</li>
+    <li><span class="mark" aria-hidden="true">○</span>d* (window average)</li>
     <li><span class="mark amber" aria-hidden="true">■</span>∆kQuai/kQuai (%) estimate</li>
+    <li><span class="mark amber" aria-hidden="true">◆</span>two series on the same cell</li>
   </ul>
 
   <p class="status-bar" role="status"><span class="status-dot idle" id="status-dot" aria-hidden="true"></span><span id="status-text">No data yet.</span></p>
@@ -88,22 +88,25 @@
 <section class="sec cell" aria-labelledby="h-state">
   <h2 id="h-state"><span class="bead" aria-hidden="true">●</span><span class="num" aria-hidden="true">02</span>state</h2>
   <p class="gloss">current state (Prime) · metrics from the latest Prime blocks (via Prime RPC).</p>
-  <div class="narrow quad">
-    <div class="metric">
-      <div class="metric-line"><span class="metric-label">latest Prime block</span><span class="metric-value"><span class="unit"># </span><span id="metric-block">–</span></span></div>
-      <div class="metric-note"><span id="metric-ts">timestamp: –</span></div>
+  <div class="tiles quad">
+    <div class="tile">
+      <div class="tile-label">latest Prime block</div>
+      <div class="tile-value"><span class="unit"># </span><span id="metric-block">–</span></div>
+      <div class="tile-note"><span id="metric-ts">timestamp: –</span></div>
     </div>
-    <div class="metric">
-      <div class="metric-line"><span class="metric-label">d* / d (last point)</span><span class="metric-value"><span id="metric-ratio">–</span> <span class="unit">ratio ·</span> <span class="badge" id="metric-ratio-badge">–</span></span></div>
-      <div class="metric-note"><span id="metric-ratio-text">Waiting for data...</span></div>
+    <div class="tile">
+      <div class="tile-label">d* / d (last point)</div>
+      <div class="tile-value"><span id="metric-ratio">–</span> <span class="unit">ratio</span> <span class="badge" id="metric-ratio-badge">–</span></div>
+      <div class="tile-note"><span id="metric-ratio-text">Waiting for data...</span></div>
     </div>
-    <div class="metric">
-      <div class="metric-line"><span class="metric-label">exchange rate (Qi → Quai)</span><span class="metric-value"><span class="unit">1 Qi = </span><span id="metric-exrate">–</span> <span class="unit">Quai</span></span></div>
-      <code id="metric-exrate-hex" hidden>–</code>
+    <div class="tile">
+      <div class="tile-label">exchange rate (Qi → Quai)</div>
+      <div class="tile-value"><span class="unit">1 Qi = </span><span id="metric-exrate">–</span> <span class="unit">Quai</span><code id="metric-exrate-hex" hidden>–</code></div>
     </div>
-    <div class="metric">
-      <div class="metric-line"><span class="metric-label">estimated ∆kQuai/kQuai</span><span class="metric-value"><span id="metric-dk">–</span> <span class="unit">% / block</span></span></div>
-      <div class="metric-note"><span id="metric-dk-text">Controller alpha = 0.001 (per spec)</span></div>
+    <div class="tile">
+      <div class="tile-label">estimated ∆kQuai/kQuai</div>
+      <div class="tile-value"><span id="metric-dk">–</span> <span class="unit">% / block</span></div>
+      <div class="tile-note"><span id="metric-dk-text">Controller alpha = 0.001 (per spec)</span></div>
     </div>
   </div>
 </section>
@@ -116,19 +119,21 @@
       <label for="conversion-amount">amount</label>
       <input type="text" id="conversion-amount" class="conversion-input" placeholder="0.00" inputmode="decimal" autocomplete="off" spellcheck="false">
     </div>
-    <div class="block-gap">
-      <span class="label">direction</span>
-      <div class="direction">
-        <span id="from-currency">Qi</span>
-        <span class="arrow" aria-hidden="true">→</span>
-        <span id="to-currency">Quai</span>
-        <button id="swap-direction-btn" class="btn swap-btn" type="button" title="Swap direction" aria-label="Swap conversion direction">↔ swap</button>
+    <div class="tiles block-gap">
+      <div class="tile">
+        <div class="tile-label">direction</div>
+        <div class="direction">
+          <span id="from-currency">Qi</span>
+          <span class="arrow" aria-hidden="true">→</span>
+          <span id="to-currency">Quai</span>
+          <button id="swap-direction-btn" class="btn swap-btn" type="button" title="Swap direction" aria-label="Swap conversion direction">↔ swap</button>
+        </div>
       </div>
-    </div>
-    <div class="block-gap">
-      <span class="label">you receive</span>
-      <div id="conversion-result" class="result" role="status">–</div>
-      <div id="conversion-details" class="details"></div>
+      <div class="tile">
+        <div class="tile-label">you receive</div>
+        <div id="conversion-result" class="result" role="status">–</div>
+        <div id="conversion-details" class="details"></div>
+      </div>
     </div>
     <p class="block-gap"><button id="calculate-btn" class="btn btn-primary calc-btn" type="button">calculate conversion</button></p>
   </div>
@@ -137,16 +142,18 @@
 <section class="sec cell" aria-labelledby="h-conversion">
   <h2 id="h-conversion"><span class="bead" aria-hidden="true">●</span><span class="num" aria-hidden="true">04</span>conversion</h2>
   <p class="gloss">conversion &amp; discounts · live conversion flow, kQuai discount and cubic preview</p>
-  <div class="narrow">
-    <div class="metric">
-      <div class="metric-line"><span class="metric-label">conversion flow (EMA)</span><span class="metric-value"><span id="metric-conversionflow">–</span> <span class="unit">Quai</span></span></div>
+  <div class="tiles">
+    <div class="tile">
+      <div class="tile-label">conversion flow (EMA)</div>
+      <div class="tile-value"><span id="metric-conversionflow">–</span> <span class="unit">Quai</span></div>
     </div>
-    <div class="metric">
-      <div class="metric-line"><span class="metric-label">kQuai discount</span><span class="metric-value"><span id="metric-kquai">–</span></span></div>
-      <div class="metric-note"><span id="metric-kquai-direction">direction: –</span></div>
+    <div class="tile">
+      <div class="tile-label">kQuai discount</div>
+      <div class="tile-value"><span id="metric-kquai">–</span></div>
+      <div class="tile-note"><span id="metric-kquai-direction">direction: –</span></div>
     </div>
-    <div class="block-gap">
-      <h3>cubic discount (preview)</h3>
+    <div class="tile">
+      <h3 class="tile-label">cubic discount (preview)</h3>
       <div class="form-row">
         <div class="field">
           <label for="cubic-amount">amount</label>
@@ -160,7 +167,7 @@
           </select></span>
         </div>
       </div>
-      <dl class="kv block-gap">
+      <dl class="kv">
         <div><dt>after cubic</dt><dd><strong id="cubic-result">–</strong></dd></div>
         <div><dt>discount</dt><dd><code id="cubic-discount">–</code></dd></div>
       </dl>
@@ -181,9 +188,9 @@
 
 </div>
 
-<script src="js/frame.js?v=d689eb0615" defer></script>
-<script src="vendor/decimal.min.js?v=d689eb0615" defer></script>
-<script src="main.js?v=d689eb0615" defer></script>
+<script src="js/frame.js?v=3f5e57cd54" defer></script>
+<script src="vendor/decimal.min.js?v=3f5e57cd54" defer></script>
+<script src="main.js?v=3f5e57cd54" defer></script>
 <script>
 if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js').catch(() => {}); }
 </script>

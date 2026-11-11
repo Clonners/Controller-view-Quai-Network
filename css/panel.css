@@ -467,13 +467,18 @@ h4 { color: var(--muted); font-weight: 400; }
   .boxes.three.content.active { grid-template-columns: 39ch 40ch 39ch; }
   .boxes.three > .cell-rest { grid-column: auto; }
 
-  /* two columns of two: the first two boxes on the left, the next two on the right */
+  /* two columns of two: the first two boxes on the left, the next two on the
+     right. The tall first box takes two of the three rows and so does the last
+     one, so the short ones (second and third) end where their content ends */
   .boxes.two:not(.content) {
     grid-template-columns: 80ch 39ch;
-    grid-template-rows: auto auto;
-    grid-auto-flow: column;
+    grid-template-rows: auto 1fr auto;
   }
-  .boxes.two > .cell { grid-column: auto; }
+  .boxes.two > .cell { grid-column: 1; }
+  .boxes.two > .cell:nth-of-type(1) { grid-row: 1 / 3; }
+  .boxes.two > .cell:nth-of-type(2) { grid-row: 3; }
+  .boxes.two > .cell:nth-of-type(3) { grid-column: 2; grid-row: 1; }
+  .boxes.two > .cell:nth-of-type(4) { grid-column: 2; grid-row: 2 / 4; }
 }
 
 /* ---------- home ---------- */
@@ -736,15 +741,13 @@ button.link:focus-visible {
 
 /* ---------- label ..... value ---------- */
 
-.kv > div,
-.metric-line {
+.kv > div {
   display: flex;
   flex-wrap: wrap;            /* a value that does not fit goes whole to the next line */
   align-items: baseline;
   min-width: 0;
 }
-.kv > div::before,
-.metric-line::before {
+.kv > div::before {
   content: "..........................................................................................";
   content: ".........................................................................................." / "";
   order: 1;
@@ -755,14 +758,12 @@ button.link:focus-visible {
   white-space: nowrap;
   color: var(--rule);
 }
-.kv dt,
-.metric-label {
+.kv dt {
   order: 0;
   flex: none;
   color: var(--muted);
 }
-.kv dd,
-.metric-value {
+.kv dd {
   order: 2;
   min-width: 0;
   max-width: 100%;
@@ -771,35 +772,160 @@ button.link:focus-visible {
   text-align: right;
   font-weight: 700;
 }
-.metric-value strong { font-weight: 700; }
 .unit { color: var(--muted); font-weight: 400; }
-.badge { color: var(--accent-text); font-weight: 400; }
-
-.metric + .metric { margin-top: var(--row); }
-.metric-note {
-  color: var(--muted);
-  overflow-wrap: anywhere;
-}
-.metric-note code { color: var(--ink-2); }
 
 @media (min-width: 60em) {
   .narrow { max-width: 60ch; }
+}
 
-  /* four metrics as two and two */
-  .narrow.quad {
-    display: grid;
-    grid-template-columns: 45ch 45ch;
-    gap: var(--row) 4ch;
-    max-width: none;
-  }
-  .quad > .metric + .metric { margin-top: 0; }
+/* ---------- tiles: a small box inside a box ----------
+   A piece of data sits in its own little frame, with round corners so it
+   does not read as one more section:
+
+     ╭──────────────────╮
+     │ blocks found     │
+     │ 12               │
+     ╰──────────────────╯
+
+   Same trick as the boxes (strings of box characters, one sign per cell, in
+   grey, under the text), with six pieces: the two sides, the top line with
+   its left corner, the right top corner, the bottom line with its left corner
+   and the right bottom corner. The first and the last child of a tile carry
+   the top and the bottom, so a tile needs two children at least and neither
+   of them may be hidden. Tiles in a stack touch, like the boxes do; side by
+   side they leave one column free. */
+
+.page {
+  --tile-side: "││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││";
+}
+
+.tile {
+  position: relative;
+  z-index: 0;                 /* a layer of its own: the frame goes under the text */
+  min-width: 0;
+  padding: var(--row) 2ch;
+}
+.tile::before,
+.tile::after,
+.tile > :first-child::before,
+.tile > :first-child::after,
+.tile > :last-child::before,
+.tile > :last-child::after {
+  position: absolute;
+  z-index: -1;
+  text-indent: 0;             /* the legend indents its lines: not the frame */
+  overflow: hidden;
+  height: var(--row);
+  color: var(--rule);
+  font-weight: 400;
+  line-height: var(--row);
+  white-space: nowrap;
+  pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+/* the sides, between the corners */
+.tile::before,
+.tile::after {
+  content: var(--tile-side);
+  content: var(--tile-side) / "";
+  top: calc(var(--row) * 0.75);
+  bottom: calc(var(--row) * 0.75);
+  width: 1ch;
+  height: auto;
+  line-height: calc(var(--row) / 2);
+  white-space: normal;
+  word-break: break-all;
+  overflow-wrap: anywhere;
+}
+.tile::before { left: 0; }
+.tile::after { right: 0; }
+.tile > :first-child::before {
+  content: "╭────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────";
+  content: "╭────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────" / "";
+  top: 0;
+  right: 1ch;
+  left: 0;
+}
+.tile > :first-child::after {
+  content: "╮";
+  content: "╮" / "";
+  top: 0;
+  right: 0;
+}
+.tile > :last-child::before {
+  content: "╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────";
+  content: "╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────" / "";
+  right: 1ch;
+  bottom: 0;
+  left: 0;
+}
+.tile > :last-child::after {
+  content: "╯";
+  content: "╯" / "";
+  right: 0;
+  bottom: 0;
+}
+
+.tile-label { color: var(--muted); font-weight: 400; overflow-wrap: anywhere; }
+.tile-title { font-weight: 700; overflow-wrap: anywhere; }
+.tile-value { font-weight: 700; overflow-wrap: anywhere; }
+.tile-value strong { font-weight: 700; }
+.tile-note { color: var(--muted); overflow-wrap: anywhere; }
+.tile-note code { color: var(--ink-2); }
+.tile > .kv + .kv,
+.tile > .form-row + .kv { margin-top: var(--row); }
+
+/* tiles in a stack, or two by two: every column is a whole number of characters */
+.tiles {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: 1ch;
+}
+.tiles > .wide { grid-column: 1 / -1; }
+/* two columns at every width (36 columns of text on a phone) */
+.tiles.duo { grid-template-columns: 18ch 17ch; }
+@media (min-width: 60em) {
+  .tiles.duo { grid-template-columns: 22ch 21ch; }      /* 44 columns of text */
+  .tiles.quad { grid-template-columns: 47ch 46ch; }     /* 94 */
 }
 @media (min-width: 80em) {
-  .narrow.quad {
-    grid-template-columns: 35ch 35ch;
-    column-gap: 4ch;
-  }
+  .tiles.duo { grid-template-columns: 16ch 16ch; }      /* 33 */
+  .tiles.quad { grid-template-columns: 37ch 36ch; }     /* 74 */
+  /* too narrow for two fields side by side */
+  .tile .form-row { flex-direction: column; align-items: stretch; }
+  .tile .form-row > .field.w-18 { flex: none; }
 }
+
+/* ---------- pills: ( text ) ----------
+   A short state or tag on one line, between round brackets in grey (the
+   square ones are for what can be pressed). */
+
+.pill::before,
+.status::before,
+.ws-indicator::before,
+.status-tag::before,
+.badge::before,
+.miners-count::before {
+  content: "( ";
+  content: "( " / "";
+  color: var(--rule);
+  font-weight: 400;
+  white-space: pre;
+}
+.pill::after,
+.status::after,
+.ws-indicator::after,
+.status-tag::after,
+.badge::after,
+.miners-count::after {
+  content: " )";
+  content: " )" / "";
+  color: var(--rule);
+  font-weight: 400;
+  white-space: pre;
+}
+.badge { color: var(--accent-text); font-weight: 400; white-space: nowrap; }
 
 /* ---------- tables: columns of text ---------- */
 
@@ -1407,7 +1533,14 @@ button.endpoint-header:focus-visible .endpoint-path { color: var(--accent-text);
   white-space: pre;
 }
 .chart-cap { color: var(--muted); }
-.chart-plot + .chart-cap { margin-top: var(--row); }
+/* the names of the two scales, each one over its own axis */
+.chart-caps {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 3ch;
+}
+.chart-cap-right { margin-left: auto; color: var(--accent-text); }
 .chart-axis { color: var(--muted); }
 .chart-cap-x { margin-bottom: var(--row); }
 .chart-plot { touch-action: pan-y; }
@@ -1433,14 +1566,21 @@ button.endpoint-header:focus-visible .endpoint-path { color: var(--accent-text);
   .chart-table { width: 72ch; }
 }
 
-.legend { margin-top: var(--row); color: var(--ink-2); }
-.legend .mark { display: inline-block; width: 2ch; color: var(--ink); }
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 3ch;
+  margin-top: var(--row);
+  color: var(--ink-2);
+}
+.legend li { padding-left: 2ch; text-indent: -2ch; }
+.legend .mark { display: inline-block; width: 2ch; color: var(--ink); text-indent: 0; }
 .legend .mark.amber { color: var(--accent); }
 
 .tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 0 3ch;
+  gap: 0 2ch;
   color: var(--muted);
 }
 

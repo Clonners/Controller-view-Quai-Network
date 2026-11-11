@@ -29,8 +29,8 @@
 <link rel="dns-prefetch" href="https://proxy.kataribe.org">
 <link rel="dns-prefetch" href="https://prime.kataribe.org">
 <link rel="preload" href="fonts/jetbrains-mono-kataribe-em1200.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/panel.css?v=d689eb0615">
-<script src="js/theme.js?v=d689eb0615"></script>
+<link rel="stylesheet" href="css/panel.css?v=3f5e57cd54">
+<script src="js/theme.js?v=3f5e57cd54"></script>
 </head>
 <body>
 <div class="page">
@@ -78,30 +78,43 @@
 <section class="sec cell" aria-labelledby="h-node">
   <h2 id="h-node"><span class="bead" aria-hidden="true">●</span><span class="num" aria-hidden="true">02</span>node</h2>
   <p class="gloss">node statistics · real-time performance metrics</p>
-  <dl class="kv two">
-    <div><dt>node name</dt><dd id="nodeName">-</dd></div>
-    <div><dt>connected workers</dt><dd id="workersConnected">-</dd></div>
-    <div><dt>blocks found</dt><dd id="blocksFound">-</dd></div>
-    <div><dt>uptime</dt><dd id="uptime">-</dd></div>
-    <div><dt>valid shares</dt><dd id="sharesValid">-</dd></div>
-    <div><dt>stale shares</dt><dd id="sharesStale">-</dd></div>
-    <div><dt>invalid shares</dt><dd id="sharesInvalid">-</dd></div>
+  <dl class="tiles duo">
+    <div class="tile wide"><dt class="tile-label">node name</dt><dd class="tile-value" id="nodeName">-</dd></div>
+    <div class="tile"><dt class="tile-label">connected workers</dt><dd class="tile-value" id="workersConnected">-</dd></div>
+    <div class="tile"><dt class="tile-label">blocks found</dt><dd class="tile-value" id="blocksFound">-</dd></div>
+    <div class="tile"><dt class="tile-label">uptime</dt><dd class="tile-value" id="uptime">-</dd></div>
+    <div class="tile"><dt class="tile-label">valid shares</dt><dd class="tile-value" id="sharesValid">-</dd></div>
+    <div class="tile"><dt class="tile-label">stale shares</dt><dd class="tile-value" id="sharesStale">-</dd></div>
+    <div class="tile"><dt class="tile-label">invalid shares</dt><dd class="tile-value" id="sharesInvalid">-</dd></div>
   </dl>
 </section>
 
 <section class="sec cell" aria-labelledby="h-algorithms">
   <h2 id="h-algorithms"><span class="bead" aria-hidden="true">●</span><span class="num" aria-hidden="true">03</span>algorithms</h2>
   <p class="gloss">algorithm statistics</p>
-  <table class="tbl keep">
-    <thead>
-      <tr><th scope="col">algorithm</th><th scope="col" class="r w-14">hashrate</th><th scope="col" class="r w-9">workers</th></tr>
-    </thead>
-    <tbody>
-      <tr><td>SHA-256</td><td class="r"><span class="v" id="shaHashrate">-</span></td><td class="r"><span class="v" id="shaWorkers">-</span></td></tr>
-      <tr><td>Scrypt</td><td class="r"><span class="v" id="scryptHashrate">-</span></td><td class="r"><span class="v" id="scryptWorkers">-</span></td></tr>
-      <tr><td>KawPoW</td><td class="r"><span class="v" id="kawpowHashrate">-</span></td><td class="r"><span class="v" id="kawpowWorkers">-</span></td></tr>
-    </tbody>
-  </table>
+  <div class="tiles">
+    <div class="tile">
+      <h3 class="tile-title">SHA-256</h3>
+      <dl class="kv">
+        <div><dt>hashrate</dt><dd id="shaHashrate">-</dd></div>
+        <div><dt>workers</dt><dd id="shaWorkers">-</dd></div>
+      </dl>
+    </div>
+    <div class="tile">
+      <h3 class="tile-title">Scrypt</h3>
+      <dl class="kv">
+        <div><dt>hashrate</dt><dd id="scryptHashrate">-</dd></div>
+        <div><dt>workers</dt><dd id="scryptWorkers">-</dd></div>
+      </dl>
+    </div>
+    <div class="tile">
+      <h3 class="tile-title">KawPoW</h3>
+      <dl class="kv">
+        <div><dt>hashrate</dt><dd id="kawpowHashrate">-</dd></div>
+        <div><dt>workers</dt><dd id="kawpowWorkers">-</dd></div>
+      </dl>
+    </div>
+  </div>
 </section>
 
 <section class="sec cell cell-rest" aria-labelledby="h-shares">
@@ -251,8 +264,8 @@
 
 </div>
 
-<script src="js/frame.js?v=d689eb0615" defer></script>
-<script type="module" src="js/main.js?v=d689eb0615"></script>
+<script src="js/frame.js?v=3f5e57cd54" defer></script>
+<script type="module" src="js/main.js?v=3f5e57cd54"></script>
 <script>
 if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js').catch(() => {}); }
 </script>
