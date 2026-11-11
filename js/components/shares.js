@@ -3,8 +3,8 @@
  * Handles share statistics display and updates
  */
 
-import { AppState } from '../state.js';
-import { formatNumber } from '../utils/formatters.js';
+import { AppState } from '../state.js?v=e05cb9a8bd';
+import { formatNumber } from '../utils/formatters.js?v=e05cb9a8bd';
 
 /**
  * Update share section from pool stats
@@ -33,20 +33,11 @@ export function updateShareSectionFromPoolStats(stats) {
         if (shareStats && shareStats.averageLuck !== undefined) {
             const luckValue = shareStats.averageLuck * 100;
             currentLuck.textContent = `${luckValue.toFixed(1)}%`;
-            if (luckValue >= 100) {
-                luckStatus.textContent = '🍀 Lucky!';
-                luckStatus.style.color = '#4ade80';
-            } else if (luckValue >= 80) {
-                luckStatus.textContent = '👍 Good';
-                luckStatus.style.color = '#ffc107';
-            } else {
-                luckStatus.textContent = '📉 Below average';
-                luckStatus.style.color = '#ff6b6b';
-            }
+            setLuckStatus(luckStatus, luckValue);
         } else {
             currentLuck.textContent = '-';
             luckStatus.textContent = 'Waiting for share data...';
-            luckStatus.style.color = '#9ca3af';
+            luckStatus.className = 'state';
         }
     }
     
@@ -66,14 +57,11 @@ export function updateShareSectionFromPoolStats(stats) {
             const parsed = Date.parse(lastShareTs);
             if (!Number.isNaN(parsed)) {
                 lastShareTime.textContent = new Date(parsed).toLocaleString();
-                lastShareTime.style.color = '#4ade80';
             } else {
                 lastShareTime.textContent = '-';
-                lastShareTime.style.color = '';
             }
         } else {
             lastShareTime.textContent = '-';
-            lastShareTime.style.color = '';
         }
     }
     
@@ -98,7 +86,7 @@ export function renderShareSummary(stats) {
     if (summaryHash === AppState.hashes.shareSummary) return;
     AppState.hashes.shareSummary = summaryHash;
     
-    container.innerHTML = '';
+    container.replaceChildren();
     
     if (validShares === 0 && staleShares === 0 && invalidShares === 0) {
         const noShares = document.createElement('div');
@@ -145,12 +133,35 @@ export function renderShareSummary(stats) {
         const efficiency = (validShares / total * 100).toFixed(2);
         const effItem = document.createElement('div');
         effItem.className = 'share-item efficiency-row';
-        effItem.innerHTML = `
-            <span class="share-label">Efficiency Rate</span>
-            <span class="share-type ${efficiency >= 99 ? 'valid' : efficiency >= 95 ? 'stale' : 'invalid'}">${efficiency}%</span>
-            <span class="share-count">${formatNumber(total)} total</span>
-        `;
+        const effLabel = document.createElement('span');
+        effLabel.className = 'share-label';
+        effLabel.textContent = 'Efficiency Rate';
+        const effType = document.createElement('span');
+        effType.className = `share-type ${efficiency >= 99 ? 'valid' : efficiency >= 95 ? 'stale' : 'invalid'}`;
+        effType.textContent = `${efficiency}%`;
+        const effCount = document.createElement('span');
+        effCount.className = 'share-count';
+        effCount.textContent = `${formatNumber(total)} total`;
+        effItem.appendChild(effLabel);
+        effItem.appendChild(effType);
+        effItem.appendChild(effCount);
         container.appendChild(effItem);
+    }
+}
+
+/**
+ * Luck in words (the state is never said by colour alone).
+ */
+function setLuckStatus(target, luckValue) {
+    if (luckValue >= 100) {
+        target.textContent = '● lucky';
+        target.className = 'state ok';
+    } else if (luckValue >= 80) {
+        target.textContent = '● good';
+        target.className = 'state warn';
+    } else {
+        target.textContent = '○ below average';
+        target.className = 'state bad';
     }
 }
 
@@ -172,17 +183,6 @@ export function updateShareStats(data) {
         const luckValue = data.averageLuck * 100;
         luckEl.textContent = `${luckValue.toFixed(1)}%`;
         
-        if (luckStatusEl) {
-            if (luckValue >= 100) {
-                luckStatusEl.textContent = '🍀 Lucky!';
-                luckStatusEl.style.color = '#4ade80';
-            } else if (luckValue >= 80) {
-                luckStatusEl.textContent = '👍 Good';
-                luckStatusEl.style.color = '#ffc107';
-            } else {
-                luckStatusEl.textContent = '📉 Below average';
-                luckStatusEl.style.color = '#ff6b6b';
-            }
-        }
+        if (luckStatusEl) setLuckStatus(luckStatusEl, luckValue);
     }
 }

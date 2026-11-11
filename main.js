@@ -1,7 +1,7 @@
 // main.js — extracted from index.html
-const alphaCtrl = 0.001; // controller α for kQuai
+const alphaCtrl = 0.001; // controller alpha for kQuai
 
-const rpcUrlInput   = document.getElementById("rpc-url") || { value: 'http://181.99.245.152:9001' };
+const rpcUrlInput   = document.getElementById("rpc-url") || { value: 'https://prime.kataribe.org' };
 const windowInput   = document.getElementById("window") || { value: '4000' };
 const chunkInput    = document.getElementById("chunk") || { value: '200' };
 const alphaSelect   = document.getElementById("alpha") || { value: '4000' };
@@ -41,7 +41,6 @@ const donationAddress  = "0x0042843bC5C3fcAFda51d2c6BB17d47370567C9a";
 
 let autoRunning = false; // controls sequential auto loop
 let autoDetectedPrimes = 0; // cumulative count since Auto was activated
-let chart = null;
 let currentSeries = []; // holds the in-memory series used for incremental updates
 
 // Update UI (chart + metrics) from a full `series` array
@@ -124,10 +123,13 @@ async function updateUIFromSeries(series, chunkSizePrime, url) {
 
     const deltaKPercent = lastDeltaK.times(100);
     metricDk.textContent = formatNumber(deltaKPercent, 4);
-    metricDkText.textContent = 'Controller α = 0.001 (per spec), estimated from d*/d (per Prime block).';
+    metricDkText.textContent = 'Controller alpha = 0.001 (per spec), estimated from d*/d (per Prime block).';
 
-    statusDot.classList.remove('red');
-    statusText.innerHTML = '<span class="em">OK</span> · ' + labels.length + ' points (' + series.length + ' Prime blocks). Last d*/d = ' + formatNumber(lastRatio, 4);
+    statusDot.classList.remove('red', 'idle');
+    const okMark = document.createElement('span');
+    okMark.className = 'em';
+    okMark.textContent = 'OK';
+    statusText.replaceChildren(okMark, document.createTextNode(' · ' + labels.length + ' points (' + series.length + ' Prime blocks). Last d*/d = ' + formatNumber(lastRatio, 4)));
   }
 }
 
@@ -142,7 +144,7 @@ window.addEventListener('error', (ev) => {
     console.error('Unhandled error:', ev.error || ev);
     if (connLabel) connLabel.textContent = 'JS error';
     if (statusText) statusText.textContent = 'Runtime error: ' + msg;
-    if (statusDot) statusDot.classList.add('red');
+    if (statusDot) { statusDot.classList.remove('idle'); statusDot.classList.add('red'); }
   } catch (e) { /* noop */ }
 });
 window.addEventListener('unhandledrejection', (ev) => {
@@ -151,7 +153,7 @@ window.addEventListener('unhandledrejection', (ev) => {
     console.error('Unhandled promise rejection:', reason);
     if (connLabel) connLabel.textContent = 'JS error';
     if (statusText) statusText.textContent = 'Unhandled rejection: ' + (reason && reason.message ? reason.message : String(reason));
-    if (statusDot) statusDot.classList.add('red');
+    if (statusDot) { statusDot.classList.remove('idle'); statusDot.classList.add('red'); }
   } catch (e) { /* noop */ }
 });
 
@@ -672,7 +674,7 @@ async function fetchHeadersByNumber(url, startBlock, endBlock, batchSize = 2000)
 // We fetch Prime headers by number and use header fields for metrics.
 
 async function fetchWindowData() {
-  if (chartSpinner) chartSpinner.style.display = 'flex';
+  if (chartSpinner) chartSpinner.hidden = false;
 
   const url = rpcUrlInput.value.trim();
 
@@ -812,112 +814,363 @@ async function fetchWindowData() {
     console.error(err);
     connDot.classList.add("red");
     setConnStatus('RPC Error', (err && err.message) ? err.message : String(err));
-    statusDot.classList.add("red");
+    statusDot.classList.remove("idle"); statusDot.classList.add("red");
     statusText.textContent = "Error querying node: " + err.message;
   } finally {
-    if (chartSpinner) chartSpinner.style.display = 'none';
+    if (chartSpinner) chartSpinner.hidden = true;
     refreshBtn.disabled = false;
     try {
       // Only clear the persistent auto spinner if auto isn't running.
       if (!autoRunning) {
         connDot.classList.remove('fetching');
         connDot.classList.remove('red');
-        connDot.style.background = '#22c55e';
       }
     } catch (e) {}
   }
 }
 
-function renderChart(labels, dValues, dStarValues, dkValues) {
-  const ctx = document.getElementById("ddstar-chart").getContext("2d");
-  if (chart) {
-    // update datasets in place for smoother UX
-    chart.data.labels = labels;
-    if (chart.data.datasets && chart.data.datasets.length >= 3) {
-      chart.data.datasets[0].data = dValues;
-      chart.data.datasets[1].data = dStarValues;
-      chart.data.datasets[2].data = dkValues;
+// ---------------------------------------------------------------------------
+// Text chart. Same call as before (labels + three series), drawn with
+// characters of the page font instead of a canvas:
+//   panel A: d (●) and d* (○); ◆ where both fall on the same cell
+//   panel B: ∆kQuai/kQuai in % (■), on its own scale
+// The drawing is hidden from screen readers: the readout under it and the
+// data table say the same in words and numbers.
+// ---------------------------------------------------------------------------
+const CHART_GUTTER = 10; // columns kept for the y labels and the axis
+let chartState = null;   // what is drawn now (kept to redraw on resize)
+
+function chartEl(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined && text !== null) node.textContent = String(text);
+  return node;
+}
+
+// How many characters fit across the chart element.
+function chartColumns(host) {
+  const probe = chartEl('span', 'chart-probe', '0000000000');
+  host.appendChild(probe);
+  const chW = probe.getBoundingClientRect().width / 10;
+  host.removeChild(probe);
+  const total = host.clientWidth;
+  if (!chW || !total) return 36;
+  return Math.max(24, Math.floor(total / chW + 0.05));
+}
+
+function chartScale(values, rows) {
+  const finite = values.filter((v) => typeof v === 'number' && isFinite(v));
+  let min = finite.length ? Math.min.apply(null, finite) : 0;
+  let max = finite.length ? Math.max.apply(null, finite) : 1;
+  if (min === max) { const pad = Math.abs(min) * 0.01 || 1; min -= pad; max += pad; }
+  return {
+    min,
+    max,
+    rowOf: (v) => Math.max(0, Math.min(rows - 1, Math.round((max - v) / (max - min) * (rows - 1)))),
+    valueAt: (r) => max - (r / (rows - 1)) * (max - min),
+  };
+}
+
+// One panel as a grid of { ch, layer } cells. Later writes win: a marker
+// replaces the cursor line, and the cursor line replaces the zero line.
+function chartPanel(opts) {
+  const { rows, plotW, colOf, series, scale, tickLabel, cursor, zeroLine } = opts;
+  const width = CHART_GUTTER + plotW;
+  const grid = [];
+  for (let r = 0; r <= rows; r++) {
+    const line = [];
+    for (let c = 0; c < width; c++) line.push({ ch: ' ', layer: 'frame' });
+    grid.push(line);
+  }
+  const put = (r, c, ch, layer) => { if (grid[r] && grid[r][c]) grid[r][c] = { ch, layer }; };
+
+  // y labels and axis
+  const ticks = rows >= 9 ? 4 : 3;
+  const tickRows = new Set();
+  for (let k = 0; k < ticks; k++) tickRows.add(Math.round(k * (rows - 1) / (ticks - 1)));
+  for (let r = 0; r < rows; r++) {
+    if (tickRows.has(r)) {
+      const label = String(tickLabel(scale.valueAt(r))).slice(0, CHART_GUTTER - 2).padStart(CHART_GUTTER - 2);
+      for (let i = 0; i < label.length; i++) put(r, i, label[i], 'frame');
+      put(r, CHART_GUTTER - 1, '┤', 'frame');
+    } else {
+      put(r, CHART_GUTTER - 1, '│', 'frame');
     }
-    chart.update();
+  }
+  put(rows, CHART_GUTTER - 1, '╰', 'frame');
+  for (let c = 0; c < plotW; c++) put(rows, CHART_GUTTER + c, '─', 'frame');
+
+  // zero line, only when zero is inside the scale
+  if (zeroLine && scale.min < 0 && scale.max > 0) {
+    const zr = scale.rowOf(0);
+    for (let c = 0; c < plotW; c++) put(zr, CHART_GUTTER + c, '╌', 'frame');
+  }
+
+  // column of the point being read
+  if (cursor >= 0) {
+    const cc = CHART_GUTTER + colOf(cursor);
+    for (let r = 0; r < rows; r++) put(r, cc, '╎', 'cursor');
+    put(rows, cc, '┴', 'cursor');
+  }
+
+  // markers
+  series.forEach((s) => {
+    s.values.forEach((v, i) => {
+      if (typeof v !== 'number' || !isFinite(v)) return;
+      const r = scale.rowOf(v);
+      const c = CHART_GUTTER + colOf(i);
+      const there = grid[r][c].marker;
+      if (there && there !== s.glyph) {
+        put(r, c, '◆', 'amber');
+        grid[r][c].marker = '◆';
+      } else {
+        put(r, c, s.glyph, s.layer);
+        grid[r][c].marker = s.glyph;
+      }
+    });
+  });
+  return grid;
+}
+
+function chartLayerText(grid, layer) {
+  return grid.map((line) => line.map((cell) => (cell.layer === layer ? cell.ch : ' ')).join('')).join('\n');
+}
+
+function chartPctTick(v) {
+  const text = formatNumber(v, 4);
+  return text.length > CHART_GUTTER - 2 ? formatNumber(v, 2) : text;
+}
+
+// First and last Prime block of the window, under the ends of the axis.
+function chartAxisText(labels, plotW) {
+  const first = String(labels[0]).split('–')[0];
+  const lastParts = String(labels[labels.length - 1]).split('–');
+  const last = lastParts[lastParts.length - 1];
+  const pad = ' '.repeat(CHART_GUTTER);
+  if (first.length + last.length + 2 <= plotW) {
+    return pad + first + ' '.repeat(plotW - first.length - last.length) + last;
+  }
+  return pad + last.padStart(plotW);
+}
+
+// All the points as a table (the chart in numbers).
+function chartTable(st, open) {
+  const details = chartEl('details', 'chart-data');
+  details.open = open;
+  details.appendChild(chartEl('summary', '', 'data table (' + st.labels.length + ' points)'));
+  const table = chartEl('table', 'tbl chart-table');
+  table.setAttribute('role', 'table');
+  const columns = [
+    ['Prime block range', 'blocks', ''],
+    ['d (normalized)', 'd', 'r'],
+    ['d* (window average)', 'd*', 'r'],
+    ['∆kQuai/kQuai (%)', '∆kQuai/kQuai %', 'r'],
+  ];
+  const thead = chartEl('thead');
+  thead.setAttribute('role', 'rowgroup');
+  const headRow = chartEl('tr');
+  headRow.setAttribute('role', 'row');
+  columns.forEach((col) => {
+    const th = chartEl('th', col[2], col[0]);
+    th.setAttribute('role', 'columnheader');
+    th.setAttribute('scope', 'col');
+    headRow.appendChild(th);
+  });
+  thead.appendChild(headRow);
+  const tbody = chartEl('tbody');
+  tbody.setAttribute('role', 'rowgroup');
+  st.labels.forEach((label, i) => {
+    const tr = chartEl('tr');
+    tr.setAttribute('role', 'row');
+    const values = [label, formatNumber(st.d[i], 4), formatNumber(st.dStar[i], 4), formatNumber(st.dk[i], 4) + ' %'];
+    values.forEach((value, k) => {
+      const td = chartEl('td', columns[k][2]);
+      td.setAttribute('role', 'cell');
+      td.setAttribute('data-label', columns[k][1]);
+      td.appendChild(chartEl('span', 'v', value));
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  table.appendChild(thead);
+  table.appendChild(tbody);
+  details.appendChild(table);
+  return details;
+}
+
+// Fill the layers and the readout for the current cursor.
+function chartPaint() {
+  const st = chartState;
+  if (!st || !st.dom) return;
+  const lay = st.layout;
+  const a = chartPanel({
+    rows: st.rowsA, plotW: lay.plotW, colOf: lay.colOf, cursor: st.cursor,
+    scale: chartScale(st.d.concat(st.dStar), st.rowsA),
+    tickLabel: (v) => formatNormalizedDifficultyTick(v).trim(),
+    series: [
+      { values: st.d, glyph: '●', layer: 'ink' },
+      { values: st.dStar, glyph: '○', layer: 'amber' },
+    ],
+  });
+  const b = chartPanel({
+    rows: st.rowsB, plotW: lay.plotW, colOf: lay.colOf, cursor: st.cursor, zeroLine: true,
+    scale: chartScale(st.dk, st.rowsB),
+    tickLabel: chartPctTick,
+    series: [{ values: st.dk, glyph: '■', layer: 'amber' }],
+  });
+  ['frame', 'cursor', 'ink', 'amber'].forEach((layer) => {
+    st.dom.a[layer].textContent = chartLayerText(a, layer);
+    st.dom.b[layer].textContent = chartLayerText(b, layer);
+  });
+
+  // Same text the old tooltip gave, for the point under the cursor.
+  const i = st.cursor;
+  const lines = [
+    ['point ' + (i + 1) + ' of ' + st.labels.length, 'blocks ' + st.labels[i]],
+    ['d (normalized)', formatNumber(st.d[i], 4)],
+    ['d* (window average)', formatNumber(st.dStar[i], 4)],
+    ['∆kQuai/kQuai (%)', formatNumber(st.dk[i], 4) + ' %'],
+  ];
+  st.dom.readout.replaceChildren(...lines.map((pair) => {
+    const item = chartEl('div');
+    item.appendChild(chartEl('dt', '', pair[0]));
+    item.appendChild(chartEl('dd', '', pair[1]));
+    return item;
+  }));
+}
+
+function chartSetCursor(index, announce) {
+  const st = chartState;
+  if (!st || !st.dom || !st.labels.length) return;
+  const i = Math.max(0, Math.min(st.labels.length - 1, index));
+  if (i === st.cursor && !announce) return;
+  st.cursor = i;
+  chartPaint();
+  if (announce) {
+    st.dom.live.textContent = 'blocks ' + st.labels[i] + ': d ' + formatNumber(st.d[i], 4) +
+      ', d star ' + formatNumber(st.dStar[i], 4) + ', delta kQuai over kQuai ' + formatNumber(st.dk[i], 4) + ' percent';
+  }
+}
+
+// Build the chart for the width available now.
+function chartBuild(host) {
+  const st = chartState;
+  if (!st) return;
+  const n = st.labels.length;
+  const oldTable = host.querySelector('details');
+  const wasOpen = oldTable ? oldTable.open : false;
+  if (n === 0) {
+    st.dom = null;
+    host.replaceChildren(chartEl('p', 'chart-cap', 'No data yet.'));
     return;
   }
-  chart = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels,
-      datasets: [
-        {
-          label: "d (normalized)",
-          data: dValues,
-          borderWidth: 1.8,
-          tension: 0.25,
-          pointRadius: 0,
-          borderColor: "#ff253a",
-        },
-        {
-          label: "d* (window average)",
-          data: dStarValues,
-          borderWidth: 1.8,
-          borderDash: [4, 4],
-          tension: 0.25,
-          pointRadius: 0,
-          borderColor: "#ff6b81",
-        },
-        {
-          label: "ΔkQuai/kQuai (%)",
-          data: dkValues,
-          yAxisID: "y1",
-          borderWidth: 1.5,
-          tension: 0.25,
-          pointRadius: 0,
-          borderColor: "#ffb347",
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: {
-        mode: "index",
-        intersect: false,
-      },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: function (ctx) {
-              const label = ctx.dataset.label || "";
-              if (label.includes("%")) {
-                return label + ": " + formatNumber(ctx.parsed.y, 4) + " %";
-              }
-              return label + ": " + formatNumber(ctx.parsed.y, 4);
-            },
-          },
-        },
-      },
-      scales: {
-        x: {
-          title: { display: true, text: "Prime block range (chunked)" },
-          ticks: { maxTicksLimit: 8 },
-        },
-        y: {
-          title: { display: true, text: "d, d* (Prime, chunk averages, nD)" },
-          ticks: {
-            maxTicksLimit: 6,
-            callback: (value) => formatNormalizedDifficultyTick(value),
-          },
-          grid: { drawBorder: false },
-        },
-        y1: {
-          position: "right",
-          title: { display: true, text: "ΔkQuai/kQuai (%)" },
-          ticks: { maxTicksLimit: 5 },
-          grid: { drawOnChartArea: false },
-        },
-      },
-    },
-  });
+
+  const cols = chartColumns(host);
+  const plotMax = Math.max(8, cols - CHART_GUTTER);
+  const step = Math.max(1, Math.min(3, Math.floor(plotMax / n)));
+  const spread = n * step <= plotMax; // false: more points than columns
+  const plotW = spread ? n * step : plotMax;
+  st.layout = {
+    cols,
+    plotW,
+    colOf: (i) => (spread ? i * step + Math.floor(step / 2) : Math.min(plotW - 1, Math.floor(i * plotW / n))),
+    indexAt: (col) => Math.max(0, Math.min(n - 1, spread ? Math.floor(col / step) : Math.floor(col * n / plotW))),
+  };
+  st.rowsA = cols >= 60 ? 10 : 8;
+  st.rowsB = 5;
+
+  const makePlot = () => {
+    const pre = chartEl('pre', 'art chart-plot');
+    pre.setAttribute('aria-hidden', 'true');
+    const layers = {};
+    [['frame', 'l l-dust'], ['cursor', 'l l-cursor'], ['ink', 'l'], ['amber', 'l l-amber']].forEach((pair) => {
+      layers[pair[0]] = chartEl('span', pair[1]);
+      pre.appendChild(layers[pair[0]]);
+    });
+    return { pre, layers };
+  };
+  const a = makePlot();
+  const b = makePlot();
+  const axis = chartEl('pre', 'art chart-axis', chartAxisText(st.labels, plotW));
+  axis.setAttribute('aria-hidden', 'true');
+  const readout = chartEl('dl', 'kv chart-readout');
+  const live = chartEl('span', 'sr');
+  live.setAttribute('aria-live', 'polite');
+
+  host.replaceChildren(
+    chartEl('p', 'chart-cap', 'd, d* (Prime, chunk averages, nD)'),
+    a.pre,
+    chartEl('p', 'chart-cap', '∆kQuai/kQuai (%)'),
+    b.pre,
+    axis,
+    chartEl('p', 'chart-cap chart-cap-x', 'Prime block range (chunked)'),
+    readout,
+    live,
+    chartTable(st, wasOpen)
+  );
+  st.dom = { a: a.layers, b: b.layers, readout, live };
+  chartPaint();
 }
+
+// Mouse or finger over the drawing: read the point of that column.
+function chartPointer(ev) {
+  const st = chartState;
+  if (!st || !st.dom || !st.layout) return;
+  if (ev.type === 'pointermove' && ev.pointerType !== 'mouse') return;
+  const pre = ev.target && ev.target.closest ? ev.target.closest('.chart-plot') : null;
+  if (!pre) return;
+  const rect = pre.getBoundingClientRect();
+  const chW = rect.width / st.layout.cols;
+  if (!chW) return;
+  const col = Math.floor((ev.clientX - rect.left) / chW) - CHART_GUTTER;
+  if (col < 0 || col >= st.layout.plotW) return;
+  chartSetCursor(st.layout.indexAt(col), false);
+}
+
+// Left/right arrows walk the points, Home/End jump to the ends.
+function chartKey(ev) {
+  const st = chartState;
+  if (ev.target !== ev.currentTarget || !st || !st.labels.length) return;
+  let i = st.cursor;
+  if (ev.key === 'ArrowLeft') i -= 1;
+  else if (ev.key === 'ArrowRight') i += 1;
+  else if (ev.key === 'Home') i = 0;
+  else if (ev.key === 'End') i = st.labels.length - 1;
+  else return;
+  ev.preventDefault();
+  chartSetCursor(i, true);
+}
+
+function renderChart(labels, dValues, dStarValues, dkValues) {
+  const host = document.getElementById("ddstar-chart");
+  if (!host) return;
+  if (!host.dataset.wired) {
+    host.dataset.wired = '1';
+    host.addEventListener('pointermove', chartPointer);
+    host.addEventListener('click', chartPointer);
+    host.addEventListener('keydown', chartKey);
+  }
+  // Follow the newest point unless the reader left the cursor on an older one.
+  const prev = chartState;
+  const n = labels.length;
+  let cursor = n - 1;
+  if (prev && prev.labels.length && prev.cursor >= 0 && prev.cursor < prev.labels.length - 1) {
+    cursor = Math.min(prev.cursor, n - 1);
+  }
+  chartState = { labels, d: dValues, dStar: dStarValues, dk: dkValues, cursor, layout: null, dom: null };
+  chartBuild(host);
+}
+
+// The grid changes with the width (40 or 100 columns): redraw when it does.
+let chartResizeTimer = null;
+window.addEventListener('resize', () => {
+  clearTimeout(chartResizeTimer);
+  chartResizeTimer = setTimeout(() => {
+    const host = document.getElementById('ddstar-chart');
+    if (!host || !chartState || !chartState.layout) return;
+    if (chartColumns(host) !== chartState.layout.cols) chartBuild(host);
+  }, 150);
+});
 
 refreshBtn.addEventListener("click", async () => {
   try {
@@ -938,8 +1191,9 @@ autoBtn.addEventListener("click", async () => {
     if (autoRunning) {
       // turning auto off
       stopAutoLoop();
-      autoBtn.textContent = "Auto (10s)";
+      autoBtn.textContent = "auto (10s)";
       autoBtn.classList.add("secondary");
+      autoBtn.setAttribute('aria-pressed', 'false');
       autoBtn.disabled = false;
       return;
     }
@@ -951,8 +1205,9 @@ autoBtn.addEventListener("click", async () => {
       try { connDot.classList.add('fetching'); } catch (e) {}
       try { autoDetectedPrimes = 0; setConnStatus('Fetching new primes', '0 primes'); } catch (e) {}
       startAutoLoop();
-      autoBtn.textContent = "Auto: On";
+      autoBtn.textContent = "auto: on";
       autoBtn.classList.remove("secondary");
+      autoBtn.setAttribute('aria-pressed', 'true');
     } finally {
       // re-enable button regardless of fetch result so user can retry/stop
       autoBtn.disabled = false;
@@ -1110,7 +1365,7 @@ function startAutoLoop() {
 function stopAutoLoop() {
   autoRunning = false;
   // When stopping auto, remove persistent spinner and restore green dot
-  try { connDot.classList.remove('fetching'); connDot.style.background = '#22c55e'; } catch (e) {}
+  try { connDot.classList.remove('fetching'); } catch (e) {}
   try { setConnStatus('Prime RPC connected', ''); } catch (e) {}
 }
 
@@ -1139,13 +1394,13 @@ calculateBtn.addEventListener('click', async () => {
   const amount = conversionAmount.value.trim();
   if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
     conversionResult.textContent = 'Invalid amount';
-    conversionResult.style.color = 'var(--danger)';
+    conversionResult.dataset.state = 'bad';
     conversionDetails.textContent = '';
     return;
   }
 
   conversionResult.textContent = 'Calculating...';
-  conversionResult.style.color = 'var(--muted)';
+  conversionResult.dataset.state = 'pending';
   conversionDetails.textContent = '';
 
   try {
@@ -1213,7 +1468,7 @@ calculateBtn.addEventListener('click', async () => {
 
     // Display the conversion result
     conversionResult.textContent = resultAmount.toFixed(6) + ' ' + toCurrency.textContent;
-    conversionResult.style.color = 'var(--success)';
+    conversionResult.dataset.state = 'ok';
 
     // Require canonical base conversion result (no fallbacks)
     if (!baseBig || baseBig === 0n) {
@@ -1245,7 +1500,7 @@ calculateBtn.addEventListener('click', async () => {
   } catch (err) {
     console.info('Conversion calculation error:', err);
     conversionResult.textContent = 'Error';
-    conversionResult.style.color = 'var(--danger)';
+    conversionResult.dataset.state = 'bad';
     conversionDetails.textContent = err.message || 'Unknown error';
   }
 });

@@ -3,10 +3,10 @@
  * Handles modal dialogs (miner stats, search, diagnostics)
  */
 
-import { AppState } from '../state.js';
-import { formatHashrate, formatNumber } from '../utils/formatters.js';
-import { fetchMinerStats, fetchMinerWorkers } from '../api/poolApi.js';
-import { forceRecordAddressHistory } from '../utils/storage.js';
+import { AppState } from '../state.js?v=e05cb9a8bd';
+import { formatHashrate, formatNumber } from '../utils/formatters.js?v=e05cb9a8bd';
+import { fetchMinerStats, fetchMinerWorkers } from '../api/poolApi.js?v=e05cb9a8bd';
+import { el, note, shortAddress, showDialog, hideDialog } from '../utils/dom.js?v=e05cb9a8bd';
 
 // =====================
 // Miner Stats Modal
@@ -21,7 +21,7 @@ export function openMinerModal(address) {
     const modal = document.getElementById('minerModal');
     if (!modal) return;
     
-    modal.style.display = 'flex';
+    showDialog(modal);
     document.getElementById('modalMinerAddress').textContent = address;
     
     // Reset values
@@ -46,7 +46,8 @@ export function openMinerModal(address) {
     document.getElementById('modalMinerLastSeen').textContent = '-';
     document.getElementById('modalMinerFirstSeen').textContent = '-';
     document.getElementById('modalMinerLuck').textContent = '-';
-    document.getElementById('modalMinerWorkersList').innerHTML = '<div class="miner-worker-item">Loading...</div>';
+    document.getElementById('modalMinerLastSeen').classList.remove('ok');
+    document.getElementById('modalMinerWorkersList').replaceChildren(note('Loading...'));
     
     // Fetch stats from API
     fetchMinerStats(address).then(stats => {
@@ -62,11 +63,11 @@ export function openMinerModal(address) {
         if (activeWorkers.length > 0) {
             renderMinerWorkersFromAPI(activeWorkers);
         } else {
-            document.getElementById('modalMinerWorkersList').innerHTML = '<div class="miner-worker-item" style="color: #9ca3af; text-align: center;">No worker data</div>';
+            document.getElementById('modalMinerWorkersList').replaceChildren(note('No worker data'));
         }
     }).catch(err => {
         console.error('Failed to fetch miner workers:', err);
-        document.getElementById('modalMinerWorkersList').innerHTML = '<div class="miner-worker-item" style="color: #ff6b6b; text-align: center;">Error loading workers</div>';
+        document.getElementById('modalMinerWorkersList').replaceChildren(note('Error loading workers', 'bad'));
     });
 
     // Blocks found from cached pool blocks
@@ -118,7 +119,7 @@ function updateMinerModalStats(stats) {
     if (stats.lastSeen) {
         const lastSeenEl = document.getElementById('modalMinerLastSeen');
         lastSeenEl.textContent = new Date(stats.lastSeen).toLocaleString();
-        lastSeenEl.style.color = '#4ade80';
+        lastSeenEl.classList.add('ok');
     } else {
         document.getElementById('modalMinerLastSeen').textContent = '-';
     }
@@ -165,7 +166,7 @@ function updateMinerSeenFromWorkers(workers) {
     const lastTs = Math.max(...timestamps);
     firstSeenEl.textContent = new Date(firstTs).toLocaleString();
     lastSeenEl.textContent = new Date(lastTs).toLocaleString();
-    lastSeenEl.style.color = '#4ade80';
+    lastSeenEl.classList.add('ok');
 }
 
 /**
@@ -199,10 +200,10 @@ function renderMinerWorkersFromAPI(workers) {
     const container = document.getElementById('modalMinerWorkersList');
     if (!container) return;
     
-    container.innerHTML = '';
+    container.replaceChildren();
     
     if (!workers || workers.length === 0) {
-        container.innerHTML = '<div class="miner-worker-item" style="color: #9ca3af; text-align: center;">No workers found</div>';
+        container.replaceChildren(note('No workers found'));
         return;
     }
     
@@ -228,10 +229,7 @@ function renderMinerWorkersFromAPI(workers) {
  * Close miner modal
  */
 export function closeMinerModal() {
-    const modal = document.getElementById('minerModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
+    hideDialog(document.getElementById('minerModal'));
     AppState.ui.currentMinerAddress = null;
 }
 
@@ -246,12 +244,9 @@ export function openSearchModal() {
     const modal = document.getElementById('searchModal');
     if (!modal) return;
     
-    modal.style.display = 'flex';
     const input = document.getElementById('searchModalInput');
-    if (input) {
-        input.value = '';
-        input.focus();
-    }
+    if (input) input.value = '';
+    showDialog(modal, input);
     
     const results = document.getElementById('searchModalResults');
     if (results) {
@@ -263,10 +258,7 @@ export function openSearchModal() {
  * Close search modal
  */
 export function closeSearchModal() {
-    const modal = document.getElementById('searchModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
+    hideDialog(document.getElementById('searchModal'));
 }
 
 /**
@@ -312,7 +304,7 @@ export function searchAddressInModal() {
     });
     
     if (addressMap.size === 0) {
-        results.innerHTML = '<div class="search-result-item no-results">No matching addresses found</div>';
+        results.replaceChildren(note('No matching addresses found'));
         return;
     }
     
@@ -324,10 +316,10 @@ export function searchAddressInModal() {
  * @param {HTMLElement} container - Container element
  */
 function renderAllAddresses(container) {
-    container.innerHTML = '';
+    container.replaceChildren();
     
     if (!AppState.cache.workers || AppState.cache.workers.length === 0) {
-        container.innerHTML = '<div class="search-result-item no-results">No connected workers</div>';
+        container.replaceChildren(note('No connected workers'));
         return;
     }
     
@@ -365,32 +357,25 @@ function renderAllAddresses(container) {
  * @param {Array} addresses - Addresses array
  */
 function renderAddressResults(container, addresses) {
-    container.innerHTML = '';
+    container.replaceChildren();
     
     addresses.forEach(data => {
-        const item = document.createElement('div');
-        item.className = 'search-result-item';
-        
-        const addressSpan = document.createElement('div');
-        addressSpan.className = 'result-address';
-        addressSpan.textContent = data.address;
-        
-        const infoSpan = document.createElement('div');
-        infoSpan.className = 'result-info';
         const workersCount = data.count ?? 0;
-        infoSpan.innerHTML = `
-            <span class="result-hashrate">${formatHashrate(data.hashrate || 0)}</span>
-            <span class="result-algo">${data.algorithm || '—'}</span>
-            <span class="result-status online">${workersCount} worker${workersCount !== 1 ? 's' : ''}</span>
-        `;
         
-        item.appendChild(addressSpan);
-        item.appendChild(infoSpan);
+        // A real button: it can be reached and pressed from the keyboard.
+        const item = el('button', { className: 'search-result-item', attrs: { type: 'button' } }, [
+            el('span', { className: 'result-address', text: data.address }),
+            el('span', { className: 'result-info' }, [
+                el('span', { className: 'result-hashrate', text: formatHashrate(data.hashrate || 0) }),
+                el('span', { className: 'result-algo', text: data.algorithm || '—' }),
+                el('span', { className: 'result-status online', text: `${workersCount} worker${workersCount !== 1 ? 's' : ''}` })
+            ])
+        ]);
         
-        item.onclick = () => {
+        item.addEventListener('click', () => {
             closeSearchModal();
             openMinerModal(data.address);
-        };
+        });
         
         container.appendChild(item);
     });
@@ -407,12 +392,9 @@ export function openBlockSearchModal() {
     const modal = document.getElementById('blockSearchModal');
     if (!modal) return;
     
-    modal.style.display = 'flex';
     const input = document.getElementById('blockSearchInput');
-    if (input) {
-        input.value = '';
-        input.focus();
-    }
+    if (input) input.value = '';
+    showDialog(modal, input);
     
     const results = document.getElementById('blockSearchResults');
     if (results) {
@@ -424,10 +406,7 @@ export function openBlockSearchModal() {
  * Close block search modal
  */
 export function closeBlockSearchModal() {
-    const modal = document.getElementById('blockSearchModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
+    hideDialog(document.getElementById('blockSearchModal'));
 }
 
 /**
@@ -474,7 +453,7 @@ export function searchBlocksByAddress() {
     }
     
     if (addressMap.size === 0) {
-        results.innerHTML = '<div class="search-result-item no-results">No matching addresses found</div>';
+        results.replaceChildren(note('No matching addresses found'));
         return;
     }
     
@@ -486,10 +465,10 @@ export function searchBlocksByAddress() {
  * @param {HTMLElement} container - Container element
  */
 function renderBlockAddresses(container) {
-    container.innerHTML = '';
+    container.replaceChildren();
     
     if (!AppState.cache.blocks || AppState.cache.blocks.length === 0) {
-        container.innerHTML = '<div class="search-result-item no-results">No blocks found yet</div>';
+        container.replaceChildren(note('No blocks found yet'));
         return;
     }
     
@@ -519,7 +498,7 @@ function renderBlockAddresses(container) {
     });
     
     if (addressMap.size === 0) {
-        container.innerHTML = '<div class="search-result-item no-results">No addresses found</div>';
+        container.replaceChildren(note('No addresses found'));
         return;
     }
     
@@ -532,39 +511,26 @@ function renderBlockAddresses(container) {
  * @param {Array} addresses - Addresses array with block data
  */
 function renderBlockAddressResults(container, addresses) {
-    container.innerHTML = '';
+    container.replaceChildren();
     
     // Sort by block count descending
     addresses.sort((a, b) => b.blockCount - a.blockCount);
     
     addresses.forEach(data => {
-        const item = document.createElement('div');
-        item.className = 'search-result-item';
+        const shortAddr = data.address.length > 20 ? shortAddress(data.address, 10, 8) : data.address;
         
-        const shortAddr = data.address.length > 20 
-            ? data.address.substring(0, 10) + '...' + data.address.substring(data.address.length - 8)
-            : data.address;
-        
-        const addressDiv = document.createElement('div');
-        addressDiv.className = 'result-address';
-        addressDiv.textContent = shortAddr;
-        addressDiv.title = data.address;
-        
-        const infoDiv = document.createElement('div');
-        infoDiv.className = 'result-info';
-            const rewardHtml = data.hasReward ? `<span class="result-algo">${data.totalReward.toFixed(4)} QUAI</span>` : '';
-            infoDiv.innerHTML = `
-                <span class="result-hashrate">${data.blockCount} block${data.blockCount !== 1 ? 's' : ''}</span>
-                ${rewardHtml}
-            `;
-        
-        item.appendChild(addressDiv);
-        item.appendChild(infoDiv);
+        const item = el('button', { className: 'search-result-item', attrs: { type: 'button' } }, [
+            el('span', { className: 'result-address', text: shortAddr, title: data.address }),
+            el('span', { className: 'result-info' }, [
+                el('span', { className: 'result-hashrate', text: `${data.blockCount} block${data.blockCount !== 1 ? 's' : ''}` }),
+                data.hasReward ? el('span', { className: 'result-algo', text: `${data.totalReward.toFixed(4)} QUAI` }) : null
+            ])
+        ]);
         
         // Filter blocks by address on click
-        item.onclick = () => {
+        item.addEventListener('click', () => {
             selectBlockAddressFilter(data.address);
-        };
+        });
         
         container.appendChild(item);
     });
@@ -581,7 +547,7 @@ export function selectBlockAddressFilter(address) {
     updateBlockFilterIndicator();
     
     // Import updateBlocks dynamically to avoid circular imports
-    import('./blocks.js').then(module => {
+    import('./blocks.js?v=e05cb9a8bd').then(module => {
         if (AppState.cache.blocks) {
             module.updateBlocks(AppState.cache.blocks);
         }
@@ -595,18 +561,24 @@ export function updateBlockFilterIndicator() {
     const indicator = document.getElementById('blockFilterIndicator');
     if (!indicator) return;
     
-    if (AppState.ui.currentBlockAddressFilter) {
-        const shortAddr = AppState.ui.currentBlockAddressFilter.length > 16 
-            ? AppState.ui.currentBlockAddressFilter.substring(0, 8) + '...' + AppState.ui.currentBlockAddressFilter.substring(AppState.ui.currentBlockAddressFilter.length - 6)
-            : AppState.ui.currentBlockAddressFilter;
+    const filter = AppState.ui.currentBlockAddressFilter;
+    if (filter) {
+        const clearBtn = el('button', {
+            className: 'btn clear-filter-btn',
+            text: 'clear filter',
+            title: 'Clear filter',
+            attrs: { type: 'button' }
+        });
+        clearBtn.addEventListener('click', () => selectBlockAddressFilter(null));
         
-        indicator.innerHTML = `
-            <span class="filter-label">Filtering:</span> 
-            <span class="filter-address">${shortAddr}</span>
-            <button class="clear-filter-btn" onclick="window.selectBlockAddressFilter(null)" title="Clear filter">✕</button>
-        `;
+        indicator.replaceChildren(
+            el('span', { className: 'filter-label', text: 'filtering:' }),
+            el('span', { className: 'filter-address', text: filter.length > 16 ? shortAddress(filter) : filter, title: filter }),
+            clearBtn
+        );
         indicator.style.display = 'flex';
     } else {
+        indicator.replaceChildren();
         indicator.style.display = 'none';
     }
 }

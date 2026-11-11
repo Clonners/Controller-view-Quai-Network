@@ -1,425 +1,261 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="stylesheet" href="css/brand.min.css">
-
-  <meta charset="UTF-8">
-  <!-- P3.6: Preconnect to external origins -->
-  <link rel="preconnect" href="https://panel.kataribe.org">
-  <link rel="preconnect" href="https://github.com">
-  <!-- P3.14: DNS-prefetch for RPC endpoints -->
-  <link rel="dns-prefetch" href="https://proxy.kataribe.org">
-  <link rel="dns-prefetch" href="https://prime.kataribe.org">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BitQuai Mining Dashboard</title>
-  <link rel="stylesheet" href="css/shared.css">
-  <link rel="stylesheet" href="css/styles.min.css">
-  <meta name="description" content="BitQuai — Mining telemetry and controller analytics for Quai Network.">
-  <meta name="theme-color" content="#ff253a">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="icon" href="icons/favicon.ico" sizes="any">
-  <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="48x48" href="icons/favicon-48x48.png">
-  <link rel="icon" type="image/png" sizes="64x64" href="icons/favicon-64x64.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon-180x180.png">
-  <link rel="manifest" href="site.webmanifest">
-  <meta property="og:title" content="BitQuai Mining Dashboard">
-  <meta property="og:description" content="Order inside entropy.">
-  <meta property="og:image" content="https://panel.kataribe.org/assets/brand/bitquai-og-1200x630.png">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://panel.kataribe.org/">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="BitQuai Mining Dashboard">
-  <meta name="twitter:description" content="Order inside entropy.">
-  <meta name="twitter:image" content="https://panel.kataribe.org/assets/brand/bitquai-og-1200x630.png">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mining · kataribe panel</title>
+<meta name="description" content="Kataribe panel: mining telemetry for Quai Network. Node statistics, workers, miners and confirmed blocks.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f5f2ea" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e0f12" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="canonical" href="https://panel.kataribe.org/mining.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Kataribe">
+<meta property="og:title" content="mining · kataribe panel">
+<meta property="og:description" content="Mining telemetry for Quai Network. Order inside entropy.">
+<meta property="og:url" content="https://panel.kataribe.org/mining.html">
+<meta property="og:image" content="https://panel.kataribe.org/brand/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="mining · kataribe panel">
+<meta name="twitter:description" content="Mining telemetry for Quai Network. Order inside entropy.">
+<meta name="twitter:image" content="https://panel.kataribe.org/brand/og.png">
+<link rel="icon" href="brand/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="brand/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="brand/icon-180.png">
+<link rel="manifest" href="site.webmanifest">
+<link rel="dns-prefetch" href="https://proxy.kataribe.org">
+<link rel="dns-prefetch" href="https://prime.kataribe.org">
+<link rel="preload" href="fonts/jetbrains-mono-kataribe.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/panel.css?v=e05cb9a8bd">
+<script src="js/theme.js?v=e05cb9a8bd"></script>
 </head>
 <body>
-    <main class="container">
-        <nav class="topnav" aria-label="Primary navigation">
-          <a class="brand" href="index.html" aria-label="BitQuai home">
-            <picture><source src="assets/brand/bitquai-icon-q-256.webp" type="image/webp"><img src="assets/brand/bitquai-icon-q-256.png" alt="BitQuai" width="256" height="256" decoding="async" loading="eager" fetchpriority="high"></picture>
-            <span class="brand-text">
-              <strong>BitQuai</strong>
-              <span>Order inside entropy</span>
-            </span>
-          </a>
-          <div class="navlinks">
-            <a href="index.html">Home</a>
-            <span class="active">Mining</span>
-            <a href="controller_view.html">Controller</a>
-          </div>
-        </nav>
+<div class="page">
+<div class="run">
 
-        <!-- Configuration Panel -->
-        <div class="config-panel">
-            <h2>Server Configuration</h2>
-            <div class="config-grid">
-                <div class="input-group">
-                    <label for="serverHost">Server (domain or URL)</label>
-                    <input type="text" id="serverHost" placeholder="e.g: prime.kataribe.org:3336 or https://host:3336" value="prime.kataribe.org:3336">
-                </div>
-                <div class="button-group">
-                    <button class="btn-connect" onclick="connectToServer()">Connect</button>
-                    <button class="btn-clear" onclick="clearConfig()">Clear</button>
-                    <button class="btn-diagnostic" onclick="openApiDiagnostic()" title="Check available API endpoints">API</button>
-                </div>
-            </div>
-            <div id="status" class="status disconnected">
-                <span class="status-dot"></span>
-                <span id="statusText">Disconnected</span>
-            </div>
-        </div>
+<header class="top">
+  <a class="brand" href="index.html" aria-label="kataribe panel, home"><pre class="art logo" aria-hidden="true"><span class="l">╭┬─┬─┬─┬╮
+   │   │
+ │
+   │</span><span class="l l-amber">
+ ●   ●
+   ●   ●
+</span></pre><span class="brand-name">kataribe</span> <span class="brand-sub">panel</span></a>
+  <nav class="nav" aria-label="Primary navigation"><a href="index.html">home</a><span class="sep" aria-hidden="true"> · </span><a href="mining.html" aria-current="page">mining</a><span class="sep" aria-hidden="true"> · </span><a href="controller_view.html">controller</a></nav>
+  <button class="theme-switch" type="button" hidden></button>
+</header>
 
-        <!-- Content Area -->
-        <div id="mainContent" class="content">
+<main>
+<h1 class="sr">mining dashboard</h1>
 
-            <!-- Algorithm Stats (moved below into the central area) -->
-
-            <!-- Charts -->
-            <div class="charts-section">
-                <!-- Prime Stats & Shares Grid -->
-                <!-- Replaced Performance Chart with Prime Stats as requested -->
-                <div class="charts-grid">
-                    <!-- Prime Stats Container (Now containing Node Stats) -->
-                    <div class="prime-stats-container">
-                        <div class="prime-header-section">
-                            <h3>NODE STATISTICS</h3>
-                            <p>Real-time performance metrics</p>
-                        </div>
-                        <div class="prime-cards-grid">
-                            <!-- Card 1: Node Name (Full Width) -->
-                            <div class="prime-stat-card">
-                                <span class="prime-label">NODE NAME</span>
-                                <div class="prime-value-lg" id="nodeName" style="font-size: 1.6rem;">-</div>
-                                
-                            </div>
-                            
-                            <!-- Card 2: Connected Workers -->
-                            <div class="prime-stat-card">
-                                <span class="prime-label">CONNECTED WORKERS</span>
-                                <div class="prime-value-lg" id="workersConnected">-</div>
-                            </div>
-
-                            <!-- Card 3: Blocks Found -->
-                            <div class="prime-stat-card">
-                                <span class="prime-label">BLOCKS FOUND</span>
-                                <div class="prime-value-lg" id="blocksFound">-</div>
-                                
-                            </div>
-
-                            <!-- Card 4: Uptime -->
-                            <div class="prime-stat-card">
-                                <span class="prime-label">UPTIME</span>
-                                <div class="prime-value-lg" id="uptime" style="font-size: 1.0rem;">-</div>
-                            </div>
-
-                            <!-- Card 5: Valid Shares -->
-                            <div class="prime-stat-card">
-                                <span class="prime-label">VALID SHARES</span>
-                                <div class="prime-value-lg" id="sharesValid">-</div>
-                            </div>
-
-                            <!-- Card 6: Stale Shares (separate) -->
-                            <div class="prime-stat-card">
-                                <span class="prime-label">STALE SHARES</span>
-                                <div class="prime-value-lg" id="sharesStale">-</div>
-                            </div>
-
-                            <!-- Card 7: Invalid Shares (separate) -->
-                            <div class="prime-stat-card">
-                                <span class="prime-label">INVALID SHARES</span>
-                                <div class="prime-value-lg" id="sharesInvalid">-</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Algorithm Stats (inserted into center column) -->
-                    <div class="algo-stats center-algo">
-                        <h2>Algorithm Statistics</h2>
-                        <div class="algo-grid">
-                            <!-- SHA-256 -->
-                            <div class="algo-card">
-                                <h3>SHA-256</h3>
-                                <div class="algo-stat">
-                                    <label>Hashrate:</label>
-                                    <value id="shaHashrate">-</value>
-                                </div>
-                                <div class="algo-stat">
-                                    <label>Workers:</label>
-                                    <value id="shaWorkers">-</value>
-                                </div>
-                            </div>
-                            
-                            <!-- Scrypt -->
-                            <div class="algo-card">
-                                <h3>Scrypt</h3>
-                                <div class="algo-stat">
-                                    <label>Hashrate:</label>
-                                    <value id="scryptHashrate">-</value>
-                                </div>
-                                <div class="algo-stat">
-                                    <label>Workers:</label>
-                                    <value id="scryptWorkers">-</value>
-                                </div>
-                            </div>
-                            
-                            <!-- KawPoW -->
-                            <div class="algo-card">
-                                <h3>KawPoW</h3>
-                                <div class="algo-stat">
-                                    <label>Hashrate:</label>
-                                    <value id="kawpowHashrate">-</value>
-                                </div>
-                                <div class="algo-stat">
-                                    <label>Workers:</label>
-                                    <value id="kawpowWorkers">-</value>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="chart-container">
-                        <div class="chart-header">
-                            <span class="chart-title">Share Distribution</span>
-                        </div>
-                            <div class="chart-canvas-wrapper">
-                            <canvas id="sharesChart"></canvas>
-                            <div id="sharesControls" class="chart-controls" aria-hidden="false"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Workers Table -->
-            <div class="workers-section">
-                <div class="workers-header">
-                    <h2>Connected Workers</h2>
-                    <button class="search-btn" onclick="openSearchModal()" title="Search address">
-                        Search
-                    </button>
-                </div>
-                <div class="panel-scroll">
-                    <table id="workersTable">
-                    <thead>
-                        <tr>
-                            <th>Address</th>
-                            <th>Worker Name</th>
-                            <th>Algorithm</th>
-                            <th>Hashrate</th>
-                        </tr>
-                    </thead>
-                    <tbody id="workersBody">
-                        <tr>
-                            <td colspan="4" style="text-align: center; color: #999;">Loading...</td>
-                        </tr>
-                    </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Miners List -->
-            <div class="miners-section">
-                <div class="miners-header">
-                    <h2>All Miners</h2>
-                    <span class="miners-count" id="minersCount">0 miners</span>
-                </div>
-                <div class="panel-scroll miners-scroll">
-                    <table id="minersTable">
-                    <thead>
-                        <tr>
-                            <th>Address</th>
-                            <th>Hashrate</th>
-                            <th>Workers</th>
-                            <th>Last Seen</th>
-                        </tr>
-                    </thead>
-                    <tbody id="minersBody">
-                        <tr>
-                            <td colspan="4" style="text-align: center; color: #999;">Loading miners...</td>
-                        </tr>
-                    </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Blocks Found -->
-            <div class="blocks-section">
-                <div class="blocks-header">
-                    <h2>Confirmed Blocks</h2>
-                    <button class="search-btn" onclick="openBlockSearchModal()" title="Search by address">
-                        Search
-                    </button>
-                </div>
-                <div id="blockFilterIndicator" class="perf-filter-indicator" style="display: none;"></div>
-                <div class="panel-scroll blocks-scroll">
-                    <table class="miners-table blocks-table">
-                        <thead>
-                            <tr>
-                                <th>HEIGHT</th>
-                                <th>HASH</th>
-                                <th>FOUND BY</th>
-                                <th>FOUND AT</th>
-                            </tr>
-                        </thead>
-                        <tbody id="blocksTableBody">
-                            <tr>
-                                <td colspan="4" style="text-align: center; color: #999;">Loading blocks...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-        </div>
-
-
-
-        <!-- Loading/Error State -->
-        <div id="loadingState" class="loading-message">
-            <strong class="loading-message-title">Mining telemetry is ready</strong>
-            <span class="loading-message-text">Connect to the configured pool to load live hashrate, workers and blocks.</span>
-            <button type="button" class="loading-connect" onclick="connectToServer()">Connect now</button>
-        </div>
+<section class="sec" aria-labelledby="h-server">
+  <h2 id="h-server"><span class="bead" aria-hidden="true">●</span><span class="num" aria-hidden="true">01</span>server</h2>
+  <p class="gloss">server configuration</p>
+  <div class="form-row">
+    <div class="field">
+      <label for="serverHost">server (domain or URL)</label>
+      <input type="text" id="serverHost" placeholder="e.g: prime.kataribe.org:3336 or https://host:3336" value="prime.kataribe.org:3336" spellcheck="false" autocomplete="off" autocapitalize="none">
     </div>
+    <div class="actions">
+      <button class="btn btn-connect" type="button" onclick="connectToServer()">connect</button>
+      <button class="btn" type="button" onclick="clearConfig()">clear</button>
+      <button class="btn" type="button" onclick="openApiDiagnostic()" title="Check available API endpoints">api</button>
+    </div>
+  </div>
+  <div class="status-line">
+    <div id="status" class="status disconnected" role="status"><span class="status-dot" aria-hidden="true"></span><span id="statusText">Disconnected</span></div>
+    <div id="wsIndicator" class="ws-indicator" style="display: none;"><span class="ws-dot" aria-hidden="true"></span><span class="ws-text">live</span></div>
+  </div>
+</section>
 
+<noscript><p class="loading-message">This page needs JavaScript to read the pool.</p></noscript>
 
-    <!-- Modals (Moved out of .container) -->
-    <!-- Miner Stats Modal -->
-        <div id="minerModal" class="miner-modal" style="display: none;">
-        <div class="miner-modal-content">
-            <div class="miner-modal-header">
-                <h2>Miner Statistics</h2>
-                <button class="modal-close-btn" onclick="closeMinerModal()">&times;</button>
-            </div>
-                <div class="miner-modal-body">
-                    <div class="miner-address-display">
-                        <label>Address:</label>
-                        <code id="modalMinerAddress">-</code>
-                    </div>
-                    <div class="miner-stats-grid">
-                        <div class="miner-stat-card">
-                            <h4>Hashrate</h4>
-                            <div class="miner-stat-value" id="modalMinerHashrate">-</div>
-                        </div>
-                        <div class="miner-stat-card">
-                            <h4>Workers</h4>
-                            <div class="miner-stat-value" id="modalMinerWorkers">-</div>
-                        </div>
-                        <div class="miner-stat-card">
-                            <h4>Valid Shares</h4>
-                            <div class="miner-stat-value" id="modalMinerValidShares">-</div>
-                        </div>
-                        <div class="miner-stat-card">
-                            <h4>Invalid Shares</h4>
-                            <div class="miner-stat-value" id="modalMinerInvalidShares">-</div>
-                        </div>
-                        <div class="miner-stat-card">
-                            <h4>Stale Shares</h4>
-                            <div class="miner-stat-value" id="modalMinerStaleShares">-</div>
-                        </div>
-                        <div class="miner-stat-card">
-                            <h4>Blocks Found</h4>
-                            <div class="miner-stat-value" id="modalMinerBlocks">-</div>
-                        </div>
-                        <div class="miner-stat-card">
-                            <h4>Last Seen</h4>
-                            <div class="miner-stat-value" id="modalMinerLastSeen">-</div>
-                        </div>
-                        <div class="miner-stat-card">
-                            <h4>First Seen</h4>
-                            <div class="miner-stat-value" id="modalMinerFirstSeen">-</div>
-                        </div>
-                        <div class="miner-stat-card luck-card">
-                            <h4>Current Luck</h4>
-                            <div class="miner-stat-value" id="modalMinerLuck">-</div>
-                        </div>
-                    </div>
-                    <div class="miner-workers-section">
-                        <h4>Workers for this Address</h4>
-                        <div id="modalMinerWorkersList" class="miner-workers-list">
-                            <div class="miner-worker-item">Loading...</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div id="mainContent" class="content">
 
-        <!-- Search Modal -->
-        <div id="searchModal" class="search-modal" style="display: none;">
-            <div class="search-modal-content">
-                <div class="search-modal-header">
-                    <h2>Search Address</h2>
-                    <button class="modal-close-btn" onclick="closeSearchModal()">&times;</button>
-                </div>
-                <div class="search-modal-body">
-                    <div class="search-input-container">
-                        <input type="text" id="searchModalInput" placeholder="Enter wallet address..." oninput="searchAddressInModal()">
-                    </div>
-                    <div class="search-results-container">
-                        <h4>Connected Addresses</h4>
-                        <div id="searchModalResults" class="search-results-list">
-                            <div class="search-result-item no-results">Loading...</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<section class="sec" aria-labelledby="h-node">
+  <h2 id="h-node"><span class="bead" aria-hidden="true">●</span><span class="num" aria-hidden="true">02</span>node</h2>
+  <p class="gloss">node statistics · real-time performance metrics</p>
+  <dl class="kv two">
+    <div><dt>node name</dt><dd id="nodeName">-</dd></div>
+    <div><dt>connected workers</dt><dd id="workersConnected">-</dd></div>
+    <div><dt>blocks found</dt><dd id="blocksFound">-</dd></div>
+    <div><dt>uptime</dt><dd id="uptime">-</dd></div>
+    <div><dt>valid shares</dt><dd id="sharesValid">-</dd></div>
+    <div><dt>stale shares</dt><dd id="sharesStale">-</dd></div>
+    <div><dt>invalid shares</dt><dd id="sharesInvalid">-</dd></div>
+  </dl>
+</section>
 
-        <!-- Block Search Modal -->
-        <div id="blockSearchModal" class="search-modal" style="display: none;">
-            <div class="search-modal-content">
-                <div class="search-modal-header">
-                    <h2>Search Blocks</h2>
-                    <button class="modal-close-btn" onclick="closeBlockSearchModal()">&times;</button>
-                </div>
-                <div class="search-modal-body">
-                    <div class="search-input-container">
-                        <input type="text" id="blockSearchInput" placeholder="Enter wallet address..." oninput="searchBlocksByAddress()">
-                    </div>
-                    <div class="search-results-container">
-                        <h4>Addresses with Blocks Found</h4>
-                        <div id="blockSearchResults" class="search-results-list">
-                            <div class="search-result-item no-results">Loading...</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<section class="sec" aria-labelledby="h-algorithms">
+  <h2 id="h-algorithms"><span class="bead" aria-hidden="true">●</span><span class="num" aria-hidden="true">03</span>algorithms</h2>
+  <p class="gloss">algorithm statistics</p>
+  <table class="tbl keep">
+    <thead>
+      <tr><th scope="col">algorithm</th><th scope="col" class="r w-14">hashrate</th><th scope="col" class="r w-9">workers</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>SHA-256</td><td class="r"><span class="v" id="shaHashrate">-</span></td><td class="r"><span class="v" id="shaWorkers">-</span></td></tr>
+      <tr><td>Scrypt</td><td class="r"><span class="v" id="scryptHashrate">-</span></td><td class="r"><span class="v" id="scryptWorkers">-</span></td></tr>
+      <tr><td>KawPoW</td><td class="r"><span class="v" id="kawpowHashrate">-</span></td><td class="r"><span class="v" id="kawpowWorkers">-</span></td></tr>
+    </tbody>
+  </table>
+</section>
 
-        <!-- API Diagnostic Modal -->
-        <div id="apiDiagnosticModal" class="search-modal" style="display: none;">
-            <div class="search-modal-content diagnostic-modal">
-                <div class="search-modal-header">
-                    <h2>API Diagnostic</h2>
-                    <button class="modal-close-btn" onclick="closeApiDiagnostic()">&times;</button>
-                </div>
-                <div class="search-modal-body">
-                    <div id="apiDiagnosticResults" class="diagnostic-results">
-                        <div class="diagnostic-loading">Click scan to check available endpoints...</div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<section class="sec" aria-labelledby="h-shares">
+  <h2 id="h-shares"><span class="bead" aria-hidden="true">●</span><span class="num" aria-hidden="true">04</span>shares</h2>
+  <p class="gloss">share distribution</p>
+  <div id="sharesChart" class="shares" role="list" aria-label="Share distribution"></div>
+  <div id="sharesControls" class="actions chart-controls"></div>
+</section>
 
-        <!-- WebSocket Status Indicator -->
-        <div id="wsIndicator" class="ws-indicator" style="display: none;">
-            <span class="ws-dot"></span>
-            <span class="ws-text">Live</span>
-        </div>
+<section class="sec" aria-labelledby="h-workers">
+  <h2 id="h-workers"><span class="bead" aria-hidden="true">●</span><span class="num" aria-hidden="true">05</span>workers</h2>
+  <div class="sec-head">
+    <p class="gloss">connected workers</p>
+    <button class="btn" type="button" onclick="openSearchModal()" title="Search address">search</button>
+  </div>
+  <table class="tbl" id="workersTable" role="table">
+    <thead role="rowgroup">
+      <tr role="row"><th role="columnheader" scope="col" class="w-44">address</th><th role="columnheader" scope="col" class="w-14">worker name</th><th role="columnheader" scope="col" class="w-11">algorithm</th><th role="columnheader" scope="col" class="r w-12">hashrate</th></tr>
+    </thead>
+    <tbody id="workersBody" role="rowgroup">
+      <tr role="row" class="message-row"><td role="cell" class="empty" colspan="4">Loading...</td></tr>
+    </tbody>
+  </table>
+</section>
 
-    </main>
+<section class="sec" aria-labelledby="h-miners">
+  <h2 id="h-miners"><span class="bead" aria-hidden="true">●</span><span class="num" aria-hidden="true">06</span>miners</h2>
+  <div class="sec-head">
+    <p class="gloss">all miners</p>
+    <span class="miners-count" id="minersCount">0 miners</span>
+  </div>
+  <table class="tbl" id="minersTable" role="table">
+    <thead role="rowgroup">
+      <tr role="row"><th role="columnheader" scope="col" class="w-44">address</th><th role="columnheader" scope="col" class="r w-13">hashrate</th><th role="columnheader" scope="col" class="r w-9">workers</th><th role="columnheader" scope="col" class="w-15">last seen</th></tr>
+    </thead>
+    <tbody id="minersBody" role="rowgroup">
+      <tr role="row" class="message-row"><td role="cell" class="empty" colspan="4">Loading miners...</td></tr>
+    </tbody>
+  </table>
+</section>
 
-    <!-- Load Modular JavaScript (ES6 Modules) -->
-        <script src="vendor/chart.min.js" defer></script>
-        <script type="module" src="js/main.js"></script>
+<section class="sec" aria-labelledby="h-blocks">
+  <h2 id="h-blocks"><span class="bead" aria-hidden="true">●</span><span class="num" aria-hidden="true">07</span>blocks</h2>
+  <div class="sec-head">
+    <p class="gloss">confirmed blocks</p>
+    <button class="btn" type="button" onclick="openBlockSearchModal()" title="Search by address">search</button>
+  </div>
+  <div id="blockFilterIndicator" style="display: none;"></div>
+  <table class="tbl" id="blocksTable" role="table">
+    <thead role="rowgroup">
+      <tr role="row"><th role="columnheader" scope="col" class="w-12">height</th><th role="columnheader" scope="col" class="w-21">hash</th><th role="columnheader" scope="col" class="w-25">found by</th><th role="columnheader" scope="col" class="w-23">found at</th></tr>
+    </thead>
+    <tbody id="blocksTableBody" role="rowgroup">
+      <tr role="row" class="message-row"><td role="cell" class="empty" colspan="4">Loading blocks...</td></tr>
+    </tbody>
+  </table>
+</section>
 
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js').catch(() => {});
-    }
-  </script>
+</div>
+
+<div id="loadingState" class="loading-message">
+  <p class="loading-title"><span class="bead open" aria-hidden="true">○</span>mining telemetry is ready</p>
+  <p class="loading-text" id="loadingStateText">Connect to the configured pool to load live hashrate, workers and blocks.</p>
+  <p><button class="btn btn-primary loading-connect" type="button" onclick="connectToServer()">connect now</button></p>
+</div>
+
+</main>
+
+<span class="cord" aria-hidden="true">││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││</span>
+<span class="cursor" aria-hidden="true">█</span>
+</div>
+
+<footer class="foot">
+  <span class="name">kataribe</span>
+  <span>order inside entropy</span>
+  <a href="https://github.com/Clonners/Controller-view-Quai-Network" target="_blank" rel="noopener noreferrer">source</a>
+</footer>
+
+<!-- boxes that float over the page -->
+
+<div id="minerModal" class="miner-modal dialog" role="dialog" aria-modal="true" aria-labelledby="minerModalTitle" style="display: none;">
+  <div class="dialog-box">
+    <div class="dialog-head"><h3 id="minerModalTitle">miner statistics</h3><button class="btn dialog-close" type="button" onclick="closeMinerModal()">close</button></div>
+    <div class="dialog-body">
+      <div>
+        <span class="label">address</span>
+        <code id="modalMinerAddress" class="modal-address">-</code>
+      </div>
+      <dl class="kv">
+        <div><dt>hashrate</dt><dd id="modalMinerHashrate">-</dd></div>
+        <div><dt>workers</dt><dd id="modalMinerWorkers">-</dd></div>
+        <div><dt>valid shares</dt><dd id="modalMinerValidShares">-</dd></div>
+        <div><dt>invalid shares</dt><dd id="modalMinerInvalidShares">-</dd></div>
+        <div><dt>stale shares</dt><dd id="modalMinerStaleShares">-</dd></div>
+        <div><dt>blocks found</dt><dd id="modalMinerBlocks">-</dd></div>
+        <div><dt>last seen</dt><dd id="modalMinerLastSeen">-</dd></div>
+        <div><dt>first seen</dt><dd id="modalMinerFirstSeen">-</dd></div>
+        <div><dt>current luck</dt><dd id="modalMinerLuck">-</dd></div>
+      </dl>
+      <div>
+        <h4>workers for this address</h4>
+        <div id="modalMinerWorkersList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="searchModal" class="search-modal dialog" role="dialog" aria-modal="true" aria-labelledby="searchModalTitle" style="display: none;">
+  <div class="dialog-box">
+    <div class="dialog-head"><h3 id="searchModalTitle">search address</h3><button class="btn dialog-close" type="button" onclick="closeSearchModal()">close</button></div>
+    <div class="dialog-body">
+      <div class="field">
+        <label for="searchModalInput">wallet address</label>
+        <input type="text" id="searchModalInput" placeholder="Enter wallet address..." oninput="searchAddressInModal()" spellcheck="false" autocomplete="off" autocapitalize="none">
+      </div>
+      <div>
+        <h4>connected addresses</h4>
+        <div id="searchModalResults"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="blockSearchModal" class="search-modal dialog" role="dialog" aria-modal="true" aria-labelledby="blockSearchModalTitle" style="display: none;">
+  <div class="dialog-box">
+    <div class="dialog-head"><h3 id="blockSearchModalTitle">search blocks</h3><button class="btn dialog-close" type="button" onclick="closeBlockSearchModal()">close</button></div>
+    <div class="dialog-body">
+      <div class="field">
+        <label for="blockSearchInput">wallet address</label>
+        <input type="text" id="blockSearchInput" placeholder="Enter wallet address..." oninput="searchBlocksByAddress()" spellcheck="false" autocomplete="off" autocapitalize="none">
+      </div>
+      <div>
+        <h4>addresses with blocks found</h4>
+        <div id="blockSearchResults"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="apiDiagnosticModal" class="api-diagnostic-modal dialog" role="dialog" aria-modal="true" aria-labelledby="apiDiagnosticTitle" style="display: none;">
+  <div class="dialog-box">
+    <div class="dialog-head"><h3 id="apiDiagnosticTitle">api diagnostic</h3><button class="btn dialog-close" type="button" onclick="closeApiDiagnostic()">close</button></div>
+    <div class="dialog-body">
+      <div id="apiDiagnosticResults" class="diagnostic-results"><div class="diagnostic-loading">Click scan to check available endpoints...</div></div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script src="js/cord.js?v=e05cb9a8bd" defer></script>
+<script type="module" src="js/main.js?v=e05cb9a8bd"></script>
+<script>
+if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js').catch(() => {}); }
+</script>
 </body>
 </html>

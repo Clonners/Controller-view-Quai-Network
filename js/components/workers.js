@@ -3,9 +3,26 @@
  * Handles worker table display and updates
  */
 
-import { AppState } from '../state.js';
-import { formatHashrate } from '../utils/formatters.js';
-import { fetchAllMiners } from '../api/poolApi.js';
+import { AppState } from '../state.js?v=e05cb9a8bd';
+import { formatHashrate } from '../utils/formatters.js?v=e05cb9a8bd';
+import { fetchAllMiners } from '../api/poolApi.js?v=e05cb9a8bd';
+import { el, cell, row, messageRow, isNarrow, shortAddress } from '../utils/dom.js?v=e05cb9a8bd';
+
+const WORKER_COLS = 4;
+const MINER_COLS = 4;
+
+/** An address the reader can open (mouse, touch or keyboard). */
+function addressButton(address, className, onOpen) {
+    const btn = el('button', {
+        className: 'link ' + className,
+        // The 40-column grid has no room for a whole address.
+        text: isNarrow() ? shortAddress(address) : address,
+        title: address + ' (view miner details)',
+        attrs: { type: 'button' }
+    });
+    btn.addEventListener('click', () => onOpen(address));
+    return btn;
+}
 
 /**
  * Update workers table
@@ -14,51 +31,37 @@ import { fetchAllMiners } from '../api/poolApi.js';
  */
 export function updateWorkers(workersData, onMinerClick) {
     const tbody = document.getElementById('workersBody');
-    
+
     // Cache workers data
     AppState.cache.workers = workersData || [];
-    
+
     // Check if workers changed to prevent flickering
     const workersHash = JSON.stringify(workersData?.map(w => ({ a: w.address, h: w.hashrate })) || []);
     if (workersHash === AppState.hashes.workers) return;
     AppState.hashes.workers = workersHash;
-    
+
     if (!tbody) return;
-    
+
     if (!workersData || workersData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #999;">No connected workers</td></tr>';
+        messageRow(tbody, WORKER_COLS, 'No connected workers');
         return;
     }
-    
-    // Build DOM safely
+
     const rows = workersData.map(worker => {
-        const tr = document.createElement('tr');
-        
         // Address column
-        const td1 = document.createElement('td');
-        const span = document.createElement('span');
-        span.className = 'worker-name clickable-address';
-        const fullAddress = worker.address || '-';
-        const addrShort = (fullAddress && fullAddress.length > 16)
-            ? (fullAddress.substring(0, 8) + '...' + fullAddress.substring(fullAddress.length - 6))
-            : fullAddress;
-        // Show abbreviated address only on small screens
-        span.textContent = (typeof window !== 'undefined' && window.innerWidth <= 768) ? addrShort : fullAddress;
-        span.title = 'Click to view miner details';
-        span.onclick = () => {
-            if (worker.address && onMinerClick) {
-                onMinerClick(worker.address);
-            }
-        };
-        td1.appendChild(span);
-        
+        let addressContent;
+        if (worker.address) {
+            addressContent = addressButton(worker.address, 'worker-name clickable-address', (address) => {
+                if (onMinerClick) onMinerClick(address);
+            });
+        } else {
+            addressContent = '-';
+        }
+
         // Worker name column
-        const td2 = document.createElement('td');
         const workerName = worker.name || worker.workerName || worker.worker || worker.rigName || worker.rig || null;
-        td2.textContent = workerName || '1';
-        
+
         // Algorithm column
-        const td3 = document.createElement('td');
         const algoRaw = (worker.algorithm || '').toLowerCase();
         let algoLabel = '—';
         if (algoRaw.includes('kawpow') || algoRaw.includes('progpow')) {
@@ -68,22 +71,16 @@ export function updateWorkers(workersData, onMinerClick) {
         } else if (algoRaw.includes('scrypt')) {
             algoLabel = 'scrypt';
         }
-        td3.textContent = algoLabel;
-        
-        // Hashrate column
-        const td4 = document.createElement('td');
-        td4.textContent = formatHashrate(worker.hashrate);
-        
-        tr.appendChild(td1);
-        tr.appendChild(td2);
-        tr.appendChild(td3);
-        tr.appendChild(td4);
-        
-        return tr;
+
+        return row([
+            cell('address', addressContent, 'c-address'),
+            cell('worker', workerName || '1', 'c-name'),
+            cell('algorithm', algoLabel),
+            cell('hashrate', formatHashrate(worker.hashrate), 'r')
+        ]);
     });
-    
-    tbody.innerHTML = '';
-    rows.forEach(row => tbody.appendChild(row));
+
+    tbody.replaceChildren(...rows);
 }
 
 /**
@@ -104,17 +101,11 @@ export async function generateMinersFromAPI(onMinerClick) {
             updateMiners(minersPayload, onMinerClick, activeAddresses);
         } else {
             // No data from API
-            const tbody = document.getElementById('minersBody');
-            if (tbody) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #999;">No miners data from API</td></tr>';
-            }
+            messageRow(document.getElementById('minersBody'), MINER_COLS, 'No miners data from API');
         }
     } catch (e) {
         console.error('Failed to fetch miners from API:', e);
-        const tbody = document.getElementById('minersBody');
-        if (tbody) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #ff6b6b;">Error loading miners from API</td></tr>';
-        }
+        messageRow(document.getElementById('minersBody'), MINER_COLS, 'Error loading miners from API', 'bad');
     }
 }
 
@@ -127,9 +118,9 @@ export async function generateMinersFromAPI(onMinerClick) {
 export function updateMiners(minersData, onMinerClick, activeAddresses = null) {
     const tbody = document.getElementById('minersBody');
     const countEl = document.getElementById('minersCount');
-    
+
     if (!tbody) return;
-    
+
     // Handle different response formats
     let miners = minersData;
     if (minersData && !Array.isArray(minersData)) {
@@ -141,7 +132,7 @@ export function updateMiners(minersData, onMinerClick, activeAddresses = null) {
     if (activeAddresses && activeAddresses.size > 0) {
         miners = miners.filter(miner => activeAddresses.has(miner.address || miner.miner));
     }
-    
+
     const activeWorkersByAddress = new Map();
     (AppState.cache.workers || []).forEach(worker => {
         const address = worker.address;
@@ -153,7 +144,7 @@ export function updateMiners(minersData, onMinerClick, activeAddresses = null) {
         entry.count += 1;
         entry.hashrate += worker.hashrate || 0;
     });
-    
+
     // Check if data changed
     const minersHash = JSON.stringify((miners || []).map(m => {
         const addr = m.address || m.miner;
@@ -162,67 +153,39 @@ export function updateMiners(minersData, onMinerClick, activeAddresses = null) {
     }));
     if (minersHash === AppState.hashes.miners) return;
     AppState.hashes.miners = minersHash;
-    
+
     if (miners.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #999;">No miners found</td></tr>';
+        messageRow(tbody, MINER_COLS, 'No miners found');
         if (countEl) countEl.textContent = '0 miners';
         return;
     }
-    
+
     if (countEl) countEl.textContent = `${miners.length} miner${miners.length !== 1 ? 's' : ''}`;
-    
+
     // Build table rows
-    tbody.innerHTML = '';
-    miners.forEach(miner => {
-        const row = document.createElement('tr');
-        
-        // Address cell
-        const addressCell = document.createElement('td');
-        const addressContainer = document.createElement('div');
-        addressContainer.className = 'miner-address-cell';
-        
+    const rows = miners.map(miner => {
         const address = miner.address || miner.miner || '-';
-        const addressShort = address.length > 16 
-            ? address.substring(0, 8) + '...' + address.substring(address.length - 6) 
-            : address;
-        
+
+        // Address cell
+        const addressContainer = el('div', { className: 'miner-address-cell' });
         if (address !== '-') {
-            const addressLink = document.createElement('a');
-            addressLink.href = '#';
-            // Show abbreviated address only on small screens
-            addressLink.textContent = (typeof window !== 'undefined' && window.innerWidth <= 768) ? addressShort : address;
-            addressLink.title = address;
-            addressLink.onclick = (e) => {
-                e.preventDefault();
-                if (onMinerClick) onMinerClick(address);
-            };
-            addressContainer.appendChild(addressLink);
+            addressContainer.appendChild(addressButton(address, 'miner-address', (addr) => {
+                if (onMinerClick) onMinerClick(addr);
+            }));
         } else {
             addressContainer.textContent = address;
         }
-        addressCell.appendChild(addressContainer);
-        row.appendChild(addressCell);
-        
+
         const active = activeWorkersByAddress.get(address) || { count: 0, hashrate: 0 };
-        
-        // Hashrate cell (active only)
-        const hashrateCell = document.createElement('td');
-        hashrateCell.textContent = formatHashrate(active.hashrate || 0);
-        hashrateCell.style.color = '#4ade80';
-        row.appendChild(hashrateCell);
-        
-        // Workers cell (active only)
-        const workersCell = document.createElement('td');
-        workersCell.textContent = active.count;
-        row.appendChild(workersCell);
-        
-        // Last seen cell
-        const lastSeenCell = document.createElement('td');
+
+        // Last seen: the state is said with a glyph and a word, never by colour alone.
         const hasActiveHashrate = (active.hashrate || 0) > 0;
-        
+        let lastSeenText = '-';
+        let lastSeenState = '';
+
         if (hasActiveHashrate) {
-            lastSeenCell.textContent = 'Online';
-            lastSeenCell.style.color = '#4ade80';
+            lastSeenText = 'Online';
+            lastSeenState = 'ok';
         } else if (miner.lastSeen || miner.lastShare) {
             const timestamp = miner.lastSeen || miner.lastShare;
             let date;
@@ -234,26 +197,34 @@ export function updateMiners(minersData, onMinerClick, activeAddresses = null) {
             if (!isNaN(date.getTime())) {
                 const diff = Date.now() - date.getTime();
                 if (diff < 60000) {
-                    lastSeenCell.textContent = 'Just now';
-                    lastSeenCell.style.color = '#4ade80';
+                    lastSeenText = 'Just now';
+                    lastSeenState = 'ok';
                 } else if (diff < 3600000) {
-                    lastSeenCell.textContent = Math.floor(diff / 60000) + 'm ago';
-                    lastSeenCell.style.color = '#4ade80';
+                    lastSeenText = Math.floor(diff / 60000) + 'm ago';
+                    lastSeenState = 'ok';
                 } else if (diff < 86400000) {
-                    lastSeenCell.textContent = Math.floor(diff / 3600000) + 'h ago';
-                    lastSeenCell.style.color = '#ff9800';
+                    lastSeenText = Math.floor(diff / 3600000) + 'h ago';
+                    lastSeenState = 'warn';
                 } else {
-                    lastSeenCell.textContent = Math.floor(diff / 86400000) + 'd ago';
-                    lastSeenCell.style.color = '#ff4b4b';
+                    lastSeenText = Math.floor(diff / 86400000) + 'd ago';
+                    lastSeenState = 'bad';
                 }
-            } else {
-                lastSeenCell.textContent = '-';
             }
-        } else {
-            lastSeenCell.textContent = '-';
         }
-        row.appendChild(lastSeenCell);
-        
-        tbody.appendChild(row);
+        const glyph = { ok: '● ', warn: '○ ', bad: '○ ' }[lastSeenState] || '';
+        const lastSeen = el('span', { className: lastSeenState ? 'state ' + lastSeenState : '' }, [
+            glyph ? el('span', { text: glyph, attrs: { 'aria-hidden': 'true' } }) : null,
+            lastSeenText
+        ]);
+
+        return row([
+            cell('address', addressContainer, 'c-address'),
+            // Hashrate and workers count only what is connected now.
+            cell('hashrate', formatHashrate(active.hashrate || 0), 'r'),
+            cell('workers', active.count, 'r'),
+            cell('last seen', lastSeen)
+        ]);
     });
+
+    tbody.replaceChildren(...rows);
 }

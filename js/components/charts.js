@@ -1,10 +1,12 @@
 /**
  * Charts Component
- * Handles chart initialization, updates, and history visualization
+ * Handles history series and the share distribution, drawn with characters
+ * (no canvas, no chart library).
  */
 
-import { AppState, Constants } from '../state.js';
-import { formatHashrate, formatLabel, formatNumber } from '../utils/formatters.js';
+import { AppState } from '../state.js?v=e05cb9a8bd';
+import { formatLabel, formatNumber } from '../utils/formatters.js?v=e05cb9a8bd';
+import { el, isNarrow } from '../utils/dom.js?v=e05cb9a8bd';
 
 /**
  * Get period window in milliseconds
@@ -167,308 +169,137 @@ export function updateCharts(stats) {
 }
 
 /**
- * Update algorithm hashrate line chart
+ * Update algorithm hashrate history
+ *
+ * The page has no element with id "algorithmsChart" (it was already missing
+ * before the text rebuild), so this history is recorded but not shown.
+ * The series is still built by buildAlgorithmSeries(); drawing it is listed
+ * as a suggested improvement, not done here.
  */
 function updateAlgorithmChart() {
-    const algoCtx = document.getElementById('algorithmsChart');
-    if (!algoCtx) return;
-    
-    const series = buildAlgorithmSeries(
-        AppState.ui.currentChartPeriod, 
-        AppState.ui.currentPerformanceFilter
-    );
-    
-    const algorithmData = {
-        labels: series.labels,
-        datasets: [
-            {
-                label: 'SHA-256',
-                data: series.sha,
-                borderColor: '#ff253a',
-                backgroundColor: 'rgba(255, 37, 58, 0.1)',
-                borderWidth: 2,
-                tension: 0.4,
-                fill: true,
-                pointRadius: 2,
-                pointBackgroundColor: '#ff253a',
-                pointBorderColor: 'rgba(15, 5, 10, 0.8)',
-                pointBorderWidth: 1
-            },
-            {
-                label: 'Scrypt',
-                data: series.scrypt,
-                borderColor: '#ff6b81',
-                backgroundColor: 'rgba(255, 107, 129, 0.1)',
-                borderWidth: 2,
-                tension: 0.4,
-                fill: true,
-                pointRadius: 2,
-                pointBackgroundColor: '#ff6b81',
-                pointBorderColor: 'rgba(15, 5, 10, 0.8)',
-                pointBorderWidth: 1
-            },
-            {
-                label: 'KawPoW',
-                data: series.kawpow,
-                borderColor: '#ff94b2',
-                backgroundColor: 'rgba(255, 148, 178, 0.1)',
-                borderWidth: 2,
-                tension: 0.4,
-                fill: true,
-                pointRadius: 2,
-                pointBackgroundColor: '#ff94b2',
-                pointBorderColor: 'rgba(15, 5, 10, 0.8)',
-                pointBorderWidth: 1
-            }
-        ]
-    };
-    
-    if (AppState.ui.charts.algorithms) {
-        AppState.ui.charts.algorithms.data.labels = algorithmData.labels;
-        AppState.ui.charts.algorithms.data.datasets[0].data = algorithmData.datasets[0].data;
-        AppState.ui.charts.algorithms.data.datasets[1].data = algorithmData.datasets[1].data;
-        AppState.ui.charts.algorithms.data.datasets[2].data = algorithmData.datasets[2].data;
-        AppState.ui.charts.algorithms.update('none');
-    } else {
-        AppState.ui.charts.algorithms = new Chart(algoCtx, {
-            type: 'line',
-            data: algorithmData,
-            options: getChartOptions()
-        });
-    }
+    const target = document.getElementById('algorithmsChart');
+    if (!target) return;
+}
+
+// ---------------------
+// Share distribution, drawn with characters
+// ---------------------
+
+const SHARE_TYPES = [
+    { key: 'valid', label: 'valid', field: 'sharesValid' },
+    { key: 'stale', label: 'stale', field: 'sharesStale' },
+    { key: 'invalid', label: 'invalid', field: 'sharesInvalid' }
+];
+
+// Last stats drawn, so the focus buttons and a resize always use current numbers.
+let lastSharesStats = null;
+let sharesResizeBound = false;
+
+/** Cells of the bar: the 40-column grid has room for a shorter one. */
+function sharesBarCells() {
+    return isNarrow() ? 18 : 40;
 }
 
 /**
- * Update shares doughnut chart
+ * Update shares distribution (three rows: name, bar, percentage, count)
  * @param {Object} stats - Pool stats
  */
 function updateSharesChart(stats) {
-    const sharesCtx = document.getElementById('sharesChart');
-    if (!sharesCtx) return;
-    
-    const sharesData = {
-        labels: ['Valid', 'Stale', 'Invalid'],
-        datasets: [{
-            label: 'Shares',
-            data: [
-                stats.sharesValid || 0,
-                stats.sharesStale || 0,
-                stats.sharesInvalid || 0
-            ],
-            backgroundColor: [
-                'rgba(74, 222, 128, 0.7)',
-                'rgba(245, 158, 11, 0.7)',
-                'rgba(255, 75, 75, 0.7)'
-            ],
-            borderColor: ['#4ade80', '#f59e0b', '#ff4b4b'],
-            borderWidth: 1
-        }]
-    };
-    
-    // Create gradients for a nicer look
-    const ctx = sharesCtx.getContext('2d');
-    const g0 = ctx.createLinearGradient(0,0,0,sharesCtx.height || 300);
-    g0.addColorStop(0, 'rgba(102, 252, 179, 0.95)');
-    g0.addColorStop(1, 'rgba(20, 160, 95, 0.85)');
-    const g1 = ctx.createLinearGradient(0,0,0,sharesCtx.height || 300);
-    g1.addColorStop(0, 'rgba(255, 200, 120, 0.95)');
-    g1.addColorStop(1, 'rgba(220, 120, 10, 0.85)');
-    const g2 = ctx.createLinearGradient(0,0,0,sharesCtx.height || 300);
-    g2.addColorStop(0, 'rgba(255, 140, 140, 0.95)');
-    g2.addColorStop(1, 'rgba(200, 60, 60, 0.85)');
+    const target = document.getElementById('sharesChart');
+    if (!target) return;
 
-    sharesData.datasets[0].backgroundColor = [g0, g1, g2];
-    // Disable hover expansion and hover borders so arcs remain whole on mouseover
-    sharesData.datasets[0].hoverOffset = 0;
-    sharesData.datasets[0].hoverBorderWidth = 0;
-    sharesData.datasets[0].borderRadius = 0; // no rounded edges to avoid visible seams
-    sharesData.datasets[0].borderWidth = 0; // remove borders between segments
-    sharesData.datasets[0].spacing = 0; // ensure no spacing between arcs
-    sharesData.datasets[0].cutout = '50%'; // smaller cutout => thicker/wider ring
+    lastSharesStats = stats || {};
+    renderSharesRows();
 
-    if (AppState.ui.charts.shares) {
-        // Respect any active shares filter so periodic updates don't undo the user's focus
-        const chart = AppState.ui.charts.shares;
-        const original = sharesData.datasets[0].data.slice();
-        const filter = AppState.ui.currentSharesFilter;
-        let applied = original;
-        if (filter) {
-            const idx = filter === 'valid' ? 0 : filter === 'stale' ? 1 : 2;
-                applied = original.map((v, i) => (i === idx ? v : 0));
-        }
-        chart.data.datasets[0].data = applied;
-        chart.update({duration: 600, easing: 'easeOutQuart'});
-    } else {
-        AppState.ui.charts.shares = new Chart(sharesCtx, {
-            type: 'doughnut',
-            data: sharesData,
-            options: Object.assign({}, getDoughnutOptions(), {
-                cutout: '50%',
-                animation: { animateRotate: true, duration: 700, easing: 'easeOutQuart' }
-            })
-        });
+    if (!AppState.ui.charts.shares) {
+        // Same slot the canvas chart used; clearConfig and others only test that it exists.
+        AppState.ui.charts.shares = { update: renderSharesRows, destroy() {} };
+        createSharesControls();
+    }
 
-        // Create custom controls for toggling focus
-        createSharesControls(stats);
+    if (!sharesResizeBound && typeof window !== 'undefined' && window.matchMedia) {
+        sharesResizeBound = true;
+        const mq = window.matchMedia('(max-width: 59.99em)');
+        const onChange = () => renderSharesRows();
+        if (mq.addEventListener) mq.addEventListener('change', onChange);
+        else if (mq.addListener) mq.addListener(onChange);
     }
 }
 
+/** Draw the three rows from the last stats and the current focus. */
+function renderSharesRows() {
+    const target = document.getElementById('sharesChart');
+    if (!target || !lastSharesStats) return;
+
+    const values = SHARE_TYPES.map(t => Number(lastSharesStats[t.field]) || 0);
+    const total = values.reduce((a, b) => a + b, 0);
+    const filter = AppState.ui.currentSharesFilter;
+    const cells = sharesBarCells();
+
+    const rows = SHARE_TYPES.map((t, i) => {
+        const value = values[i];
+        const share = total > 0 ? value / total : 0;
+        // A focused category keeps its bar; the others are emptied (the numbers stay).
+        const dimmed = !!filter && filter !== t.key;
+        let filled = dimmed ? 0 : Math.round(share * cells);
+        if (!dimmed && value > 0 && filled === 0) filled = 1;
+
+        const bar = el('span', { className: 'bar', attrs: { 'aria-hidden': 'true' } }, [
+            el('span', { className: 'bar-on', text: '\u2588'.repeat(filled) }),
+            el('span', { className: 'bar-off', text: '\u2591'.repeat(cells - filled) })
+        ]);
+
+        return el('div', {
+            className: 'share-row share-' + t.key + (dimmed ? ' dim' : '') + (filter === t.key ? ' focus' : ''),
+            attrs: { role: 'listitem' }
+        }, [
+            el('span', { className: 'share-label', text: t.label }),
+            bar,
+            el('span', { className: 'share-pct', text: total > 0 ? (share * 100).toFixed(2) + ' %' : '-' }),
+            el('span', { className: 'share-count', text: formatNumber(value) })
+        ]);
+    });
+
+    target.replaceChildren(...rows);
+}
+
 /**
- * Create toggle controls under the shares chart to focus on a single category.
- * Clicking a button will animate chart composition to show only that category (or reset).
+ * Create toggle controls under the shares rows to focus on a single category.
+ * Pressing a button keeps only that category's bar (pressing it again resets).
  */
-function createSharesControls(stats) {
+function createSharesControls() {
     const container = document.getElementById('sharesControls');
     if (!container) return;
-    container.innerHTML = '';
-
-    const types = [
-        { key: 'valid', label: 'Valid', valueIndex: 0 },
-        { key: 'stale', label: 'Stale', valueIndex: 1 },
-        { key: 'invalid', label: 'Invalid', valueIndex: 2 }
-    ];
+    container.replaceChildren();
 
     const activeFilter = AppState.ui.currentSharesFilter;
-    types.forEach(t => {
-        const btn = document.createElement('button');
-        btn.className = 'toggle-btn';
-        btn.setAttribute('data-type', t.key);
-        btn.innerHTML = `<span class="dot"></span><span>${t.label}</span>`;
-
-        // initialize active state from AppState
-        if (activeFilter === t.key) {
-            btn.classList.add('active');
-        }
+    SHARE_TYPES.forEach(t => {
+        const btn = el('button', {
+            className: 'btn toggle-btn' + (activeFilter === t.key ? ' active' : ''),
+            text: t.label,
+            attrs: { type: 'button', 'data-type': t.key, 'aria-pressed': activeFilter === t.key ? 'true' : 'false' }
+        });
 
         btn.addEventListener('click', () => {
             const wasActive = (AppState.ui.currentSharesFilter === t.key);
             // toggle filter in AppState (null => no filter)
             AppState.ui.currentSharesFilter = wasActive ? null : t.key;
 
-            // Update button classes
-            document.querySelectorAll('#sharesControls .toggle-btn').forEach(b => b.classList.remove('active'));
-            if (!wasActive) btn.classList.add('active');
-
-            const chart = AppState.ui.charts.shares;
-            if (!chart) return;
-
-            const original = [stats.sharesValid || 0, stats.sharesStale || 0, stats.sharesInvalid || 0];
-            let newData = original;
-            const filterNow = AppState.ui.currentSharesFilter;
-            if (filterNow) {
-                const idx = filterNow === 'valid' ? 0 : filterNow === 'stale' ? 1 : 2;
-                    newData = original.map((v, i) => (i === idx ? v : 0));
+            // Update button states
+            document.querySelectorAll('#sharesControls .toggle-btn').forEach(b => {
+                b.classList.remove('active');
+                b.setAttribute('aria-pressed', 'false');
+            });
+            if (!wasActive) {
+                btn.classList.add('active');
+                btn.setAttribute('aria-pressed', 'true');
             }
 
-            chart.data.datasets[0].data = newData;
-            chart.update({duration: 700, easing: 'easeOutQuart'});
+            renderSharesRows();
         });
 
         container.appendChild(btn);
     });
-}
-
-/**
- * Get line chart options
- * @returns {Object} Chart.js options
- */
-function getChartOptions() {
-    return {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: { duration: 0 },
-        interaction: { mode: 'index', intersect: false },
-        plugins: {
-            legend: {
-                display: false,
-                position: 'bottom',
-                labels: {
-                    color: '#9ca3af',
-                    font: { size: 11, family: "system-ui, -apple-system, BlinkMacSystemFont, sans-serif" },
-                    padding: 12,
-                    usePointStyle: true,
-                    pointStyle: 'circle'
-                }
-            },
-            tooltip: {
-                backgroundColor: 'rgba(7, 3, 6, 0.95)',
-                titleColor: '#e5e7eb',
-                bodyColor: '#9ca3af',
-                borderColor: 'rgba(255, 37, 58, 0.3)',
-                borderWidth: 1,
-                titleFont: { size: 12, weight: 600 },
-                bodyFont: { size: 11 },
-                padding: 10,
-                displayColors: true,
-                callbacks: {
-                    label: function(context) {
-                        return context.dataset.label + ': ' + formatHashrate(context.raw);
-                    }
-                }
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                grid: { color: 'rgba(255, 37, 58, 0.1)', drawBorder: false },
-                ticks: {
-                    color: '#9ca3af',
-                    font: { size: 10 },
-                    callback: function(value) { return formatHashrate(value); }
-                }
-            },
-            x: {
-                grid: { color: 'rgba(255, 37, 58, 0.05)', drawBorder: false },
-                ticks: { color: '#9ca3af', font: { size: 10 } }
-            }
-        }
-    };
-}
-
-/**
- * Get doughnut chart options
- * @returns {Object} Chart.js options
- */
-function getDoughnutOptions() {
-    return {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: { duration: 0 },
-        elements: {
-            arc: {
-                borderWidth: 0
-            }
-        },
-        plugins: {
-            legend: {
-                display: false,
-                position: 'bottom',
-                labels: {
-                    color: '#9ca3af',
-                    font: { size: 11, family: "system-ui, -apple-system, BlinkMacSystemFont, sans-serif" },
-                    padding: 12,
-                    usePointStyle: true,
-                    pointStyle: 'circle'
-                }
-            },
-            tooltip: {
-                backgroundColor: 'rgba(7, 3, 6, 0.95)',
-                titleColor: '#e5e7eb',
-                bodyColor: '#9ca3af',
-                borderColor: 'rgba(255, 37, 58, 0.3)',
-                borderWidth: 1,
-                titleFont: { size: 12, weight: 600 },
-                bodyFont: { size: 11 },
-                padding: 10,
-                displayColors: true,
-                callbacks: {
-                    label: function(context) {
-                        return context.label + ': ' + formatNumber(context.raw);
-                    }
-                }
-            }
-        }
-    };
 }
 
 /**

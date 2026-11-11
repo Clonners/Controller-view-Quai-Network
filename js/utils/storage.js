@@ -3,8 +3,8 @@
  * Functions for persisting data to localStorage
  */
 
-import { AppState } from '../state.js';
-import { Config } from '../config.js';
+import { AppState } from '../state.js?v=e05cb9a8bd';
+import { Config } from '../config.js?v=e05cb9a8bd';
 
 /**
  * Save server configuration to localStorage

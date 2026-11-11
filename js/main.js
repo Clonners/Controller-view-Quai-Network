@@ -3,27 +3,28 @@
  * Quai Mining Dashboard - Modular Version
  */
 
-import { AppState, setUpdateInterval, clearUpdateInterval } from './state.js';
-import { Config } from './config.js';
-import { formatHashrate, formatNumber, formatUptime, hashStats } from './utils/formatters.js';
-import { initHistory, recordHistory, saveServerConfig, saveServerHost, loadServerConfig, clearServerConfig } from './utils/storage.js';
+import { AppState, setUpdateInterval, clearUpdateInterval } from './state.js?v=e05cb9a8bd';
+import { Config } from './config.js?v=e05cb9a8bd';
+import { formatHashrate, formatNumber, formatUptime, hashStats } from './utils/formatters.js?v=e05cb9a8bd';
+import { initHistory, recordHistory, saveServerConfig, saveServerHost, loadServerConfig, clearServerConfig } from './utils/storage.js?v=e05cb9a8bd';
 import { 
     initNotifications, showSuccess, showError, showWarning, showInfo,
     showLoading, hideLoading, showTableSkeleton 
-} from './utils/notifications.js';
-import { isValidIP, testConnection, fetchPoolStats, fetchWorkers, fetchShareHistory, fetchPoolBlocksEndpoint, fetchMinerWorkers, fetchAllMiners } from './api/poolApi.js';
-import { updateCharts, updateChartPeriod } from './components/charts.js';
-import { updateWorkers, generateMinersFromAPI } from './components/workers.js';
-import { updateBlocks, updateQuickStats, setStatsPeriod } from './components/blocks.js';
-import { updateShareSectionFromPoolStats, updateShareStats } from './components/shares.js';
+} from './utils/notifications.js?v=e05cb9a8bd';
+import { isValidIP, testConnection, fetchPoolStats, fetchWorkers, fetchShareHistory, fetchPoolBlocksEndpoint, fetchMinerWorkers, fetchAllMiners } from './api/poolApi.js?v=e05cb9a8bd';
+import { updateCharts, updateChartPeriod } from './components/charts.js?v=e05cb9a8bd';
+import { updateWorkers, generateMinersFromAPI } from './components/workers.js?v=e05cb9a8bd';
+import { updateBlocks, updateQuickStats, setStatsPeriod } from './components/blocks.js?v=e05cb9a8bd';
+import { updateShareSectionFromPoolStats, updateShareStats } from './components/shares.js?v=e05cb9a8bd';
 import { 
     openMinerModal, closeMinerModal, 
     openSearchModal, closeSearchModal, searchAddressInModal,
     openBlockSearchModal, closeBlockSearchModal, searchBlocksByAddress, selectBlockAddressFilter,
     initModalEventListeners 
-} from './components/modals.js';
-import { initWebSocket, closeWebSocket } from './components/websocket.js';
-import { openApiDiagnostic, closeApiDiagnostic, initDiagnosticGlobals } from './components/diagnostics.js';
+} from './components/modals.js?v=e05cb9a8bd';
+import { initWebSocket, closeWebSocket } from './components/websocket.js?v=e05cb9a8bd';
+import { openApiDiagnostic, closeApiDiagnostic, initDiagnosticGlobals } from './components/diagnostics.js?v=e05cb9a8bd';
+import { messageRow } from './utils/dom.js?v=e05cb9a8bd';
 
 // =====================
 // Global Exports (Immediate-Binding)
@@ -55,6 +56,33 @@ try {
 // =====================
 
 /**
+ * Leave a connection attempt before it starts (bad input):
+ * free the flag and the button so the reader can try again.
+ */
+function abortConnect(connectBtn) {
+    AppState.connection.isConnecting = false;
+    if (connectBtn) connectBtn.disabled = false;
+}
+
+/**
+ * Text of the "not connected" block (the title and its connect button stay).
+ * @param {string} text
+ * @param {string} kind - '' | 'bad'
+ */
+function setLoadingMessage(text, kind = '') {
+    const box = document.getElementById('loadingState');
+    if (!box) return;
+    box.style.display = 'block';
+    const line = document.getElementById('loadingStateText');
+    if (line) {
+        line.textContent = text;
+        line.classList.toggle('bad', kind === 'bad');
+    } else {
+        box.textContent = text;
+    }
+}
+
+/**
  * Connect to server
  */
 async function connectToServer() {
@@ -81,6 +109,7 @@ async function connectToServer() {
         if (!val) {
             showWarning('Enter server host or URL');
             updateStatus('Enter server host', 'disconnected');
+            abortConnect(connectBtn);
             return;
         }
         if (val.startsWith('http://') || val.startsWith('https://')) {
@@ -108,6 +137,7 @@ async function connectToServer() {
         if (!rawIp || !rawPort) {
             showWarning('Enter IP and port');
             updateStatus('Enter IP and port', 'disconnected');
+            abortConnect(connectBtn);
             return;
         }
         ip = rawIp;
@@ -132,12 +162,14 @@ async function connectToServer() {
     if (!isValidIP(host)) {
         showError('Invalid IP/Domain format');
         updateStatus('Invalid IP/Domain (e.g: 192.168.1.1 or mining.local)', 'disconnected');
+        abortConnect(connectBtn);
         return;
     }
     
     if (isNaN(portNum) || portNum < 1 || portNum > 65535) {
         showError('Port must be between 1-65535');
         updateStatus('Port must be between 1-65535', 'disconnected');
+        abortConnect(connectBtn);
         return;
     }
     
@@ -164,7 +196,7 @@ async function connectToServer() {
         hideLoading();
         showInfo('Already connected to this server');
         updateStatus('Connected', 'connected');
-        if (connectBtn) connectBtn.disabled = false;
+        abortConnect(connectBtn);
         return;
     }
 
@@ -269,9 +301,15 @@ async function connectToServer() {
             try { saveServerConfig(ip, port); } catch (e) {}
         }
         
-        // Show loading states for tables
+        // Show loading states for tables.
+        // The remembered fingerprints are dropped so the placeholder rows are always
+        // replaced by the first answer, even when it equals the previous session's.
+        AppState.hashes.workers = '';
+        AppState.hashes.miners = '';
+        AppState.hashes.blocks = '';
+        AppState.cache.lastPoolBlocksFetch = 0;
         showTableSkeleton('workersBody', Config.ui.skeletonRows, 4);
-        showTableSkeleton('blocksTableBody', Config.ui.skeletonRows, 6);
+        showTableSkeleton('blocksTableBody', Config.ui.skeletonRows, 4);
         
         // Start auto-update
         updateDashboard();
@@ -296,14 +334,7 @@ async function connectToServer() {
         showError(`Connection failed: ${errorMsg}`);
         updateStatus(errorMsg, 'disconnected');
         document.getElementById('mainContent').classList.remove('active');
-        document.getElementById('loadingState').style.display = 'block';
-        
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'error-message';
-        errorDiv.textContent = `Connection error: ${errorMsg}`;
-        const loadingState = document.getElementById('loadingState');
-        loadingState.innerHTML = '';
-        loadingState.appendChild(errorDiv);
+        setLoadingMessage(`Connection error: ${errorMsg}`, 'bad');
         
         console.error('Connection error:', error);
         if (connectBtn) connectBtn.disabled = false;
@@ -365,11 +396,7 @@ function clearConfig() {
     try {
         const mainContentEl = document.getElementById('mainContent');
         if (mainContentEl && mainContentEl.classList) mainContentEl.classList.remove('active');
-        const loadingStateEl = document.getElementById('loadingState');
-        if (loadingStateEl) {
-            loadingStateEl.style.display = 'block';
-            loadingStateEl.textContent = 'Waiting for connection...';
-        }
+        setLoadingMessage('Waiting for connection...');
         updateStatus('Disconnected', 'disconnected');
     } catch (e) { console.warn('clearConfig: DOM update error', e); }
     
@@ -395,12 +422,9 @@ function clearConfig() {
     AppState.hashes.shareSummary = '';
 
     // Reset table placeholders so UI shows loading state until next successful connect
-    const wb = document.getElementById('workersBody');
-    if (wb) wb.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #999;">Waiting for connection...</td></tr>';
-    const mb = document.getElementById('minersBody');
-    if (mb) mb.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #999;">Waiting for connection...</td></tr>';
-    const bb = document.getElementById('blocksTableBody');
-    if (bb) bb.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #999;">Waiting for connection...</td></tr>';
+    messageRow(document.getElementById('workersBody'), 4, 'Waiting for connection...');
+    messageRow(document.getElementById('minersBody'), 4, 'Waiting for connection...');
+    messageRow(document.getElementById('blocksTableBody'), 4, 'Waiting for connection...');
 
     try {
         // Ensure connect button is enabled after clearing

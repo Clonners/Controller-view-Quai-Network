@@ -1,363 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <!-- P3.6: Preconnect to external origins -->
-  <link rel="preconnect" href="https://panel.kataribe.org">
-  <link rel="preconnect" href="https://github.com">
-  <!-- P3.14: DNS-prefetch for RPC endpoints -->
-  <link rel="dns-prefetch" href="https://proxy.kataribe.org">
-  <link rel="dns-prefetch" href="https://prime.kataribe.org">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BitQuai Controller Dashboard</title>
-  <link rel="stylesheet" href="css/shared.css">
-  <link rel="stylesheet" href="css/brand.min.css">
-  <link rel="stylesheet" href="controller_styles.min.css">
-  <meta name="description" content="BitQuai — Mining telemetry and controller analytics for Quai Network.">
-  <meta name="theme-color" content="#ff253a">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="icon" href="icons/favicon.ico" sizes="any">
-  <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="48x48" href="icons/favicon-48x48.png">
-  <link rel="icon" type="image/png" sizes="64x64" href="icons/favicon-64x64.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon-180x180.png">
-  <link rel="manifest" href="site.webmanifest">
-  <meta property="og:title" content="BitQuai Controller Dashboard">
-  <meta property="og:description" content="Order inside entropy.">
-  <meta property="og:image" content="https://panel.kataribe.org/assets/brand/bitquai-og-1200x630.png">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://panel.kataribe.org/">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="BitQuai Controller Dashboard">
-  <meta name="twitter:description" content="Order inside entropy.">
-  <meta name="twitter:image" content="https://panel.kataribe.org/assets/brand/bitquai-og-1200x630.png">
-  <!-- P3.5: Critical CSS inlined for LCP — renders header/h1 + first card above the fold -->
-  <style>
-    /* Critical CSS — above-the-fold only */
-    :root{--bg:#050307;--text:#e5e7eb;--muted:#9ca3af;--accent:#ff253a;--success:#4ade80;--danger:#ff4b4b;--card-radius:16px;--shadow-soft:0 18px 45px rgba(0,0,0,0.7);--font:system-ui,-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif}
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    body{margin:0;font-family:var(--font);background:radial-gradient(circle at top,#2b0005 0,var(--bg) 40%,#020005 80%);color:var(--text);min-height:100vh;padding:24px;display:flex;justify-content:center;overflow-x:hidden}
-    .app{width:100%;max-width:1200px}
-    header{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;margin-bottom:20px}
-    .logo{width:36px;height:36px;border-radius:999px;flex-shrink:0;box-shadow:0 0 0 2px rgba(255,37,58,0.4)}
-    .header-main{display:flex;flex-direction:column;gap:2px;min-width:0}
-    header h1{font-size:1.4rem;margin:0;letter-spacing:.03em;display:flex;align-items:center;gap:8px}
-    .header-actions{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-    .nav-pill{padding:6px 10px;border-radius:8px;background:rgba(255,37,58,.08);color:var(--text);text-decoration:none;border:1px solid rgba(255,37,58,.08);font-weight:600;display:inline-flex;align-items:center;gap:6px;font-size:.78rem}
-    .github-pill,.donate-pill{padding:6px 12px;border-radius:999px;font-size:.72rem;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;cursor:pointer}
-    .donate-pill{border:1px solid rgba(248,250,252,.12);background:radial-gradient(circle at top left,rgba(255,37,58,.18),rgba(15,5,10,.96));color:var(--muted);box-shadow:0 10px 24px rgba(255,37,58,.35)}
-    .donate-label,.github-label{font-weight:500;color:#e5e7eb}
-    .donate-heart{font-size:.85rem;color:#ff9db3}
-    .donate-address{display:none}
-    .github-pill{border:1px solid rgba(148,163,184,.5);background:rgba(8,10,15,.95);color:var(--muted);text-decoration:none;box-shadow:0 8px 18px rgba(15,23,42,.45)}
-    .grid{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(0,1.3fr);gap:18px}
-    .card{background:radial-gradient(circle at top left,#1a060b 0,#060106 55%);border-radius:var(--card-radius);border:1px solid rgba(56,12,24,.9);box-shadow:var(--shadow-soft);padding:16px 16px 14px;position:relative;overflow:hidden}
-    .card::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at top right,rgba(255,37,58,.18),transparent 55%);opacity:.9;pointer-events:none}
-    .card-header{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:10px}
-    .card-title{font-size:.9rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#e5e7eb}
-    .card-subtitle{font-size:.75rem;color:var(--muted)}
-    .card-header.flex-between{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
-    .card-header .left{display:flex;gap:12px;align-items:center;min-width:0;flex:1 1 auto}
-    .rpc-input{flex:1 1 240px;min-width:0;max-width:100%;padding:8px 12px;border-radius:18px;border:1px solid rgba(255,255,255,.08);background:transparent;color:inherit}
-    .header-actions-btns{display:flex;gap:8px;align-items:center;white-space:nowrap}
-    .pill{margin-left:auto;display:flex;gap:8px;align-items:center}
-    .pill{border-radius:999px;padding:4px 9px;font-size:.7rem;border:1px solid rgba(75,85,99,.7);color:var(--muted);display:inline-flex;align-items:center;gap:6px;background:rgba(7,3,7,.95)}
-    .pill-dot{width:6px;height:6px;border-radius:999px;background:var(--success)}
-    @keyframes pulseDot{0%{transform:scale(1);opacity:.9}50%{transform:scale(1.4);opacity:.4}100%{transform:scale(1);opacity:.9}}
-    .pill-dot{animation:pulseDot 1.8s ease-out infinite}
-    input[type="text"],input[type="number"],select{background:rgba(10,2,9,.95);border-radius:999px;border:1px solid rgba(148,27,49,.8);padding:6px 10px;color:var(--text);font-size:.78rem;outline:none;min-width:0}
-    input[type="text"]{width:260px;max-width:100%}
-    input[type="number"]{width:82px}
-    select{padding-right:26px}
-    input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 1px rgba(255,37,58,.32);background:rgba(10,2,10,1)}
-    button{border-radius:999px;border:none;padding:7px 14px;font-size:.8rem;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#ff253a,#ff7a3c);color:#050308;box-shadow:0 10px 24px rgba(255,37,58,.6);white-space:nowrap}
-    button.secondary{background:transparent;color:var(--muted);border:1px solid rgba(75,85,99,.8);box-shadow:none}
-    #conversion-card{grid-column:2;grid-row:1;align-self:stretch}
-    .chart-wrapper{position:relative;min-height:300px;width:100%}
-    canvas{position:relative;z-index:1;width:100%!important;max-height:360px}
-    .legend{position:relative;z-index:1;margin-top:6px;font-size:.72rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-    .legend-item{display:inline-flex;align-items:center;gap:6px;padding:3px 8px;border-radius:999px;background:rgba(8,2,8,.98);border:1px solid rgba(51,16,22,.95)}
-    .legend-swatch{width:10px;height:3px;border-radius:999px;background:var(--accent)}
-    .legend-swatch.alt{background:#ff6b81}
-    .legend-swatch.delta{background:#ffb347}
-    .status-bar{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px;font-size:.72rem;color:var(--muted);border-top:1px solid rgba(51,16,22,.9);padding-top:8px}
-    .status-dot{width:8px;height:8px;border-radius:50%;background:var(--success);display:inline-block}
-    .status-bar-right{display:flex;gap:8px;flex-wrap:wrap}
-    .status-tag{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;background:rgba(8,2,8,.98);border:1px solid rgba(51,16,22,.9)}
-    .status-dot-mini{width:5px;height:5px;border-radius:50%;background:var(--success);display:inline-block}
-    .metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
-    .metric-card{background:rgba(6,1,6,.7);border-radius:12px;border:1px solid rgba(56,12,24,.7);padding:12px}
-    .metric-title{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
-    .metric-main{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
-    .metric-value{font-size:1.6rem;font-weight:700;color:#e5e7eb}
-    .metric-unit{font-size:.8rem;color:var(--muted)}
-    .metric-badge{font-size:.65rem;padding:2px 6px;border-radius:999px;background:rgba(255,37,58,.15);color:var(--accent)}
-    .metric-footer{display:flex;align-items:center;margin-top:6px;font-size:.72rem;color:var(--muted);flex-wrap:wrap;gap:4px;overflow-wrap:anywhere}
-    .metric-title-exrate{display:flex;flex-direction:column;gap:2px}
-    .metric-title-exrate-sub{font-size:.65rem;color:var(--muted)}
-    .metric-main-exrate{display:flex;align-items:baseline;gap:6px}
-    .metric-prefix{font-size:.85rem;color:var(--muted)}
-    .conversion-container{display:flex;flex-direction:column;gap:12px;padding:0;position:relative;z-index:1}
-    .conversion-input-group{display:flex;flex-direction:column;gap:6px}
-    .conversion-input-group label,.direction-caption{font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
-    #conversion-card .conversion-input{width:100%;min-height:42px;padding:10px 12px;background:rgba(10,2,9,.95);border-radius:10px;border:1px solid rgba(148,27,49,.8);color:var(--text);font-size:.9rem;outline:none}
-    .conversion-direction{min-height:54px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 10px 9px 12px;background:rgba(6,1,6,.72);border-radius:10px;border:1px solid rgba(56,12,24,.75)}
-    .direction-copy{display:flex;flex-direction:column;gap:3px;min-width:0}
-    .direction-labels{display:flex;align-items:center;gap:7px;font-weight:650;font-size:.92rem;line-height:1.2}
-    .direction-labels .arrow{color:var(--accent);font-size:1rem}
-    .swap-btn{flex:0 0 36px;width:36px;height:36px;padding:0;background:rgba(255,37,58,.1);border:1px solid rgba(255,37,58,.36);border-radius:10px;box-shadow:none;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:#ff5a6b}
-    .swap-btn svg{width:18px;height:18px}
-    .conversion-result{min-height:68px;padding:11px 12px;border-radius:10px;background:rgba(6,1,6,.58);border:1px solid rgba(56,12,24,.75);display:grid;grid-template-columns:minmax(0,1fr) minmax(72px,auto);align-items:center;gap:4px 12px}
-    .result-label{margin:0;font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
-    .result-value{min-width:0;font-size:1.3rem;line-height:1.2;font-weight:700;color:var(--text);text-align:right;overflow-wrap:anywhere}
-    .result-details{grid-column:1/-1;min-width:0;max-width:100%;font-size:.7rem;line-height:1.4;color:var(--muted);margin-top:1px;overflow-wrap:anywhere}
-    .calc-btn{width:100%;min-height:42px;padding:10px 16px;justify-content:center;background:linear-gradient(135deg,#ff253a,#ff6b3d);border:none;border-radius:10px;font-size:.82rem;font-weight:700;cursor:pointer;color:#130206;box-shadow:0 8px 20px rgba(255,37,58,.34);text-transform:none;letter-spacing:.025em}
-    @media(pointer:coarse){#conversion-card .conversion-input,#conversion-card .calc-btn{min-height:44px}.swap-btn{flex:0 0 44px!important;width:44px!important;height:44px!important;min-height:44px!important;padding:0!important}}
-    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-    @media(max-width:600px){.rpc-input{flex:1 1 100%;width:100%;max-width:100%}.card-header.flex-between{align-items:flex-start}.card-header .left{order:1;width:100%}.header-actions-btns{order:2;width:100%;display:grid;grid-template-columns:1fr 1fr}.header-actions-btns button{justify-content:center}.pill{order:3}.card{padding:14px 12px}.chart-wrapper{min-width:0;overflow:hidden}.metric-footer{display:block;line-height:1.45}}
-    @media(max-width:900px){body{padding:16px 10px 24px}header{align-items:flex-start}.grid{grid-template-columns:minmax(0,1fr)}#chart-card{width:100%;min-height:420px}.header-actions{margin-left:0}.github-pill,.donate-pill{width:100%;justify-content:center}#conversion-card{grid-column:1;grid-row:2;align-self:start}}
-  </style>
-  <!-- Full page styles loaded above with a valid text/css MIME type. -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>controller · kataribe panel</title>
+<meta name="description" content="Kataribe panel: Quai Network controller analytics. d and d* over the latest Prime blocks, exchange rate, conversion flow and discounts.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f5f2ea" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e0f12" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="canonical" href="https://panel.kataribe.org/controller_view.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Kataribe">
+<meta property="og:title" content="controller · kataribe panel">
+<meta property="og:description" content="Quai Network controller analytics. Order inside entropy.">
+<meta property="og:url" content="https://panel.kataribe.org/controller_view.html">
+<meta property="og:image" content="https://panel.kataribe.org/brand/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="controller · kataribe panel">
+<meta name="twitter:description" content="Quai Network controller analytics. Order inside entropy.">
+<meta name="twitter:image" content="https://panel.kataribe.org/brand/og.png">
+<link rel="icon" href="brand/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="brand/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="brand/icon-180.png">
+<link rel="manifest" href="site.webmanifest">
+<link rel="dns-prefetch" href="https://prime.kataribe.org">
+<link rel="preload" href="fonts/jetbrains-mono-kataribe.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/panel.css?v=e05cb9a8bd">
+<script src="js/theme.js?v=e05cb9a8bd"></script>
 </head>
 <body>
-  <main class="app">
-    <nav class="topnav" aria-label="Primary navigation">
-      <a class="brand" href="index.html" aria-label="BitQuai home">
-        <picture><source src="assets/brand/bitquai-icon-q-256.webp" type="image/webp"><img src="assets/brand/bitquai-icon-q-256.png" alt="BitQuai" width="256" height="256" decoding="async" loading="eager" fetchpriority="high"></picture>
-        <span class="brand-text">
-          <strong>BitQuai</strong>
-          <span>Order inside entropy</span>
-        </span>
-      </a>
-      <div class="navlinks">
-        <a href="index.html">Home</a>
-        <a href="mining.html">Mining</a>
-        <span class="active">Controller</span>
-      </div>
-    </nav>
+<div class="page">
+<div class="run">
 
-    
+<header class="top">
+  <a class="brand" href="index.html" aria-label="kataribe panel, home"><pre class="art logo" aria-hidden="true"><span class="l">╭┬─┬─┬─┬╮
+   │   │
+ │
+   │</span><span class="l l-amber">
+ ●   ●
+   ●   ●
+</span></pre><span class="brand-name">kataribe</span> <span class="brand-sub">panel</span></a>
+  <nav class="nav" aria-label="Primary navigation"><a href="index.html">home</a><span class="sep" aria-hidden="true"> · </span><a href="mining.html">mining</a><span class="sep" aria-hidden="true"> · </span><a href="controller_view.html" aria-current="page">controller</a></nav>
+  <button class="theme-switch" type="button" hidden></button>
+</header>
 
-    <div class="grid">
-      <section class="card" id="chart-card" aria-label="DD* Star chart">
-        <div class="card-header flex-between">
-          <div class="left">
-            <input class="rpc-input" type="text" id="rpc-url" placeholder="RPC endpoint (prime)" value="https://prime.kataribe.org" spellcheck="false" aria-label="RPC endpoint URL" />
-            <div class="header-actions-btns">
-              <button id="refresh-btn"><span>Refresh</span></button>
-              <button id="auto-btn" class="secondary">Auto</button>
-            </div>
-          </div>
-          <div class="pill">
-            <span class="pill-dot" id="conn-dot" style="background:#22c55e;"></span>
-            <span id="conn-label">Connected</span>
-          </div>
-        </div>
+<main>
+<h1 class="sr">controller dashboard</h1>
 
-        <div class="chart-wrapper" style="position: relative; min-height: 300px; width: 100%;">
-          <div id="chart-loading-overlay" class="chart-loading-overlay" style="display: none;">
-            <div class="spinner-large"></div>
-            <div class="spinner-text">Loading chart data...</div>
-          </div>
-          <canvas id="ddstar-chart"></canvas>
-        </div>
-
-        <div class="legend">
-          <span class="legend-item">
-            <span class="legend-swatch"></span> d (normalized difficulty, Prime)
-          </span>
-          <span class="legend-item">
-            <span class="legend-swatch alt"></span> d* (window average)
-          </span>
-          <span class="legend-item">
-            <span class="legend-swatch delta"></span> ΔkQuai/kQuai (%) estimate
-          </span>
-        </div>
-
-        <div class="status-bar">
-          <div>
-            <span class="status-dot" id="status-dot"></span>
-            <span id="status-text">No data yet.</span>
-          </div>
-          <div class="status-bar-right">
-            <span class="status-tag" title="d*/d > 1 means FX helps Qi">
-              <span class="status-dot-mini"></span>
-              <span>&gt; 1 → FX helps Qi</span>
-            </span>
-            <span class="status-tag" title="d*/d < 1 means FX helps Quai">
-              <span class="status-dot-mini"></span>
-              <span>&lt; 1 → FX helps Quai</span>
-            </span>
-          </div>
-        </div>
-      </section>
-
-      <section class="card" aria-label="Current state Prime metrics">
-        <div class="card-header">
-          <div>
-            <div class="card-title">Current state (Prime)</div>
-            <div class="card-subtitle">
-              Metrics from the latest Prime blocks (via Prime RPC).
-            </div>
-          </div>
-        </div>
-
-        <div class="metrics-grid">
-          <div class="metric-card">
-            <div class="metric-title">Latest Prime block</div>
-            <div class="metric-main">
-              <div class="metric-value" id="metric-block">–</div>
-              <div class="metric-unit">#</div>
-            </div>
-            <div class="metric-footer">
-              <span id="metric-ts">timestamp: –</span>
-            </div>
-          </div>
-
-          <div class="metric-card">
-            <div class="metric-title">d* / d (last point)</div>
-            <div class="metric-main">
-              <div class="metric-value" id="metric-ratio">–</div>
-              <div class="metric-unit">ratio</div>
-              <span class="metric-badge" id="metric-ratio-badge">–</span>
-            </div>
-            <div class="metric-footer">
-              <span id="metric-ratio-text">Waiting for data...</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="metrics-grid" style="margin-top:10px;">
-          <div class="metric-card">
-            <div class="metric-title metric-title-exrate">
-              <span class="metric-title-exrate-main">Exchange Rate</span>
-              <span class="metric-title-exrate-sub">(Qi → Quai)</span>
-            </div>
-            <div class="metric-main metric-main-exrate">
-              <span class="metric-prefix">1 Qi =</span>
-              <div class="metric-value" id="metric-exrate">–</div>
-              <span class="metric-unit">Quai</span>
-            </div>
-            <code id="metric-exrate-hex" hidden>–</code>
-          </div>
-
-          <div class="metric-card">
-            <div class="metric-title">Estimated ΔkQuai/kQuai</div>
-            <div class="metric-main">
-              <div class="metric-value" id="metric-dk">–</div>
-              <div class="metric-unit">/ block</div>
-            </div>
-            <div class="metric-footer">
-              <span id="metric-dk-text">Controller α = 0.001 (per spec)</span>
-            </div>
-          </div>
-        </div>
-
-        
-      </section>
-
-      <section class="card" aria-label="Conversion and discounts">
-        <div class="card-header">
-          <div>
-            <div class="card-title">Conversion & Discounts</div>
-            <div class="card-subtitle">Live conversion flow, kQuai discount and cubic preview</div>
-          </div>
-        </div>
-
-        <div class="metrics-grid" style="margin-top:8px;">
-          <div class="metric-card">
-            <div class="metric-title">Conversion Flow (EMA)</div>
-            <div class="metric-main">
-              <div class="metric-value" id="metric-conversionflow">–</div>
-              <div class="metric-unit">Quai</div>
-            </div>
-
-          </div>
-
-          <div class="metric-card">
-            <div class="metric-title">kQuai Discount</div>
-            <div class="metric-main">
-                <div class="metric-value" id="metric-kquai">–</div>
-                <div class="metric-unit"></div>
-              </div>
-            <div class="metric-footer">
-              <span id="metric-kquai-direction">direction: –</span>
-            </div>
-          </div>
-
-          <div class="metric-card">
-            <div class="metric-title">Cubic Discount (preview)</div>
-            <div class="metric-main">
-              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <input id="cubic-amount" class="conversion-input" placeholder="Amount" style="width:120px" aria-label="Conversion amount" />
-                <label for="cubic-isqi" class="sr-only">Currency unit</label>
-                <select id="cubic-isqi" style="padding:6px;border-radius:6px">
-                  <option value="true">Qi</option>
-                  <option value="false">Quai</option>
-                </select>
-              </div>
-            </div>
-            <div class="metric-footer">
-              <div>After cubic: <strong id="cubic-result">–</strong></div>
-              <div>Discount: <code id="cubic-discount">–</code></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="card" id="conversion-card">
-        <div class="card-header">
-          <h2 class="card-title">Conversion Calculator</h2>
-        </div>
-        <div class="conversion-container">
-          <div class="conversion-input-group">
-            <label for="conversion-amount">Amount</label>
-            <input type="text" id="conversion-amount" class="conversion-input" placeholder="0.00" inputmode="decimal" autocomplete="off" spellcheck="false" />
-          </div>
-          
-          <div class="conversion-direction">
-            <div class="direction-copy">
-              <span class="direction-caption">Direction</span>
-              <div class="direction-labels">
-                <span id="from-currency">Qi</span>
-                <span class="arrow">→</span>
-                <span id="to-currency">Quai</span>
-              </div>
-            </div>
-            <button id="swap-direction-btn" class="swap-btn" type="button" title="Swap direction" aria-label="Swap conversion direction">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <path d="M7 16V4M7 4L3 8M7 4L11 8M17 8V20M17 20L21 16M17 20L13 16"/>
-              </svg>
-            </button>
-          </div>
-
-          <div class="conversion-result">
-            <div class="result-label">You receive</div>
-            <div class="result-value" id="conversion-result">–</div>
-            <div class="result-details" id="conversion-details"></div>
-          </div>
-
-          <button id="calculate-btn" class="calc-btn" type="button">Calculate conversion</button>
-        </div>
-      </section>
+<section class="sec" id="chart-card" aria-labelledby="h-chart">
+  <h2 id="h-chart"><span class="bead" aria-hidden="true">●</span><span class="num" aria-hidden="true">01</span>chart</h2>
+  <p class="gloss">d and d* over the latest Prime blocks</p>
+  <div class="form-row">
+    <div class="field">
+      <label for="rpc-url">RPC endpoint (prime)</label>
+      <input class="rpc-input" type="text" id="rpc-url" placeholder="RPC endpoint (prime)" value="https://prime.kataribe.org" spellcheck="false" autocomplete="off" autocapitalize="none">
     </div>
+    <div class="actions header-actions-btns">
+      <button id="refresh-btn" class="btn btn-primary" type="button">refresh</button>
+      <button id="auto-btn" class="btn secondary" type="button" aria-pressed="false">auto (10s)</button>
+    </div>
+  </div>
+  <div class="status-line">
+    <div class="pill"><span class="pill-dot fetching" id="conn-dot" aria-hidden="true"></span><span id="conn-label">Connecting...</span></div>
+  </div>
 
-    <footer>
-      
-    </footer>
-  </main>
+  <p id="chart-loading-overlay" class="chart-loading-overlay" hidden>loading chart data...</p>
+  <div id="ddstar-chart" class="chart" tabindex="0" role="group" aria-label="d and d* chart. Use the left and right arrow keys to read each point."></div>
+  <noscript><p class="note bad">This page needs JavaScript to read the node.</p></noscript>
 
-  <!-- P2: Native deferred script loading -->
-  <script src="vendor/decimal.min.js" defer></script>
-  <script src="vendor/chart.min.js" defer></script>
-  <script src="main.js" defer></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js').catch(() => {});
-    }
-  </script>
+  <ul class="legend" aria-label="Chart legend">
+    <li><span class="mark" aria-hidden="true">●</span>d (normalized difficulty, Prime)</li>
+    <li><span class="mark amber" aria-hidden="true">○</span>d* (window average)</li>
+    <li><span class="mark" aria-hidden="true">◆</span>d and d* on the same cell</li>
+    <li><span class="mark amber" aria-hidden="true">■</span>∆kQuai/kQuai (%) estimate</li>
+  </ul>
+
+  <p class="status-bar" role="status"><span class="status-dot idle" id="status-dot" aria-hidden="true"></span><span id="status-text">No data yet.</span></p>
+  <p class="tags">
+    <span class="status-tag" title="d*/d &gt; 1 means FX helps Qi">&gt; 1 → FX helps Qi</span>
+    <span class="status-tag" title="d*/d &lt; 1 means FX helps Quai">&lt; 1 → FX helps Quai</span>
+  </p>
+</section>
+
+<section class="sec" aria-labelledby="h-state">
+  <h2 id="h-state"><span class="bead" aria-hidden="true">●</span><span class="num" aria-hidden="true">02</span>state</h2>
+  <p class="gloss">current state (Prime) · metrics from the latest Prime blocks (via Prime RPC).</p>
+  <div class="narrow">
+    <div class="metric">
+      <div class="metric-line"><span class="metric-label">latest Prime block</span><span class="metric-value"><span class="unit"># </span><span id="metric-block">–</span></span></div>
+      <div class="metric-note"><span id="metric-ts">timestamp: –</span></div>
+    </div>
+    <div class="metric">
+      <div class="metric-line"><span class="metric-label">d* / d (last point)</span><span class="metric-value"><span id="metric-ratio">–</span> <span class="unit">ratio ·</span> <span class="badge" id="metric-ratio-badge">–</span></span></div>
+      <div class="metric-note"><span id="metric-ratio-text">Waiting for data...</span></div>
+    </div>
+    <div class="metric">
+      <div class="metric-line"><span class="metric-label">exchange rate (Qi → Quai)</span><span class="metric-value"><span class="unit">1 Qi = </span><span id="metric-exrate">–</span> <span class="unit">Quai</span></span></div>
+      <code id="metric-exrate-hex" hidden>–</code>
+    </div>
+    <div class="metric">
+      <div class="metric-line"><span class="metric-label">estimated ∆kQuai/kQuai</span><span class="metric-value"><span id="metric-dk">–</span> <span class="unit">% / block</span></span></div>
+      <div class="metric-note"><span id="metric-dk-text">Controller alpha = 0.001 (per spec)</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" aria-labelledby="h-conversion">
+  <h2 id="h-conversion"><span class="bead" aria-hidden="true">●</span><span class="num" aria-hidden="true">03</span>conversion</h2>
+  <p class="gloss">conversion &amp; discounts · live conversion flow, kQuai discount and cubic preview</p>
+  <div class="narrow">
+    <div class="metric">
+      <div class="metric-line"><span class="metric-label">conversion flow (EMA)</span><span class="metric-value"><span id="metric-conversionflow">–</span> <span class="unit">Quai</span></span></div>
+    </div>
+    <div class="metric">
+      <div class="metric-line"><span class="metric-label">kQuai discount</span><span class="metric-value"><span id="metric-kquai">–</span></span></div>
+      <div class="metric-note"><span id="metric-kquai-direction">direction: –</span></div>
+    </div>
+    <div class="block-gap">
+      <h3>cubic discount (preview)</h3>
+      <div class="form-row">
+        <div class="field">
+          <label for="cubic-amount">amount</label>
+          <input id="cubic-amount" class="conversion-input" type="text" placeholder="Amount" inputmode="decimal" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="field w-18">
+          <label for="cubic-isqi">currency unit</label>
+          <span class="select"><select id="cubic-isqi">
+            <option value="true">Qi</option>
+            <option value="false">Quai</option>
+          </select></span>
+        </div>
+      </div>
+      <dl class="kv block-gap">
+        <div><dt>after cubic</dt><dd><strong id="cubic-result">–</strong></dd></div>
+        <div><dt>discount</dt><dd><code id="cubic-discount">–</code></dd></div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="conversion-card" aria-labelledby="h-calculator">
+  <h2 id="h-calculator"><span class="bead" aria-hidden="true">●</span><span class="num" aria-hidden="true">04</span>calculator</h2>
+  <p class="gloss">conversion calculator</p>
+  <div class="narrow">
+    <div class="field">
+      <label for="conversion-amount">amount</label>
+      <input type="text" id="conversion-amount" class="conversion-input" placeholder="0.00" inputmode="decimal" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="block-gap">
+      <span class="label">direction</span>
+      <div class="direction">
+        <span id="from-currency">Qi</span>
+        <span class="arrow" aria-hidden="true">→</span>
+        <span id="to-currency">Quai</span>
+        <button id="swap-direction-btn" class="btn swap-btn" type="button" title="Swap direction" aria-label="Swap conversion direction">↔ swap</button>
+      </div>
+    </div>
+    <div class="block-gap">
+      <span class="label">you receive</span>
+      <div id="conversion-result" class="result" role="status">–</div>
+      <div id="conversion-details" class="details"></div>
+    </div>
+    <p class="block-gap"><button id="calculate-btn" class="btn btn-primary calc-btn" type="button">calculate conversion</button></p>
+  </div>
+</section>
+
+</main>
+
+<span class="cord" aria-hidden="true">││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││</span>
+<span class="cursor" aria-hidden="true">█</span>
+</div>
+
+<footer class="foot">
+  <span class="name">kataribe</span>
+  <span>order inside entropy</span>
+  <a href="https://github.com/Clonners/Controller-view-Quai-Network" target="_blank" rel="noopener noreferrer">source</a>
+</footer>
+
+</div>
+
+<script src="js/cord.js?v=e05cb9a8bd" defer></script>
+<script src="vendor/decimal.min.js?v=e05cb9a8bd" defer></script>
+<script src="main.js?v=e05cb9a8bd" defer></script>
+<script>
+if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js').catch(() => {}); }
+</script>
 </body>
 </html>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="kataribe">
+  <title>kataribe</title>
+  <rect width="32" height="32" rx="7" fill="#15171c"/>
+  <g fill="none" stroke="#f1ede4" stroke-linecap="round">
+    <path stroke-width="2.4" d="M5.5 11A20 20 0 0 1 26.5 11"/>
+    <path stroke-width="2" d="M9 9.4V21M16 8V27M23 9.4V17"/>
+  </g>
+  <g fill="#e6b655">
+    <circle cx="9" cy="16" r="2.6"/>
+    <circle cx="16" cy="22" r="2.6"/>
+    <circle cx="23" cy="17" r="2.6"/>
+  </g>
+</svg>

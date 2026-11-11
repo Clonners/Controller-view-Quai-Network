@@ -1,366 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="preload" as="image" href="assets/brand/bitquai-hero-1920x1080.webp" type="image/webp">
-<link rel="stylesheet" href="css/brand.min.css">
-
-  <meta charset="UTF-8">
-  <!-- P3.6: Preconnect to external origins -->
-  <link rel="preconnect" href="https://panel.kataribe.org">
-  <link rel="preconnect" href="https://github.com">
-  <!-- P3.14: DNS-prefetch for RPC endpoints -->
-  <link rel="dns-prefetch" href="https://proxy.kataribe.org">
-  <link rel="dns-prefetch" href="https://prime.kataribe.org">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BitQuai — Order Inside Entropy</title>
-  <meta name="description" content="BitQuai — Mining telemetry and controller analytics for Quai Network.">
-  <meta name="theme-color" content="#ff253a">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="icon" href="icons/favicon.ico" sizes="any">
-  <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="48x48" href="icons/favicon-48x48.png">
-  <link rel="icon" type="image/png" sizes="64x64" href="icons/favicon-64x64.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon-180x180.png">
-  <link rel="manifest" href="site.webmanifest">
-  <meta property="og:title" content="BitQuai">
-  <meta property="og:description" content="Order inside entropy.">
-  <meta property="og:image" content="https://panel.kataribe.org/assets/brand/bitquai-og-1200x630.png">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://panel.kataribe.org/">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="BitQuai">
-  <meta name="twitter:description" content="Order inside entropy.">
-  <meta name="twitter:image" content="https://panel.kataribe.org/assets/brand/bitquai-og-1200x630.png">
-  <link rel="stylesheet" href="css/shared.css">
-  <style>
-    :root {
-      color-scheme: dark;
-      --bg: #050307;
-      --panel: #12070b;
-      --panel-2: #1a0a10;
-      --border: #301219;
-      --border-strong: rgba(255, 37, 58, 0.34);
-      --accent: #ff253a;
-      --accent-soft: rgba(255, 37, 58, 0.16);
-      --text: #f6f7fb;
-      --muted: #c0c6d2;
-      --dim: #8b92a0;
-      --green: #4ade80;
-      --shadow: 0 28px 80px rgba(0, 0, 0, 0.72);
-      --radius-lg: 28px;
-      --radius-md: 18px;
-      --max: 1180px;
-    }
-
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: var(--text);
-      background: #050307;
-      overflow-x: hidden;
-    }
-
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      background-image:
-        linear-gradient(rgba(255,255,255,.028) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.022) 1px, transparent 1px);
-      background-size: 42px 42px;
-      mask-image: linear-gradient(to bottom, rgba(0,0,0,.7) 30%, transparent 100%);
-      opacity: .38;
-      z-index: 0;
-    }
-
-    a { color: inherit; }
-
-    .shell {
-      position: relative;
-      z-index: 1;
-      width: min(100%, var(--max));
-      margin: 0 auto;
-      padding: 20px 20px 56px;
-    }
-
-    .hero {
-      position: relative;
-      min-height: calc(100vh - 92px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-
-    .hero-bg {
-      position: absolute;
-      inset: 0;
-      z-index: 0;
-    }
-
-    .hero-bg img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      object-position: center;
-      display: block;
-    }
-
-    @media (max-width: 768px) {
-      .hero {
-        min-height: calc(100vh - 80px);
-      }
-      .hero-bg {
-        background: url('assets/img/hero-mobile-bg.png') center top / cover no-repeat;
-      }
-      .hero-bg img {
-        display: none;
-      }
-    }
-
-    .hero-bg::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(ellipse at center, rgba(5,3,7,.15) 0%, rgba(5,3,7,.45) 100%);
-      pointer-events: none;
-    }
-
-    .section-label {
-      margin: 0 0 16px;
-      color: var(--muted);
-      font-size: 12px;
-      letter-spacing: .16em;
-      text-transform: uppercase;
-    }
-
-    .surfaces {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
-      margin-top: 8px;
-    }
-
-    .surface-card {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      padding: 18px;
-      border-radius: 24px;
-      border: 1px solid rgba(255, 37, 58, .17);
-      background:
-        linear-gradient(180deg, rgba(26,10,16,.96), rgba(10,5,9,.9)),
-        radial-gradient(circle at 20% 0%, rgba(255, 37, 58, .18), transparent 34%);
-      text-decoration: none;
-      overflow: hidden;
-      transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
-    }
-
-    .surface-card::after {
-      content: "";
-      position: absolute;
-      inset: auto -18% -38% auto;
-      width: 180px;
-      height: 180px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 37, 58, .22);
-      background: rgba(255,37,58,.08);
-      filter: blur(.2px);
-    }
-
-    .surface-card:hover {
-      transform: translateY(-4px);
-      border-color: rgba(255, 37, 58, .42);
-      box-shadow: 0 22px 54px rgba(0,0,0,.54);
-    }
-
-    .surface-card .preview {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      aspect-ratio: 16 / 10;
-      border-radius: 14px;
-      border: 1px solid rgba(255, 37, 58, .12);
-      overflow: hidden;
-      background: #0a0508;
-    }
-
-    .surface-card .preview img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    .surface-top {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      color: var(--muted);
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: .12em;
-    }
-
-    .surface-card h2 {
-      position: relative;
-      z-index: 1;
-      margin: 0;
-      font-size: clamp(22px, 3vw, 32px);
-      line-height: .95;
-      letter-spacing: -.03em;
-    }
-
-    .surface-card p {
-      position: relative;
-      z-index: 1;
-      margin: 0;
-      color: var(--muted);
-      line-height: 1.5;
-      font-size: 13px;
-      max-width: 280px;
-    }
-
-    .status {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      width: fit-content;
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.04);
-      border: 1px solid rgba(255,255,255,.07);
-      color: #cdd2dc;
-      font-size: 12px;
-    }
-
-    .dot { width: 7px; height: 7px; border-radius: 999px; background: var(--green); box-shadow: 0 0 16px rgba(74,222,128,.5); }
-
-    .footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      margin-top: 42px;
-      padding-top: 22px;
-      border-top: 1px solid rgba(255, 37, 58, .14);
-      color: var(--dim);
-      font-size: 13px;
-      flex-wrap: wrap;
-    }
-
-    .footer a { color: var(--muted); text-decoration: none; }
-    .footer a:hover { color: var(--accent); }
-
-    @media (max-width: 900px) {
-      .surfaces { grid-template-columns: 1fr; }
-    }
-
-    @media (max-width: 560px) {
-      .shell { padding-inline: 14px; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>kataribe panel</title>
+<meta name="description" content="Kataribe panel: mining telemetry and controller analytics for Quai Network.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f5f2ea" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e0f12" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="canonical" href="https://panel.kataribe.org/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Kataribe">
+<meta property="og:title" content="kataribe panel">
+<meta property="og:description" content="Kataribe panel: mining telemetry and controller analytics for Quai Network.">
+<meta property="og:url" content="https://panel.kataribe.org/">
+<meta property="og:image" content="https://panel.kataribe.org/brand/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="kataribe panel">
+<meta name="twitter:description" content="Kataribe panel: mining telemetry and controller analytics for Quai Network.">
+<meta name="twitter:image" content="https://panel.kataribe.org/brand/og.png">
+<link rel="icon" href="brand/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="brand/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="brand/icon-180.png">
+<link rel="manifest" href="site.webmanifest">
+<link rel="preload" href="fonts/jetbrains-mono-kataribe.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/panel.css?v=e05cb9a8bd">
+<script src="js/theme.js?v=e05cb9a8bd"></script>
 </head>
 <body>
-  <main class="shell">
-    <nav class="topnav" aria-label="Primary navigation">
-      <a class="brand" href="index.html" aria-label="BitQuai home - Order inside entropy">
-        <picture><source src="assets/brand/bitquai-icon-q-256.webp" type="image/webp"><img src="assets/brand/bitquai-icon-q-256.png" alt="BitQuai Q mark" width="256" height="256" decoding="async" loading="eager" fetchpriority="high"></picture>
-        <span class="brand-text">
-          <strong>BitQuai</strong>
-          <span>Order inside entropy</span>
-        </span>
-      </a>
-      <div class="navlinks">
-        <span class="active">Home</span>
-        <a href="mining.html">Mining</a>
-        <a href="controller_view.html">Controller</a>
-      </div>
-    </nav>
+<div class="page">
+<div class="run">
 
-    <section class="hero">
-      <div class="hero-bg">
-        <picture>
-          <source srcset="assets/brand/bitquai-hero-1920x1080.webp" type="image/webp">
-          <img src="assets/brand/bitquai-hero-1920x1080.png" alt="BitQuai" width="1920" height="1080" fetchpriority="high" loading="eager" decoding="async">
-        </picture>
-      </div>
-    </section>
+<header class="top">
+  <a class="brand" href="index.html" aria-label="kataribe panel, home"><pre class="art logo" aria-hidden="true"><span class="l">╭┬─┬─┬─┬╮
+   │   │
+ │
+   │</span><span class="l l-amber">
+ ●   ●
+   ●   ●
+</span></pre><span class="brand-name">kataribe</span> <span class="brand-sub">panel</span></a>
+  <nav class="nav" aria-label="Primary navigation"><a href="index.html" aria-current="page">home</a><span class="sep" aria-hidden="true"> · </span><a href="mining.html">mining</a><span class="sep" aria-hidden="true"> · </span><a href="controller_view.html">controller</a></nav>
+  <button class="theme-switch" type="button" hidden></button>
+</header>
 
-    <section aria-labelledby="surfaces-title">
-      <p class="section-label" id="surfaces-title">Project surfaces</p>
-      <div class="surfaces">
-        <a class="surface-card" href="mining.html">
-          <div class="preview" style="background:linear-gradient(135deg, #1a060b, #0a0408);display:flex;align-items:center;justify-content:center;border-radius:14px;">
-            <svg viewBox="0 0 320 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:85%;opacity:.7">
-              <rect x="10" y="10" width="300" height="30" rx="6" fill="rgba(255,37,58,0.1)" stroke="rgba(255,37,58,0.2)" stroke-width="1"/>
-              <text x="20" y="30" fill="#ff253a" font-size="11" font-family="monospace">Mining Dashboard</text>
-              <rect x="10" y="52" width="145" height="138" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,37,58,0.12)" stroke-width="1"/>
-              <rect x="170" y="52" width="140" height="66" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,37,58,0.12)" stroke-width="1"/>
-              <rect x="170" y="124" width="140" height="66" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,37,58,0.12)" stroke-width="1"/>
-              <text x="25" y="80" fill="#9ca3af" font-size="9" font-family="monospace">Workers</text>
-              <text x="25" y="96" fill="#4ade80" font-size="18" font-weight="bold" font-family="monospace">9 active</text>
-              <text x="185" y="76" fill="#9ca3af" font-size="9" font-family="monospace">Hashrate</text>
-              <text x="185" y="92" fill="#e5e7eb" font-size="14" font-family="monospace">180 TH/s</text>
-              <text x="185" y="148" fill="#9ca3af" font-size="9" font-family="monospace">Blocks</text>
-              <text x="185" y="164" fill="#e5e7eb" font-size="14" font-family="monospace">2 found</text>
-              <line x1="25" y1="110" x2="140" y2="110" stroke="rgba(255,37,58,0.3)" stroke-width="1"/>
-              <line x1="25" y1="120" x2="130" y2="120" stroke="rgba(255,37,58,0.2)" stroke-width="1"/>
-              <line x1="25" y1="130" x2="140" y2="130" stroke="rgba(255,37,58,0.3)" stroke-width="1"/>
-            </svg>
-          </div>
-          <div class="surface-top"><span>01 / Mining</span><span class="status"><span class="dot"></span>Dashboard</span></div>
-          <h2>Mining telemetry</h2>
-        </a>
+<main>
+<div class="entry">
+  <h1>panel</h1>
+  <p class="gloss">mining telemetry and controller analytics for Quai Network.</p>
+  <p class="gloss">order inside entropy</p>
+</div>
 
-        <a class="surface-card" href="controller_view.html">
-          <div class="preview" style="background:linear-gradient(135deg, #1a060b, #0a0408);display:flex;align-items:center;justify-content:center;border-radius:14px;">
-            <svg viewBox="0 0 320 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:85%;opacity:.7">
-              <rect x="10" y="10" width="300" height="30" rx="6" fill="rgba(255,37,58,0.1)" stroke="rgba(255,37,58,0.2)" stroke-width="1"/>
-              <text x="20" y="30" fill="#ff253a" font-size="11" font-family="monospace">Controller</text>
-              <rect x="10" y="52" width="200" height="138" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,37,58,0.12)" stroke-width="1"/>
-              <rect x="220" y="52" width="90" height="66" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,37,58,0.12)" stroke-width="1"/>
-              <rect x="220" y="124" width="90" height="66" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,37,58,0.12)" stroke-width="1"/>
-              <path d="M20 160 Q50 130 80 140 Q110 150 140 120 Q170 90 200 110" stroke="#ff253a" stroke-width="2" fill="none"/>
-              <path d="M20 170 Q50 150 80 155 Q110 160 140 140 Q170 120 200 135" stroke="rgba(255,37,58,0.4)" stroke-width="1.5" fill="none"/>
-              <text x="230" y="76" fill="#9ca3af" font-size="8" font-family="monospace">Conversion</text>
-              <text x="230" y="92" fill="#e5e7eb" font-size="12" font-family="monospace">1 WQI</text>
-              <text x="230" y="148" fill="#9ca3af" font-size="8" font-family="monospace">Price</text>
-              <text x="230" y="164" fill="#e5e7eb" font-size="12" font-family="monospace">$0.42</text>
-            </svg>
-          </div>
-          <div class="surface-top"><span>02 / Controller</span><span class="status"><span class="dot"></span>Analytics</span></div>
-          <h2>Controller view</h2>
-        </a>
-      </div>
-    </section>
+<section class="sec" aria-labelledby="h-surfaces">
+  <h2 id="h-surfaces" class="sr">project surfaces</h2>
+  <dl class="strands">
+    <div class="strand">
+      <dt><span class="bead" aria-hidden="true">●</span><a href="mining.html">mining</a></dt>
+      <dd>01 / mining dashboard · mining telemetry: node statistics, algorithms, share distribution, connected workers, miners and confirmed blocks, read live from the pool.</dd>
+      <dd><a href="mining.html">open mining</a></dd>
+    </div>
+    <div class="strand">
+      <dt><span class="bead" aria-hidden="true">●</span><a href="controller_view.html">controller</a></dt>
+      <dd>02 / controller analytics · controller view: d and d* over the latest Prime blocks, exchange rate, conversion flow, discounts and a conversion calculator.</dd>
+      <dd><a href="controller_view.html">open controller</a></dd>
+    </div>
+  </dl>
+</section>
+</main>
 
-    <footer class="footer">
-      <span>BitQuai · Order inside entropy</span>
-      <a href="https://github.com/Clonners/Controller-view-Quai-Network" target="_blank" rel="noopener noreferrer">GitHub</a>
-    </footer>
-  </main>
+<span class="cord" aria-hidden="true">││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││</span>
+<span class="cursor" aria-hidden="true">█</span>
+</div>
 
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js').catch(() => {});
-    }
-  </script>
+<footer class="foot">
+  <span class="name">kataribe</span>
+  <span>order inside entropy</span>
+  <a href="https://github.com/Clonners/Controller-view-Quai-Network" target="_blank" rel="noopener noreferrer">source</a>
+</footer>
+
+</div>
+
+<script src="js/cord.js?v=e05cb9a8bd" defer></script>
+<script>
+if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js').catch(() => {}); }
+</script>
 </body>
 </html>

@@ -1,15 +1,37 @@
 /**
  * Diagnostics Component
  * API diagnostic tool for debugging
+ *
+ * Text interface: everything read from the node (paths, previews, JSON) is written
+ * with textContent, never as HTML.
  */
 
-import { AppState, Constants } from '../state.js';
-import { testWebSocket } from './websocket.js';
-import { fetchWithProxyFallback } from '../api/poolApi.js';
-import { Config } from '../config.js';
+import { AppState, Constants } from '../state.js?v=e05cb9a8bd';
+import { testWebSocket } from './websocket.js?v=e05cb9a8bd';
+import { fetchWithProxyFallback } from '../api/poolApi.js?v=e05cb9a8bd';
+import { Config } from '../config.js?v=e05cb9a8bd';
+import { el, button, note, shortAddress, copyWithFeedback, showDialog, hideDialog, layerRoot } from '../utils/dom.js?v=e05cb9a8bd';
+import { showError, showWarning } from '../utils/notifications.js?v=e05cb9a8bd';
 
 // Store last diagnostic results for download
 let lastDiagnosticResults = null;
+
+// A scan started later wins: an older one must not paint over it.
+let scanSerial = 0;
+
+/**
+ * Server address typed in the form, for running the scan before connecting.
+ * @returns {string|null}
+ */
+function baseUrlFromForm() {
+    const raw = document.getElementById('serverHost')?.value?.trim();
+    if (!raw) return null;
+    if (/^https?:\/\//i.test(raw)) {
+        try { return new URL(raw).origin; } catch (e) { return null; }
+    }
+    const protocol = window.location.protocol === 'https:' ? 'https' : 'http';
+    return `${protocol}://${raw.replace(/\/+$/, '')}`;
+}
 
 /**
  * Open API diagnostic modal
@@ -17,28 +39,34 @@ let lastDiagnosticResults = null;
 export async function openApiDiagnostic() {
     const modal = document.getElementById('apiDiagnosticModal');
     if (!modal) return;
-    
-    modal.style.display = 'flex';
+
+    showDialog(modal);
     const resultsContainer = document.getElementById('apiDiagnosticResults');
-    
-    // Allow diagnostics even if not connected by using the input fields
+    if (!resultsContainer) return;
+
+    // Allow diagnostics even if not connected by using the server field
     let baseUrl = AppState.connection.apiBaseUrl;
     if (!baseUrl) {
-        const ipInput = document.getElementById('serverIp')?.value?.trim();
-        const portInput = document.getElementById('serverPort')?.value?.trim();
-        if (!ipInput || !portInput) {
-            resultsContainer.innerHTML = '<div class="diagnostic-error">⚠️ Enter server IP and port first.</div>';
+        baseUrl = baseUrlFromForm();
+        if (!baseUrl) {
+            resultsContainer.replaceChildren(
+                el('div', { className: 'diagnostic-error', text: 'Enter server host first.' })
+            );
             return;
         }
-        const protocol = window.location.protocol === 'https:' ? 'https' : 'http';
-        baseUrl = `${protocol}://${ipInput}:${portInput}`;
     }
-    
-    resultsContainer.innerHTML = '<div class="diagnostic-loading">🔍 Scanning API endpoints...</div>';
-    
+
+    const serial = ++scanSerial;
+    resultsContainer.replaceChildren(
+        el('div', { className: 'diagnostic-loading' }, [
+            el('span', { className: 'loading-cursor', text: '█ ', attrs: { 'aria-hidden': 'true' } }),
+            'Scanning API endpoints...'
+        ])
+    );
+
     // Get a sample address
     const sampleAddress = AppState.cache.workers.length > 0 ? AppState.cache.workers[0].address : null;
-    
+
     // Endpoints to test
     const endpointsToTest = [
         { path: '/health', description: 'Health check', category: 'System' },
@@ -54,36 +82,37 @@ export async function openApiDiagnostic() {
             { path: `/api/miner/${sampleAddress}/workers`, description: 'Workers for an address', category: 'Miner' },
         ] : []),
     ];
-    
+
     const results = [];
     const allData = {};
-    
+
     for (const endpoint of endpointsToTest) {
         try {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 5000);
-            
+
             const response = await fetchWithProxyFallback(endpoint.path, {
                 signal: controller.signal,
                 method: 'GET'
             }, baseUrl);
             clearTimeout(timeoutId);
-            
+
             let responseData = null;
             let dataPreview = '';
-            
+
             if (response.ok) {
+                // Read the body once: it may not be JSON.
+                const text = await response.text();
                 try {
-                    responseData = await response.json();
+                    responseData = JSON.parse(text);
                     dataPreview = getDataPreview(responseData);
                     allData[endpoint.path] = responseData;
                 } catch (e) {
-                    const text = await response.text();
                     dataPreview = '(non-JSON response)';
                     allData[endpoint.path] = { _raw: text };
                 }
             }
-            
+
             results.push({
                 path: endpoint.path,
                 description: endpoint.description,
@@ -104,11 +133,13 @@ export async function openApiDiagnostic() {
             });
         }
     }
-    
+
     // Test WebSocket
     const wsResult = await testWebSocket();
     results.push(wsResult);
-    
+
+    if (serial !== scanSerial) return;
+
     // Store for download
     lastDiagnosticResults = {
         timestamp: new Date().toISOString(),
@@ -117,7 +148,7 @@ export async function openApiDiagnostic() {
         endpoints: results,
         fullData: allData
     };
-    
+
     // Render results
     renderDiagnosticResults(resultsContainer, results, sampleAddress);
 }
@@ -140,6 +171,50 @@ function getDataPreview(data) {
 }
 
 /**
+ * One endpoint of the list: a line that opens its details when it answered.
+ */
+function endpointItem(r) {
+    const item = el('div', { className: 'endpoint-item ' + (r.ok ? 'available' : 'unavailable') });
+
+    const headParts = [
+        el('span', { className: 'endpoint-status', text: r.ok ? '✓' : '✗', attrs: { 'aria-hidden': 'true' } }),
+        el('span', { className: 'sr', text: r.ok ? 'available: ' : 'not available: ' }),
+        el('span', { className: 'endpoint-path', text: r.path }),
+        el('span', { className: 'endpoint-desc', text: r.description }),
+        !r.ok ? el('span', { className: 'endpoint-error', text: String(r.status) }) : null
+    ];
+
+    if (!r.ok) {
+        item.appendChild(el('div', { className: 'endpoint-header' }, headParts));
+        return item;
+    }
+
+    const details = el('div', { className: 'endpoint-details' });
+    details.hidden = true;
+
+    const header = el('button', {
+        className: 'endpoint-header',
+        attrs: { type: 'button', 'aria-expanded': 'false' },
+        on: { click: () => toggleEndpointDetails(item) }
+    }, headParts);
+
+    const buttons = el('div', { className: 'endpoint-buttons' });
+    const fullUrl = `${lastDiagnosticResults.serverUrl}${r.path}`;
+    const copyBtn = button('copy url', () => copyWithFeedback(fullUrl, copyBtn), { className: 'copy-endpoint-btn' });
+    buttons.appendChild(copyBtn);
+    if (r.path !== '/api/ws') {
+        buttons.appendChild(button('view data', () => viewEndpointData(r.path), { className: 'view-data-btn' }));
+    }
+
+    details.appendChild(el('div', { className: 'endpoint-preview', text: r.dataPreview || '' }));
+    details.appendChild(buttons);
+
+    item.appendChild(header);
+    item.appendChild(details);
+    return item;
+}
+
+/**
  * Render diagnostic results
  * @param {HTMLElement} container - Container element
  * @param {Array} results - Results array
@@ -148,99 +223,74 @@ function getDataPreview(data) {
 function renderDiagnosticResults(container, results, sampleAddress) {
     const available = results.filter(r => r.ok);
     const unavailable = results.filter(r => !r.ok);
-    
+
     const categories = ['System', 'Pool', 'Standard', 'Miner', 'Real-time'];
-    
-    let html = `
-        <div class="diagnostic-actions">
-            <button class="diagnostic-btn download-btn" onclick="window.downloadDiagnosticReport()">
-                📥 Download Full Report
-            </button>
-            <button class="diagnostic-btn refresh-btn" onclick="window.viewAllDiagnosticData()">
-                📄 View All Data
-            </button>
-            <button class="diagnostic-btn refresh-btn" onclick="window.captureWebSocketSample()">
-                ⚡ Capture WS Sample
-            </button>
-            <button class="diagnostic-btn refresh-btn" onclick="window.openApiDiagnostic()">
-                🔄 Refresh
-            </button>
-        </div>
-        <div class="diagnostic-summary">
-            <div class="summary-stat available">
-                <span class="stat-number">${available.length}</span>
-                <span class="stat-label">Available</span>
-            </div>
-            <div class="summary-stat unavailable">
-                <span class="stat-number">${unavailable.length}</span>
-                <span class="stat-label">Not Found</span>
-            </div>
-        </div>
-        ${sampleAddress ? `<div class="diagnostic-note">📝 Testing miner endpoints with: <code>${sampleAddress.substring(0, 10)}...${sampleAddress.slice(-6)}</code></div>` : '<div class="diagnostic-note warning">⚠️ No connected miners - miner-specific endpoints not tested</div>'}
-    `;
-    
+
+    const parts = [];
+
+    parts.push(el('div', { className: 'diagnostic-actions' }, [
+        button('download full report', () => downloadDiagnosticReport(), { className: 'diagnostic-btn download-btn' }),
+        button('view all data', () => viewAllDiagnosticData(), { className: 'diagnostic-btn' }),
+        button('capture ws sample', () => captureWebSocketSample(), { className: 'diagnostic-btn' }),
+        button('refresh', () => openApiDiagnostic(), { className: 'diagnostic-btn refresh-btn' })
+    ]));
+
+    parts.push(el('div', { className: 'diagnostic-summary' }, [
+        el('span', { className: 'summary-stat available' }, [
+            el('span', { className: 'stat-label', text: 'available ' }),
+            el('span', { className: 'stat-number', text: String(available.length) })
+        ]),
+        el('span', { className: 'summary-sep', text: ' · ', attrs: { 'aria-hidden': 'true' } }),
+        el('span', { className: 'summary-stat unavailable' }, [
+            el('span', { className: 'stat-label', text: 'not found ' }),
+            el('span', { className: 'stat-number', text: String(unavailable.length) })
+        ])
+    ]));
+
+    if (sampleAddress) {
+        parts.push(el('div', { className: 'diagnostic-note' }, [
+            'Testing miner endpoints with: ',
+            el('code', { text: shortAddress(sampleAddress, 10, 6), title: sampleAddress })
+        ]));
+    } else {
+        parts.push(el('div', {
+            className: 'diagnostic-note warning',
+            text: 'No connected miners - miner-specific endpoints not tested'
+        }));
+    }
+
     categories.forEach(category => {
         const categoryResults = results.filter(r => r.category === category);
         if (categoryResults.length === 0) return;
-        
+
         const categoryAvailable = categoryResults.filter(r => r.ok);
-        const categoryIcon = category === 'System' ? '🔧' : 
-                            category === 'Pool' ? '🏊' : 
-                            category === 'Standard' ? '📊' : 
-                            category === 'Miner' ? '⛏️' : '⚡';
-        
-        html += `
-            <div class="diagnostic-section">
-                <h4>${categoryIcon} ${category} Endpoints <span class="category-count">(${categoryAvailable.length}/${categoryResults.length})</span></h4>
-                <div class="endpoint-list">
-        `;
-        
-        categoryResults.forEach(r => {
-            const statusClass = r.ok ? 'available' : 'unavailable';
-            const statusIcon = r.ok ? '✓' : '✗';
-            
-            html += `
-                <div class="endpoint-item ${statusClass}" onclick="window.toggleEndpointDetails(this)">
-                    <div class="endpoint-header">
-                        <span class="endpoint-status">${statusIcon}</span>
-                        <span class="endpoint-path">${r.path}</span>
-                        <span class="endpoint-desc">${r.description}</span>
-                        ${!r.ok ? `<span class="endpoint-error">${r.status}</span>` : ''}
-                    </div>
-                    ${r.ok ? `
-                    <div class="endpoint-details" style="display: none;">
-                        <div class="endpoint-preview">${r.dataPreview || ''}</div>
-                        <div class="endpoint-buttons">
-                            <button class="copy-endpoint-btn" onclick="event.stopPropagation(); window.copyToClipboard('${lastDiagnosticResults.serverUrl}${r.path}')">📋 Copy URL</button>
-                            ${r.path !== '/api/ws' ? `<button class="view-data-btn" onclick="event.stopPropagation(); window.viewEndpointData('${r.path}')">👁️ View Data</button>` : ''}
-                        </div>
-                    </div>
-                    ` : ''}
-                </div>
-            `;
-        });
-        
-        html += `
-                </div>
-            </div>
-        `;
+
+        parts.push(el('div', { className: 'diagnostic-section' }, [
+            el('h4', {}, [
+                `${category.toLowerCase()} endpoints `,
+                el('span', { className: 'category-count', text: `(${categoryAvailable.length}/${categoryResults.length})` })
+            ]),
+            el('div', { className: 'endpoint-list' }, categoryResults.map(endpointItem))
+        ]));
     });
-    
-    html += `
-        <div class="diagnostic-info">
-            <strong>📋 API Summary</strong><br>
-            <ul>
-                <li><strong>/api/pool/stats</strong> - Main dashboard data (hashrate by algorithm, workers, shares)</li>
-                <li><strong>/api/pool/shares</strong> - Luck statistics (averageLuck field)</li>
-                <li><strong>/api/pool/workers</strong> - List of connected workers with individual hashrates</li>
-                <li><strong>/api/pool/blocks</strong> - Blocks found by the pool</li>
-                <li><strong>/api/miner/{address}/stats</strong> - Individual miner statistics</li>
-                <li><strong>/api/ws</strong> - Real-time updates via WebSocket</li>
-            </ul>
-        </div>
-    `;
-    
-    container.innerHTML = html;
+
+    const summary = [
+        ['/api/pool/stats', 'Main dashboard data (hashrate by algorithm, workers, shares)'],
+        ['/api/pool/shares', 'Luck statistics (averageLuck field)'],
+        ['/api/pool/workers', 'List of connected workers with individual hashrates'],
+        ['/api/pool/blocks', 'Blocks found by the pool'],
+        ['/api/miner/{address}/stats', 'Individual miner statistics'],
+        ['/api/ws', 'Real-time updates via WebSocket']
+    ];
+    parts.push(el('div', { className: 'diagnostic-info' }, [
+        el('h4', { text: 'api summary' }),
+        el('ul', {}, summary.map(([path, what]) => el('li', {}, [
+            el('strong', { text: path }),
+            ' - ' + what
+        ])))
+    ]));
+
+    container.replaceChildren(...parts);
 }
 
 /**
@@ -248,10 +298,10 @@ function renderDiagnosticResults(container, results, sampleAddress) {
  */
 export function downloadDiagnosticReport() {
     if (!lastDiagnosticResults) {
-        alert('No diagnostic data available. Please run the diagnostic first.');
+        showWarning('No diagnostic data available. Please run the diagnostic first.');
         return;
     }
-    
+
     let report = `========================================
 QUAI MINING NODE - API DIAGNOSTIC REPORT
 ========================================
@@ -263,7 +313,7 @@ Sample Miner Address: ${lastDiagnosticResults.sampleAddress || 'None available'}
 
     const available = lastDiagnosticResults.endpoints.filter(e => e.ok);
     const unavailable = lastDiagnosticResults.endpoints.filter(e => !e.ok);
-    
+
     report += `SUMMARY
 --------
 Available Endpoints: ${available.length}
@@ -332,12 +382,16 @@ END OF REPORT
 
 /**
  * Toggle endpoint details
- * @param {HTMLElement} element - Element clicked
+ * @param {HTMLElement} element - Endpoint item (or anything inside it)
  */
 export function toggleEndpointDetails(element) {
-    const details = element.querySelector('.endpoint-details');
-    if (details) {
-        details.style.display = details.style.display === 'none' ? 'block' : 'none';
+    const item = element?.closest ? (element.closest('.endpoint-item') || element) : element;
+    const details = item?.querySelector('.endpoint-details');
+    if (!details) return;
+    details.hidden = !details.hidden;
+    const header = item.querySelector('.endpoint-header');
+    if (header && header.hasAttribute('aria-expanded')) {
+        header.setAttribute('aria-expanded', details.hidden ? 'false' : 'true');
     }
 }
 
@@ -346,9 +400,53 @@ export function toggleEndpointDetails(element) {
  * @param {string} text - Text to copy
  */
 export function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(() => {
-        // Show feedback
+    return copyWithFeedback(text, null);
+}
+
+// ---------------------
+// Data window (raw answers of the node, as text)
+// ---------------------
+
+const dataViewOpeners = new WeakMap();
+
+function closeDataView(dataModal) {
+    if (!dataModal) return;
+    const opener = dataViewOpeners.get(dataModal);
+    dataModal.remove();
+    if (opener && document.contains(opener) && typeof opener.focus === 'function') {
+        try { opener.focus({ preventScroll: true }); } catch (e) { /* ignore */ }
+    }
+}
+
+/**
+ * Open a window with data shown as indented JSON text.
+ * @param {string} title
+ * @param {any} data
+ */
+function openDataView(title, data) {
+    const dataModal = el('div', {
+        className: 'data-view-modal',
+        attrs: { role: 'dialog', 'aria-modal': 'true', 'aria-label': title }
     });
+    const closeBtn = button('close', () => closeDataView(dataModal), { className: 'dialog-close' });
+
+    dataModal.appendChild(el('div', { className: 'data-view-content' }, [
+        el('div', { className: 'data-view-header' }, [
+            el('h3', { text: title }),
+            closeBtn
+        ]),
+        // tabindex: the text can be scrolled with the keyboard
+        el('pre', { className: 'data-view-json', text: JSON.stringify(data, null, 2), attrs: { tabindex: '0' } })
+    ]));
+    dataModal.addEventListener('click', (e) => {
+        if (e.target === dataModal) closeDataView(dataModal);
+    });
+
+    const active = document.activeElement;
+    if (active && active !== document.body) dataViewOpeners.set(dataModal, active);
+
+    layerRoot().appendChild(dataModal);
+    try { closeBtn.focus({ preventScroll: true }); } catch (e) { /* ignore */ }
 }
 
 /**
@@ -359,26 +457,12 @@ export async function viewEndpointData(path) {
     try {
         const baseUrl = AppState.connection.apiBaseUrl || lastDiagnosticResults?.serverUrl;
         if (!baseUrl) throw new Error('No server URL available');
-        const response = await fetch(`${baseUrl}${path}`);
+        // Same road as the scan (through the proxy when the page needs it).
+        const response = await fetchWithProxyFallback(path, { method: 'GET' }, baseUrl);
         const data = await response.json();
-        
-        const dataModal = document.createElement('div');
-        dataModal.className = 'data-view-modal';
-        dataModal.innerHTML = `
-            <div class="data-view-content">
-                <div class="data-view-header">
-                    <h3>📄 ${path}</h3>
-                    <button onclick="this.closest('.data-view-modal').remove()">✕</button>
-                </div>
-                <pre class="data-view-json">${JSON.stringify(data, null, 2)}</pre>
-            </div>
-        `;
-        dataModal.onclick = (e) => {
-            if (e.target === dataModal) dataModal.remove();
-        };
-        document.body.appendChild(dataModal);
+        openDataView(path, data);
     } catch (e) {
-        alert('Error fetching data: ' + e.message);
+        showError('Error fetching data: ' + e.message);
     }
 }
 
@@ -387,28 +471,14 @@ export async function viewEndpointData(path) {
  */
 export function viewAllDiagnosticData() {
     if (!lastDiagnosticResults) {
-        alert('No diagnostic data available. Please run the diagnostic first.');
+        showWarning('No diagnostic data available. Please run the diagnostic first.');
         return;
     }
     const limitedData = JSON.parse(JSON.stringify(lastDiagnosticResults.fullData));
     if (limitedData['/api/pool/shares']?.shares && Array.isArray(limitedData['/api/pool/shares'].shares)) {
         limitedData['/api/pool/shares'].shares = limitedData['/api/pool/shares'].shares.slice(0, 1);
     }
-    const dataModal = document.createElement('div');
-    dataModal.className = 'data-view-modal';
-    dataModal.innerHTML = `
-        <div class="data-view-content">
-            <div class="data-view-header">
-                <h3>📄 All API Responses</h3>
-                <button onclick="this.closest('.data-view-modal').remove()">✕</button>
-            </div>
-            <pre class="data-view-json">${JSON.stringify(limitedData, null, 2)}</pre>
-        </div>
-    `;
-    dataModal.onclick = (e) => {
-        if (e.target === dataModal) dataModal.remove();
-    };
-    document.body.appendChild(dataModal);
+    openDataView('all api responses', limitedData);
 }
 
 /**
@@ -417,7 +487,7 @@ export function viewAllDiagnosticData() {
 export async function captureWebSocketSample() {
     const baseUrl = AppState.connection.apiBaseUrl || lastDiagnosticResults?.serverUrl;
     if (!baseUrl) {
-        alert('No server URL available. Please run the diagnostic first.');
+        showWarning('No server URL available. Please run the diagnostic first.');
         return;
     }
 
@@ -498,29 +568,14 @@ export async function captureWebSocketSample() {
 
     lastDiagnosticResults.fullData['/api/ws'] = result;
 
-    const dataModal = document.createElement('div');
-    dataModal.className = 'data-view-modal';
-    dataModal.innerHTML = `
-        <div class="data-view-content">
-            <div class="data-view-header">
-                <h3>📄 /api/ws (sample)</h3>
-                <button onclick="this.closest('.data-view-modal').remove()">✕</button>
-            </div>
-            <pre class="data-view-json">${JSON.stringify(result, null, 2)}</pre>
-        </div>
-    `;
-    dataModal.onclick = (e) => {
-        if (e.target === dataModal) dataModal.remove();
-    };
-    document.body.appendChild(dataModal);
+    openDataView('/api/ws (sample)', result);
 }
 
 /**
  * Close API diagnostic modal
  */
 export function closeApiDiagnostic() {
-    const modal = document.getElementById('apiDiagnosticModal');
-    if (modal) modal.style.display = 'none';
+    hideDialog(document.getElementById('apiDiagnosticModal'));
 }
 
 /**
@@ -535,4 +590,24 @@ export function initDiagnosticGlobals() {
     window.viewEndpointData = viewEndpointData;
     window.viewAllDiagnosticData = viewAllDiagnosticData;
     window.captureWebSocketSample = captureWebSocketSample;
+
+    // Escape closes the data window on top first, then the diagnostic itself.
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        const views = document.querySelectorAll('.data-view-modal');
+        if (views.length > 0) {
+            closeDataView(views[views.length - 1]);
+            return;
+        }
+        const modal = document.getElementById('apiDiagnosticModal');
+        if (modal && modal.style.display === 'flex') closeApiDiagnostic();
+    });
+
+    // A click outside the box closes the diagnostic.
+    const modal = document.getElementById('apiDiagnosticModal');
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeApiDiagnostic();
+        });
+    }
 }

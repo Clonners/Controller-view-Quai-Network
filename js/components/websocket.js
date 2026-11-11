@@ -3,8 +3,9 @@
  * Handles real-time updates via WebSocket connection
  */
 
-import { AppState } from '../state.js';
-import { Config } from '../config.js';
+import { AppState } from '../state.js?v=e05cb9a8bd';
+import { Config } from '../config.js?v=e05cb9a8bd';
+import { el, layerRoot } from '../utils/dom.js?v=e05cb9a8bd';
 
 let wsReconnectTimeout = null;
 
@@ -146,19 +147,24 @@ function updateWSIndicator(connected) {
     indicator.style.display = 'flex';
     if (connected) {
         indicator.classList.remove('disconnected');
-        const text = indicator.querySelector('.ws-text'); if (text) text.textContent = 'Live';
+        const text = indicator.querySelector('.ws-text'); if (text) text.textContent = 'live';
     } else {
         indicator.classList.add('disconnected');
-        const text = indicator.querySelector('.ws-text'); if (text) text.textContent = 'Reconnecting...';
+        const text = indicator.querySelector('.ws-text'); if (text) text.textContent = 'reconnecting...';
     }
 }
 
 export function showBlockNotification(block) {
     try {
-        const notification = document.createElement('div');
-        notification.className = 'block-notification';
-        notification.innerHTML = `<div style="color:#4ade80;font-weight:600;margin-bottom:6px">🎉 Block Found!</div><div style="color:#e5e7eb;font-size:0.85rem;">Hash: ${(block.hash||'').substring(0,20)}...</div>`;
-        document.body.appendChild(notification);
+        // The hash comes from the node: written as text, never as HTML.
+        const notification = el('div', { className: 'block-notification', attrs: { role: 'status' } }, [
+            el('div', { className: 'block-notification-title' }, [
+                el('span', { text: '◆ ', attrs: { 'aria-hidden': 'true' } }),
+                'block found'
+            ]),
+            el('div', { className: 'block-notification-hash', text: 'hash: ' + String(block.hash || '').substring(0, 20) + '...' })
+        ]);
+        layerRoot().appendChild(notification);
         setTimeout(() => notification.remove(), 5000);
     } catch (e) { console.warn('showBlockNotification error', e); }
 }

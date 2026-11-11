@@ -1,18 +1,26 @@
 #!/usr/bin/env python3
 """
-BitQuai Controller-View build script.
+Kataribe panel build script.
 Usage:
   python3 build.py              # Run all build steps
-  python3 build.py --css        # Minify CSS only
+  python3 build.py --stamp      # Version the assets (?v=<hash>) and the service worker
   python3 build.py --validate   # Validate HTML only
   python3 build.py --links      # Check internal links only
   python3 build.py --dist       # Copy to dist/ directory only
+  python3 build.py --check      # Fail if --stamp would change anything (nothing is written)
+
+The site has one hand-written stylesheet (css/panel.css) served as it is, so there
+is no minify step. Cloudflare keeps css/js for hours: every css/js address carries
+?v=<hash of the whole static shell>, and --stamp rewrites it everywhere at once
+(HTML, ES-module imports and the service worker list). Run it before each commit
+that touches a page, a stylesheet or a script.
 
 Requires: Python 3.8+ (stdlib only)
 """
 
 import argparse
 import glob
+import hashlib
 import html.parser
 import json
 import os
@@ -24,65 +32,113 @@ from pathlib import Path
 # ─── Paths ───────────────────────────────────────────────────────────
 ROOT = Path(__file__).resolve().parent
 DIST = ROOT / "dist"
+os.chdir(ROOT)  # every path below is relative to the site root
 
-CSS_FILES = [
-    "css/styles.css",
-    "css/brand.css",
-    "controller_styles.css",
+HTML_FILES = sorted(f for f in glob.glob("*.html") + glob.glob("*/index.html") if not f.startswith("dist/"))
+
+# ─── Asset versions (?v=<hash>) and service worker list ─────────────
+SW_FILE = "sw.js"
+SW_START = "/* build:assets:start"
+SW_END = "/* build:assets:end */"
+
+# Extra files the service worker keeps for offline use (besides pages, css and js).
+SHELL_EXTRA = [
+    "site.webmanifest",
+    "fonts/jetbrains-mono-kataribe.woff2",
+    "brand/favicon.svg",
+    "brand/favicon-32.png",
+    "brand/icon-180.png",
+    "brand/icon-192.png",
+    "brand/icon-512.png",
 ]
 
-HTML_FILES = [f for f in glob.glob("*.html") + glob.glob("*/index.html") if not f.startswith("dist/")]
+# Pages kept offline (the redirect stubs are not needed there).
+SHELL_PAGES = ["index.html", "mining.html", "controller_view.html", "404.html"]
 
-# ─── CSS Minifier ───────────────────────────────────────────────────
-def minify_css(text: str) -> str:
-    """Strip comments, normalize whitespace, remove unnecessary chars."""
-    # Remove CSS comments /* ... */
-    text = re.sub(r'/\*.*?\*/', '', text, flags=re.DOTALL)
-    # Remove leading/trailing whitespace from lines
-    text = '\n'.join(line.strip() for line in text.split('\n'))
-    # Remove newlines around braces, colons, semicolons
-    text = re.sub(r'\s*\{\s*', '{', text)
-    text = re.sub(r'\s*\}\s*', '}', text)
-    text = re.sub(r'\s*;\s*', ';', text)
-    text = re.sub(r'\s*:\s*', ':', text)
-    text = re.sub(r'\s*,\s*', ',', text)
-    # Collapse multiple spaces
-    text = re.sub(r'[^\S\n]+', ' ', text)
-    # Remove remaining newlines
-    text = text.replace('\n', '')
-    # Remove space before semicolons and closing braces
-    text = re.sub(r'\s*;{1}', ';', text)
-    text = re.sub(r'\s*}', '}', text)
-    # Remove space after opening brace
-    text = re.sub(r'{\s*', '{', text)
-    # Remove empty rules
-    text = re.sub(r'[^{]*\{\s*\}', '', text)
-    return text.strip()
+VERSION_RE = re.compile(r'(\.(?:css|js))\?v=[0-9a-z]+')
+# href="x.css" / src="x.js" in HTML (local addresses only)
+HTML_REF_RE = re.compile(r'''((?:href|src)=["'])(?!https?:|//|data:)([^"'?#]+\.(?:css|js))(?:\?v=[0-9a-z]+)?(["'])''')
+# import ... from './x.js'   and   import('./x.js')
+JS_IMPORT_RE = re.compile(r'''((?:\bfrom\s*|\bimport\s*\(\s*|\bimport\s+)["'])(\.{1,2}/[^"'?#]+\.js)(?:\?v=[0-9a-z]+)?(["'])''')
 
 
-def build_css() -> list:
-    """Minify all CSS files. Returns list of (original, minified) tuples."""
-    results = []
-    for rel_path in CSS_FILES:
-        src = ROOT / rel_path
-        if not src.exists():
-            print(f"  ⚠ CSS not found: {rel_path}")
+def script_files() -> list:
+    """Every script of the site, as paths relative to the root."""
+    files = set(glob.glob("js/**/*.js", recursive=True)) | {"main.js", "vendor/decimal.min.js"}
+    return sorted(f.replace(os.sep, "/") for f in files if (ROOT / f).exists())
+
+
+def style_files() -> list:
+    return sorted(f.replace(os.sep, "/") for f in glob.glob("css/*.css"))
+
+
+def strip_versions(text: str) -> str:
+    return VERSION_RE.sub(r"\1", text)
+
+
+def shell_hash() -> str:
+    """One short hash for the whole static shell (the same whatever ?v= it carries now)."""
+    digest = hashlib.sha256()
+    for rel in sorted(set(HTML_FILES + style_files() + script_files() + SHELL_EXTRA)):
+        path = ROOT / rel
+        if not path.exists():
             continue
+        data = path.read_bytes()
+        if rel.endswith((".html", ".css", ".js")):
+            data = strip_versions(data.decode("utf-8")).encode("utf-8")
+        digest.update(rel.encode("utf-8") + b"\0" + data + b"\0")
+    return digest.hexdigest()[:10]
 
-        rel = Path(rel_path)
-        min_rel_path = rel.with_name(f"{rel.stem}.min{rel.suffix}")
-        min_path = ROOT / min_rel_path
-        original = src.read_text(encoding="utf-8")
-        minified = minify_css(original)
-        min_path.write_text(minified, encoding="utf-8")
 
-        orig_kb = len(original.encode("utf-8")) / 1024
-        mini_kb = len(minified.encode("utf-8")) / 1024
-        reduction = (1 - mini_kb / orig_kb) * 100 if orig_kb > 0 else 0
+def sw_block(version: str) -> str:
+    urls = ["/"] + ["/" + p for p in SHELL_PAGES if (ROOT / p).exists()]
+    urls += [f"/{f}?v={version}" for f in style_files() + script_files()]
+    urls += ["/" + f for f in SHELL_EXTRA if (ROOT / f).exists()]
+    lines = [SW_START + " — written by `python3 build.py --stamp`; do not edit by hand */",
+             f"const CACHE = 'panel-ascii-{version}';",
+             "const ASSETS = ["]
+    lines += [f"  '{u}'," for u in urls]
+    lines += ["];", SW_END]
+    return "\n".join(lines)
 
-        print(f"  ✓ {rel_path}: {orig_kb:.1f}KB → {mini_kb:.1f}KB ({reduction:.0f}% smaller)")
-        results.append((original, minified))
-    return results
+
+def stamp_assets(write: bool = True) -> list:
+    """Put ?v=<hash> on every css/js address. Returns the files that changed (or would)."""
+    version = shell_hash()
+    changed = []
+
+    def apply(rel: str, new_text: str, old_text: str):
+        if new_text != old_text:
+            changed.append(rel)
+            if write:
+                (ROOT / rel).write_text(new_text, encoding="utf-8", newline="\n")
+
+    for rel in HTML_FILES:
+        old = (ROOT / rel).read_text(encoding="utf-8")
+        apply(rel, HTML_REF_RE.sub(lambda m: f"{m.group(1)}{m.group(2)}?v={version}{m.group(3)}", old), old)
+
+    for rel in script_files():
+        if rel.startswith("vendor/"):
+            continue
+        old = (ROOT / rel).read_text(encoding="utf-8")
+        apply(rel, JS_IMPORT_RE.sub(lambda m: f"{m.group(1)}{m.group(2)}?v={version}{m.group(3)}", old), old)
+
+    sw_path = ROOT / SW_FILE
+    if sw_path.exists():
+        old = sw_path.read_text(encoding="utf-8")
+        start, end = old.find(SW_START), old.find(SW_END)
+        if start == -1 or end == -1:
+            print(f"  ✗ {SW_FILE}: build markers not found")
+            changed.append(SW_FILE + " (markers missing)")
+        else:
+            apply(SW_FILE, old[:start] + sw_block(version) + old[end + len(SW_END):], old)
+
+    verb = "updated" if write else "would change"
+    if changed:
+        for rel in changed:
+            print(f"  {'✓' if write else '✗'} {verb}: {rel}")
+    print(f"  {'✓' if write or not changed else '✗'} asset version: {version}" + ("" if write or not changed else "  (run: python3 build.py --stamp)"))
+    return changed
 
 
 # ─── HTML Validator ─────────────────────────────────────────────────
@@ -282,7 +338,7 @@ def check_links() -> list:
 
 # ─── Build Dist ──────────────────────────────────────────────────────
 def build_dist() -> str:
-    """Copy project to dist/ with minified CSS referenced."""
+    """Copy the site to dist/ (what gets served: no build tooling)."""
     if DIST.exists():
         shutil.rmtree(DIST)
     DIST.mkdir(parents=True)
@@ -304,16 +360,6 @@ def build_dist() -> str:
             if not item.name.endswith('.min'):
                 shutil.copy2(item, DIST / item.name)
 
-    # Also copy minified CSS files (.min.css keeps a valid text/css MIME type)
-    for css_file in CSS_FILES:
-        rel = Path(css_file)
-        min_rel = rel.with_name(f"{rel.stem}.min{rel.suffix}")
-        min_src = ROOT / min_rel
-        if min_src.exists():
-            dest = DIST / min_rel
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(min_src, dest)
-
     # Report
     total = sum(f.stat().st_size for f in DIST.rglob('*') if f.is_file()) / 1024
     file_count = sum(1 for f in DIST.rglob('*') if f.is_file())
@@ -324,30 +370,35 @@ def build_dist() -> str:
 
 # ─── Main ────────────────────────────────────────────────────────────
 def main():
-    parser = argparse.ArgumentParser(description="BitQuai Controller-View build tool")
-    parser.add_argument("--css", action="store_true", help="Minify CSS files")
+    parser = argparse.ArgumentParser(description="Kataribe panel build tool")
+    parser.add_argument("--stamp", action="store_true", help="Version css/js addresses and the service worker list")
+    parser.add_argument("--check", action="store_true", help="Fail if --stamp would change anything")
     parser.add_argument("--validate", action="store_true", help="Validate HTML files")
     parser.add_argument("--links", action="store_true", help="Check internal links")
     parser.add_argument("--dist", action="store_true", help="Build dist/ directory")
     args = parser.parse_args()
 
     # If no flags, run all
-    run_all = not any([args.css, args.validate, args.links, args.dist])
+    run_all = not any([args.stamp, args.check, args.validate, args.links, args.dist])
 
     print("=" * 50)
-    print("BitQuai Controller-View Build")
+    print("Kataribe panel build")
     print("=" * 50)
 
     total_errors = 0
 
-    if run_all or args.css:
-        print("\n📦 Minifying CSS...")
-        build_css()
+    if (run_all or args.stamp) and not args.check:
+        print("\n📦 Versioning assets...")
+        stamp_assets(write=True)
+
+    if args.check:
+        print("\n📦 Checking asset versions...")
+        total_errors += len(stamp_assets(write=False))
 
     if run_all or args.validate:
         print("\n🔍 Validating HTML...")
         results = validate_html()
-        total_errors = sum(len(e) for _, e, _ in results)
+        total_errors += sum(len(e) for _, e, _ in results)
 
     if run_all or args.links:
         print("\n🔗 Checking internal links...")

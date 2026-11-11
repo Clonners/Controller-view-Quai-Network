@@ -1,93 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>404 — Page Not Found | BitQuai</title>
-  <link rel="stylesheet" href="css/brand.css">
-  <style>
-    .error-page {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      text-align: center;
-      padding: 24px;
-      animation: fadeUp 0.5s ease-out both;
-    }
-    .error-code {
-      font-size: 6rem;
-      font-weight: 900;
-      background: linear-gradient(135deg, var(--accent), #ff7a3c);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      line-height: 1;
-      margin-bottom: 16px;
-    }
-    .error-title {
-      font-size: 1.5rem;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-    .error-desc {
-      color: var(--muted);
-      max-width: 400px;
-      margin-bottom: 32px;
-      line-height: 1.5;
-    }
-    .error-actions {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    .error-actions a {
-      padding: 10px 20px;
-      border-radius: 999px;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 0.85rem;
-      transition: transform 0.12s ease, box-shadow 0.12s ease;
-    }
-    .error-actions a:hover {
-      transform: translateY(-1px);
-    }
-    .error-actions a.primary {
-      background: linear-gradient(135deg, var(--accent), #ff7a3c);
-      color: #050308;
-      box-shadow: 0 10px 24px rgba(255, 37, 58, 0.6);
-    }
-    .error-actions a.secondary {
-      background: rgba(7, 3, 7, 0.95);
-      color: var(--muted);
-      border: 1px solid rgba(75, 85, 99, 0.8);
-    }
-    .error-actions a.secondary:hover {
-      border-color: var(--accent);
-      color: var(--text);
-    }
-    @media (max-width: 600px) {
-      .error-code { font-size: 4rem; }
-      .error-title { font-size: 1.2rem; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>page not found · kataribe panel</title>
+<meta name="description" content="Kataribe panel: mining telemetry and controller analytics for Quai Network.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f5f2ea" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e0f12" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://panel.kataribe.org/404.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Kataribe">
+<meta property="og:title" content="page not found · kataribe panel">
+<meta property="og:description" content="Kataribe panel: mining telemetry and controller analytics for Quai Network.">
+<meta property="og:url" content="https://panel.kataribe.org/404.html">
+<meta property="og:image" content="https://panel.kataribe.org/brand/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="page not found · kataribe panel">
+<meta name="twitter:description" content="Kataribe panel: mining telemetry and controller analytics for Quai Network.">
+<meta name="twitter:image" content="https://panel.kataribe.org/brand/og.png">
+<link rel="icon" href="/brand/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/brand/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/brand/icon-180.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="preload" href="/fonts/jetbrains-mono-kataribe.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/css/panel.css?v=e05cb9a8bd">
+<script src="/js/theme.js?v=e05cb9a8bd"></script>
 </head>
 <body>
-  <div class="error-page">
-    <div class="error-code">404</div>
-    <h1 class="error-title">Page Not Found</h1>
-    <p class="error-desc">The page you're looking for doesn't exist or has been moved. Head back to BitQuai.</p>
-    <div class="error-actions">
-      <a href="/" class="primary">Go Home</a>
-      <a href="/mining.html" class="secondary">Mining Dashboard</a>
-    </div>
-  </div>
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js').catch(() => {});
-    }
-  </script>
+<div class="page">
+<div class="run">
+
+<header class="top">
+  <a class="brand" href="/" aria-label="kataribe panel, home"><pre class="art logo" aria-hidden="true"><span class="l">╭┬─┬─┬─┬╮
+   │   │
+ │
+   │</span><span class="l l-amber">
+ ●   ●
+   ●   ●
+</span></pre><span class="brand-name">kataribe</span> <span class="brand-sub">panel</span></a>
+  <nav class="nav" aria-label="Primary navigation"><a href="/">home</a><span class="sep" aria-hidden="true"> · </span><a href="/mining.html">mining</a><span class="sep" aria-hidden="true"> · </span><a href="/controller_view.html">controller</a></nav>
+  <button class="theme-switch" type="button" hidden></button>
+</header>
+
+<main>
+<div class="entry">
+  <h1>404</h1>
+  <p class="gloss">page not found</p>
+</div>
+
+<div class="sec">
+  <p>The page you're looking for doesn't exist or has been moved. Head back to the panel.</p>
+  <p class="actions block-gap"><a href="/">go home</a><a href="/mining.html">mining dashboard</a><a href="/controller_view.html">controller</a></p>
+</div>
+</main>
+
+<span class="cord" aria-hidden="true">││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││││</span>
+<span class="cursor" aria-hidden="true">█</span>
+</div>
+
+<footer class="foot">
+  <span class="name">kataribe</span>
+  <span>order inside entropy</span>
+  <a href="https://github.com/Clonners/Controller-view-Quai-Network" target="_blank" rel="noopener noreferrer">source</a>
+</footer>
+
+</div>
+
+<script src="/js/cord.js?v=e05cb9a8bd" defer></script>
+<script>
+if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js').catch(() => {}); }
+</script>
 </body>
 </html>
