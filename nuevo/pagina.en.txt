@@ -1,0 +1,42 @@
+╭┬─┬─┬─┬╮  kataribe panel
+ ● │ ● │   ● recorded · 7 seconds ago
+ │ ●   ●
+   │
+
+────┬────────●──────────────────────────────────────────────────────────────────
+╭───┴───╮     1 Qi is worth 154.38 Quai: 31.3% more than
+│  ● ●  │     25 hours ago.
+╰┬─┬─┬─┬╯
+ ● ● ● ╵
+
+              √ checked · real, recorded + worked out here
+
+╔═ 1 Qi is worth ══════════════════════╗ ┌─ How it moved ──────────────────────┐
+║ 1 5 4 . 3 8   Q u a i                ║ │ ▁▁▁▁▁▁▁▁▁▁▁▁▁▂▃▄▅▆▇▇▇▇▇█████▇▇▇████ │
+║                                      ║ │ time watched ············· 25 hours │
+║ in 25 hours ··············· up 31.3% ║ │ the low ··············· 116.88 Quai │
+║ the network pushes in favour of      ║ │ the high ·············· 154.38 Quai │
+║                                 Quai ║ └─────────────────────────────────────┘
+╚══════════════════════════════════════╝
+                                         ┌─ Which way the network pushes ──────┐
+┌─ If you convert Qi now ──────────────┐ │ in favour of ················· Quai │
+│ Qi          you receive    discount  │ │ Quai ├───────────●┼────────────┤ Qi │
+│ 1           153.59 Quai       0.47%  │ │ scale ······················ 0.9989 │
+│ 10          154.36 Quai         90%  │ └─────────────────────────────────────┘
+│ 100       1,543.64 Quai         90%  │
+│ 1,000    15,436.39 Quai         90%  │ ┌─ The network ───────────────────────┐
+└──────────────────────────────────────┘ │ latest block ·········· #11,091,089 │
+                                         │ read ················ 7 seconds ago │
+┌─ Calculator ─────────────────────────┐ │ a block every ········· 4.8 seconds │
+│ Reading the network…                 │ │ Prime block ············ #2,453,647 │
+└──────────────────────────────────────┘ │ came out ··········· 22 seconds ago │
+                                         └─────────────────────────────────────┘
+
+────────────────────────────────────────────────────────────────────────────────
+A page made of letters, with no images and no artificial intelligence: every
+sentence comes from the data you see.
+Version without the program: real data recorded on 12 Nov 2026, 04:45 UTC. With
+the program on, it is read live.
+
+[ this page as text ]
+

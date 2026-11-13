@@ -1,0 +1,42 @@
+╭┬─┬─┬─┬╮  kataribe painel
+ ● │ ● │   ● gravado · há 7 segundos
+ │ ●   ●
+   │
+
+────┬────────●──────────────────────────────────────────────────────────────────
+╭───┴───╮     1 Qi vale 154,38 Quai: 31,3% a mais do que
+│  ● ●  │     há 25 horas.
+╰┬─┬─┬─┬╯
+ ● ● ● ╵
+
+              √ conferido · real, gravado + calculado aqui
+
+╔═ 1 Qi vale ══════════════════════════╗ ┌─ Como se moveu ─────────────────────┐
+║ 1 5 4 , 3 8   Q u a i                ║ │ ▁▁▁▁▁▁▁▁▁▁▁▁▁▂▃▄▅▆▇▇▇▇▇█████▇▇▇████ │
+║                                      ║ │ tempo observado ·········· 25 horas │
+║ em 25 horas ············ subiu 31,3% ║ │ o mais baixo ·········· 116,88 Quai │
+║ a rede empurra a favor de ····· Quai ║ │ o mais alto ··········· 154,38 Quai │
+╚══════════════════════════════════════╝ └─────────────────────────────────────┘
+
+┌─ Se você trocar Qi agora ────────────┐ ┌─ Para onde a rede empurra ──────────┐
+│ Qi          você recebe    desconto  │ │ a favor de ··················· Quai │
+│ 1           153,59 Quai       0,47%  │ │ Quai ├───────────●┼────────────┤ Qi │
+│ 10          154,36 Quai         90%  │ │ balança ···················· 0,9989 │
+│ 100       1.543,64 Quai         90%  │ └─────────────────────────────────────┘
+│ 1.000    15.436,39 Quai         90%  │
+└──────────────────────────────────────┘ ┌─ A rede ────────────────────────────┐
+                                         │ último bloco ·········· #11.091.089 │
+┌─ Calculadora ────────────────────────┐ │ lido há ················ 7 segundos │
+│ Lendo a rede…                        │ │ um bloco a cada ······ 4,8 segundos │
+└──────────────────────────────────────┘ │ bloco da Prime ········· #2.453.647 │
+                                         │ saiu há ··············· 22 segundos │
+                                         └─────────────────────────────────────┘
+
+────────────────────────────────────────────────────────────────────────────────
+Página feita de letras, sem imagens e sem inteligência artificial: cada frase
+sai dos dados que você vê.
+Versão sem o programa: dados reais gravados em 12 nov 2026, 04:45 UTC. Com o
+programa ativo, são lidos ao vivo.
+
+[ esta página em texto ]
+

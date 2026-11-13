@@ -1294,7 +1294,7 @@ const Ser5 = (() => {
         const t0 = performance.now(); let k = 0; while (acum >= DT - 1e-6 && k < 8) { paso(DT); acum -= DT; k++; } if (k === 8) acum = 0;
         V.costo.vivo.ms += performance.now() - t0; V.costo.vivo.seg += dt; seguir();
       };
-      document.addEventListener('visibilitychange', () => { if (document.hidden) { if (raf) cancelAnimationFrame(raf); if (lentoT) clearTimeout(lentoT); raf = 0; lentoT = 0; ant = 0; callar(); V.guardar(); } else seguir(); });
+      document.addEventListener('visibilitychange', () => { if (document.hidden) { if (raf) cancelAnimationFrame(raf); if (lentoT) clearTimeout(lentoT); raf = 0; lentoT = 0; ant = 0; V.guardar(); /* 13/11 owner: the phrase being spoken finishes with the tab hidden; nothing new starts until it is visible again */ } else seguir(); });
       seguir();
     }
     window.__listo = true;
