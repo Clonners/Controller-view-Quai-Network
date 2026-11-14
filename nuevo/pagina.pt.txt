@@ -11,24 +11,33 @@
 
               √ conferido · real, gravado + calculado aqui
 
-╔═ 1 Qi vale ══════════════════════════╗ ┌─ Como se moveu ─────────────────────┐
-║ 1 5 4 , 3 8   Q u a i                ║ │ ▁▁▁▁▁▁▁▁▁▁▁▁▁▂▃▄▅▆▇▇▇▇▇█████▇▇▇████ │
-║                                      ║ │ tempo observado ·········· 25 horas │
-║ em 25 horas ············ subiu 31,3% ║ │ o mais baixo ·········· 116,88 Quai │
-║ a rede empurra a favor de ····· Quai ║ │ o mais alto ··········· 154,38 Quai │
-╚══════════════════════════════════════╝ └─────────────────────────────────────┘
+╔═ 1 Qi vale ══════════════════════════╗ ┌─ No mercado ────────────────────────┐
+║ 1 5 4 , 3 8   Q u a i                ║ │ 1 WQI vale ············ 134,99 Quai │
+║                                      ║ │ segundo a rede ········ 154,38 Quai │
+║ em 25 horas ············ subiu 31,3% ║ │ diferença ··········· 12,6% a menos │
+║ WQI no mercado ········· 134,99 Quai ║ │ fundo em WQI ··········· 30.195 WQI │
+║ a rede empurra a favor de ····· Quai ║ │ fundo em Quai ······ 4.076.094 Quai │
+╚══════════════════════════════════════╝ │ última troca há ··········· 3 horas │
+                                         └─────────────────────────────────────┘
+┌─ Se você trocar Qi agora ────────────┐
+│ Qi          você recebe    desconto  │ ┌─ Como se moveu ─────────────────────┐
+│ 1           153,59 Quai       0,47%  │ │ ▁▁▁▁▁▁▁▁▁▁▁▁▁▂▃▄▅▆▇▇▇▇▇█████▇▇▇████ │
+│ 10          154,36 Quai         90%  │ │ tempo observado ·········· 25 horas │
+│ 100       1.543,64 Quai         90%  │ │ o mais baixo ·········· 116,88 Quai │
+│ 1.000    15.436,39 Quai         90%  │ │ o mais alto ··········· 154,38 Quai │
+└──────────────────────────────────────┘ └─────────────────────────────────────┘
 
-┌─ Se você trocar Qi agora ────────────┐ ┌─ Para onde a rede empurra ──────────┐
-│ Qi          você recebe    desconto  │ │ a favor de ··················· Quai │
-│ 1           153,59 Quai       0,47%  │ │ Quai ├───────────●┼────────────┤ Qi │
-│ 10          154,36 Quai         90%  │ │ balança ···················· 0,9989 │
-│ 100       1.543,64 Quai         90%  │ └─────────────────────────────────────┘
-│ 1.000    15.436,39 Quai         90%  │
-└──────────────────────────────────────┘ ┌─ A rede ────────────────────────────┐
-                                         │ último bloco ·········· #11.091.089 │
-┌─ Calculadora ────────────────────────┐ │ lido há ················ 7 segundos │
-│ Lendo a rede…                        │ │ um bloco a cada ······ 4,8 segundos │
-└──────────────────────────────────────┘ │ bloco da Prime ········· #2.453.647 │
+┌─ Calculadora ────────────────────────┐ ┌─ Para onde a rede empurra ──────────┐
+│ Lendo a rede…                        │ │ a favor de ··················· Quai │
+└──────────────────────────────────────┘ │ Quai ├───────────●┼────────────┤ Qi │
+                                         │ balança ···················· 0,9989 │
+┌─ Mineração: nó da Kataribe ──────────┐ └─────────────────────────────────────┘
+│ Esta cópia gravada não consulta      │
+│ nenhum nó. Na página ao vivo você    │ ┌─ A rede ────────────────────────────┐
+│ pode escrever o endereço do seu.     │ │ último bloco ·········· #11.091.089 │
+└──────────────────────────────────────┘ │ lido há ················ 7 segundos │
+                                         │ um bloco a cada ······ 4,8 segundos │
+                                         │ bloco da Prime ········· #2.453.647 │
                                          │ saiu há ··············· 22 segundos │
                                          └─────────────────────────────────────┘
 

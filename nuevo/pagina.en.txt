@@ -11,25 +11,34 @@
 
               √ checked · real, recorded + worked out here
 
-╔═ 1 Qi is worth ══════════════════════╗ ┌─ How it moved ──────────────────────┐
-║ 1 5 4 . 3 8   Q u a i                ║ │ ▁▁▁▁▁▁▁▁▁▁▁▁▁▂▃▄▅▆▇▇▇▇▇█████▇▇▇████ │
-║                                      ║ │ time watched ············· 25 hours │
-║ in 25 hours ··············· up 31.3% ║ │ the low ··············· 116.88 Quai │
-║ the network pushes in favour of      ║ │ the high ·············· 154.38 Quai │
-║                                 Quai ║ └─────────────────────────────────────┘
-╚══════════════════════════════════════╝
+╔═ 1 Qi is worth ══════════════════════╗ ┌─ On the market ─────────────────────┐
+║ 1 5 4 . 3 8   Q u a i                ║ │ 1 WQI is worth ········ 134.99 Quai │
+║                                      ║ │ by the network ········ 154.38 Quai │
+║ in 25 hours ··············· up 31.3% ║ │ difference ············· 12.6% less │
+║ WQI on the market ······ 134.99 Quai ║ │ pool, in WQI ··········· 30,195 WQI │
+║ the network pushes in favour of      ║ │ pool, in Quai ······ 4,076,094 Quai │
+║                                 Quai ║ │ last trade ············ 3 hours ago │
+╚══════════════════════════════════════╝ └─────────────────────────────────────┘
+
+┌─ If you convert Qi now ──────────────┐ ┌─ How it moved ──────────────────────┐
+│ Qi          you receive    discount  │ │ ▁▁▁▁▁▁▁▁▁▁▁▁▁▂▃▄▅▆▇▇▇▇▇█████▇▇▇████ │
+│ 1           153.59 Quai       0.47%  │ │ time watched ············· 25 hours │
+│ 10          154.36 Quai         90%  │ │ the low ··············· 116.88 Quai │
+│ 100       1,543.64 Quai         90%  │ │ the high ·············· 154.38 Quai │
+│ 1,000    15,436.39 Quai         90%  │ └─────────────────────────────────────┘
+└──────────────────────────────────────┘
                                          ┌─ Which way the network pushes ──────┐
-┌─ If you convert Qi now ──────────────┐ │ in favour of ················· Quai │
-│ Qi          you receive    discount  │ │ Quai ├───────────●┼────────────┤ Qi │
-│ 1           153.59 Quai       0.47%  │ │ scale ······················ 0.9989 │
-│ 10          154.36 Quai         90%  │ └─────────────────────────────────────┘
-│ 100       1,543.64 Quai         90%  │
-│ 1,000    15,436.39 Quai         90%  │ ┌─ The network ───────────────────────┐
-└──────────────────────────────────────┘ │ latest block ·········· #11,091,089 │
-                                         │ read ················ 7 seconds ago │
-┌─ Calculator ─────────────────────────┐ │ a block every ········· 4.8 seconds │
-│ Reading the network…                 │ │ Prime block ············ #2,453,647 │
-└──────────────────────────────────────┘ │ came out ··········· 22 seconds ago │
+┌─ Calculator ─────────────────────────┐ │ in favour of ················· Quai │
+│ Reading the network…                 │ │ Quai ├───────────●┼────────────┤ Qi │
+└──────────────────────────────────────┘ │ scale ······················ 0.9989 │
+                                         └─────────────────────────────────────┘
+┌─ Mining: Kataribe node ──────────────┐
+│ This recorded copy does not ask any  │ ┌─ The network ───────────────────────┐
+│ node. On the live page you can type  │ │ latest block ·········· #11,091,089 │
+│ the address of yours.                │ │ read ················ 7 seconds ago │
+└──────────────────────────────────────┘ │ a block every ········· 4.8 seconds │
+                                         │ Prime block ············ #2,453,647 │
+                                         │ came out ··········· 22 seconds ago │
                                          └─────────────────────────────────────┘
 
 ────────────────────────────────────────────────────────────────────────────────
