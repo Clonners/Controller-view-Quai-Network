@@ -1,3 +1,57 @@
+// comun.ja.js — vuelta 10. Lo que el japonés necesita para la VOZ GRABADA y que es igual en todas las páginas:
+// los números dichos en palabras, con su contador. El armador lo pone delante del paquete de cada página.
+// Con la voz del teléfono no se usa (llano: true): el teléfono lee las cifras y los contadores solo.
+//
+// Cómo se dicen (decisión de la vuelta 10, SIN revisar por un hablante nativo). Las fichas van en katakana, tal como suenan:
+// - enteros por grupos de cuatro (マン, オク); 300 サン ビャク, 600 ロッ ピャク, 800 ハッ ピャク, 3000 サン ゼン, 8000 ハッ セン;
+// - decimales: テン y después cifra por cifra; delante de テン el 0 es レー, イチ pasa a イッ y ジュー a ジュッ;
+// - el contador que sigue al número (時間 秒 分 日 台 個) lo dice el número, porque lo cambia: 4時間 ヨ ジカン, 1分 イッ プン, 3分 サン プン,
+//   1個 イッ コ, 2日 フツカ, 20日 ハツカ…; el por ciento: 1% イッ パーセント, 10% ジュッ パーセント.
+if (typeof Decir6 !== 'undefined') (() => {
+  const D = ['ゼロ', 'イチ', 'ニ', 'サン', 'ヨン', 'ゴ', 'ロク', 'ナナ', 'ハチ', 'キュー'];
+  const g4 = (n, solo) => {   // un grupo de 1 a 9999; solo: el grupo es 1000 justo y lleva マン u オク detrás (イッ セン マン)
+    const r = [], m = Math.floor(n / 1000), c = Math.floor(n / 100) % 10, d = Math.floor(n / 10) % 10, u = n % 10;
+    if (m) { if (m === 1) { if (solo && n === 1000) r.push('イッ'); r.push('セン'); } else if (m === 3) r.push('サン', 'ゼン'); else if (m === 8) r.push('ハッ', 'セン'); else r.push(D[m], 'セン'); }
+    if (c) { if (c === 1) r.push('ヒャク'); else if (c === 3) r.push('サン', 'ビャク'); else if (c === 6) r.push('ロッ', 'ピャク'); else if (c === 8) r.push('ハッ', 'ピャク'); else r.push(D[c], 'ヒャク'); }
+    if (d) { if (d > 1) r.push(D[d]); r.push('ジュー'); }
+    if (u) r.push(D[u]);
+    return r;
+  };
+  const entero = (n) => {
+    if (!n) return ['ゼロ'];
+    const r = [], oku = Math.floor(n / 1e8), man = Math.floor(n / 1e4) % 1e4, u = n % 1e4;
+    if (oku) r.push(...g4(oku, true), 'オク');
+    if (man) r.push(...g4(man, true), 'マン');
+    if (u) r.push(...g4(u, false));
+    return r;
+  };
+  const DIAS = { 1: ['イチニチ'], 2: ['フツカ'], 3: ['ミッカ'], 4: ['ヨッカ'], 5: ['イツカ'], 6: ['ムイカ'], 7: ['ナノカ'], 8: ['ヨーカ'], 9: ['ココノカ'], 10: ['トーカ'], 14: ['ジュー', 'ヨッカ'], 20: ['ハツカ'], 24: ['ニ', 'ジュー', 'ヨッカ'] };
+  const CORTA = { 'イチ': 'イッ', 'ロク': 'ロッ', 'ハチ': 'ハッ', 'ジュー': 'ジュッ', 'ヒャク': 'ヒャッ' };   // delante de プン y コ
+  const numero = (p) => {
+    const r = [], n = +p.ent, cifras = (s) => [...s].map((c) => D[+c]), ult = (f) => { r[r.length - 1] = f; };
+    if (p.signo) r.push(p.signo === '+' ? 'プラス' : p.signo === '±' ? 'プラスマイナス' : 'マイナス');
+    if (!p.dec && p.cont === '日' && DIAS[n] && p.ent.length <= 12) return r.concat(DIAS[n]);
+    if (p.ent.length > 12) r.push(...cifras(p.ent)); else if (!n && p.dec) r.push('レー'); else r.push(...entero(n));
+    if (p.dec) { const u = r[r.length - 1]; if (u === 'イチ') ult('イッ'); else if (u === 'ジュー') ult('ジュッ'); r.push('テン', ...cifras(p.dec)); }
+    const u = r[r.length - 1];
+    if (p.pct) { if (!p.dec && (u === 'イチ' || u === 'ジュー')) ult(CORTA[u]); r.push('パーセント'); }
+    else if (p.cont === '時間') { if (!p.dec && u === 'ヨン') ult('ヨ'); else if (!p.dec && u === 'キュー') ult('ク'); r.push('ジカン'); }
+    else if (p.cont === '秒') r.push('ビョー');
+    else if (p.cont === '台') r.push('ダイ');
+    else if (p.cont === '日') { if (!p.dec && u === 'キュー') ult('ク'); r.push('ニチ'); }
+    else if (p.cont === '分') { if (CORTA[u]) { ult(CORTA[u]); r.push('プン'); } else r.push(u === 'サン' || u === 'ヨン' || u === 'セン' || u === 'ゼン' || u === 'マン' ? 'プン' : 'フン'); }
+    else if (p.cont === '個') { if (CORTA[u]) ult(CORTA[u]); r.push('コ'); }
+    return r;
+  };
+  Decir6.def('ja', {
+    llano: true, sep: [',', '.'], pct: 'パーセント', entero, numero: (p) => numero(p),
+    contadores: ['時間', '秒', '分', '日', '台', '個'], contCorta: true,
+    variantes: [{}, { cont: '時間' }, { cont: '秒' }, { cont: '分' }, { cont: '日' }, { cont: '台' }, { cont: '個' }, { pct: true }],
+    simbolos: { '%': 'パーセント', '=': 'イコール', '+': 'プラス', '×': 'カケル' },
+  });
+})();
+
+;
 // Paquete de idioma: japonés (ja) para v5-panel. Vuelta 6. Lo trae la página recién cuando alguien elige 日本語.
 // Escritura de letras anchas (cada letra ocupa dos celdas) y sin espacios entre palabras: la pieza común se encarga del ancho y del corte.
 // Convenciones de este paquete (las revisa lengua6.mjs):
@@ -169,8 +223,9 @@ Ser5.idiomaDef('ja', {
 // cómo se dicen las marcas en japonés (el resto lo lee la voz del teléfono)
 if (typeof Decir6 !== 'undefined') Decir6.def('ja', {
   terminos: {
-    Quai: 'クワイ', QUAI: 'クワイ', kQuai: 'ケークワイ', Qi: 'チー', QI: 'チー', WQI: 'ラップドチー', WQUAI: 'ラップドクワイ', Kataribe: 'カタリベ', Prime: 'プライム',
-    'SHA-256': 'シャーにーごーろく', Scrypt: 'エスクリプト', KawPoW: 'カウパウ',
-    'H/s': 'ハッシュ毎秒', 'KH/s': 'キロハッシュ毎秒', 'MH/s': 'メガハッシュ毎秒', 'GH/s': 'ギガハッシュ毎秒', 'TH/s': 'テラハッシュ毎秒', 'PH/s': 'ペタハッシュ毎秒',
+    // vuelta 10: en katakana y partidos por palabras (cada palabra es un pedazo de la voz grabada; la voz del teléfono los lee igual)
+    Quai: 'クワイ', QUAI: 'クワイ', kQuai: 'ケー クワイ', Qi: 'チー', QI: 'チー', WQI: 'ラップド チー', WQUAI: 'ラップド クワイ', Kataribe: 'カタリベ', Prime: 'プライム',
+    'SHA-256': 'シャー ニー ゴー ロク', Scrypt: 'エスクリプト', KawPoW: 'カウパウ',
+    'H/s': 'ハッシュ マイビョー', 'KH/s': 'キロ ハッシュ マイビョー', 'MH/s': 'メガ ハッシュ マイビョー', 'GH/s': 'ギガ ハッシュ マイビョー', 'TH/s': 'テラ ハッシュ マイビョー', 'PH/s': 'ペタ ハッシュ マイビョー',
   },
 });

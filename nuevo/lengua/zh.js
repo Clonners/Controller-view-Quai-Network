@@ -1,3 +1,50 @@
+// comun.zh.js — vuelta 10. Lo que el chino necesita para la VOZ GRABADA y que es igual en todas las páginas:
+// los números dichos en palabras. El armador lo pone delante del paquete de cada página.
+// Con la voz del teléfono no se usa (llano: true): el teléfono lee las cifras solo.
+//
+// Cómo se dicen (decisión de la vuelta 10, SIN revisar por un hablante nativo). Una ficha por sílaba con sentido:
+// - enteros por grupos de cuatro (万, 亿), con 零 donde se salta un lugar (一千零五, 一万零一); 十 a secas del 10 al 19 al principio;
+// - 两 en 两千, 两万, 两亿 y cuando el número es un 2 a secas delante de una palabra de medida (两小时, 两天, 两台, 两个);
+// - decimales: 点 y después cifra por cifra; el por ciento va DELANTE: 百分之 + el número.
+if (typeof Decir6 !== 'undefined') (() => {
+  const D = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+  const g4 = (n, cabeza) => {   // un grupo de 1 a 9999; cabeza: es el principio del número (10 a 19: 十…, no 一十…)
+    const r = [], m = Math.floor(n / 1000), c = Math.floor(n / 100) % 10, d = Math.floor(n / 10) % 10, u = n % 10;
+    if (m) r.push(m === 2 ? '两' : D[m], '千');
+    if (c) r.push(D[c], '百'); else if (m && (d || u)) r.push('零');
+    if (d) { if (!(d === 1 && cabeza && !m && !c)) r.push(D[d]); r.push('十'); } else if (c && u) r.push('零');
+    if (u) r.push(D[u]);
+    return r;
+  };
+  const entero = (n) => {
+    if (!n) return ['零'];
+    const gs = [Math.floor(n / 1e8), Math.floor(n / 1e4) % 1e4, n % 1e4], us = ['亿', '万', ''], r = []; let hubo = false, cero = false;
+    gs.forEach((g, i) => {
+      if (!g) { if (hubo) cero = true; return; }
+      if (hubo && (cero || g < 1000)) r.push('零');
+      if (g === 2 && us[i]) r.push('两'); else r.push(...g4(g, !hubo));
+      if (us[i]) r.push(us[i]);
+      hubo = true; cero = false;
+    });
+    return r;
+  };
+  const numero = (p) => {
+    const r = [], n = +p.ent, cifras = (s) => [...s].map((c) => D[+c]);
+    if (p.signo) r.push(p.signo === '+' ? '正' : p.signo === '±' ? '正负' : '负');
+    if (p.pct) r.push('百分之');
+    if (p.ent.length > 12) r.push(...cifras(p.ent)); else if (n === 2 && !p.dec && p.cont && !p.pct) r.push('两'); else r.push(...entero(n));
+    if (p.dec) r.push('点', ...cifras(p.dec));
+    return r;
+  };
+  Decir6.def('zh', {
+    llano: true, sep: [',', '.'], pct: '百分之', entero, numero: (p) => numero(p),
+    contadores: ['小时', '分钟', '秒', '天', '台', '个'], contParte: true,   // la palabra de medida se corta de lo que sigue (« 3 天 | 前的 »): así cada unidad se graba una vez
+    variantes: [{}, { cont: '小时' }, { pct: true }],
+    simbolos: { '%': '百分之', '=': '等于', '+': '加', '×': '乘' },
+  });
+})();
+
+;
 // Paquete de idioma: chino simplificado (zh) para v5-panel. Vuelta 6. Lo trae la página recién cuando alguien elige 中文.
 // Escritura de letras anchas (cada letra ocupa dos celdas) y sin espacios entre palabras: la pieza común se encarga del ancho y del corte.
 // Convenciones de este paquete (las revisa lengua6.mjs):

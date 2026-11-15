@@ -1,3 +1,48 @@
+// comun.ru.js — vuelta 10. Lo que el ruso necesita para la VOZ GRABADA y que es igual en todas las páginas:
+// los números dichos en palabras. El armador lo pone delante del paquete de cada página (lengua/<pagina>.ru.js).
+// Con la voz del teléfono no se usa (llano: true): el teléfono lee las cifras solo y las declina solo.
+//
+// Cómo se dicen (decisión de la vuelta 10, SIN revisar por un hablante nativo):
+// - enteros en nominativo masculino (сто пятьдесят четыре); miles, millones y miles de millones con su forma (одна тысяча, две тысячи, пять тысяч);
+// - decimales a la manera coloquial: entero + «и» + lo de después de la coma (154,38 → сто пятьдесят четыре и тридцать восемь;
+//   0,9989 → ноль и девять девять восемь девять). Así el número no cambia con el caso de la frase;
+// - 1 y 2 concuerdan con la palabra que sigue cuando es секунду/минуту/секунды/минуты (одну секунду, две минуты);
+// - el por ciento: процент (1, 21…), процента (2 a 4 y detrás de cualquier decimal), процентов (lo demás).
+// Las frases del paquete están escritas para que el número caiga siempre en nominativo o acusativo (ver el estándar, §7).
+if (typeof Decir6 !== 'undefined') (() => {
+  const U = ['ноль', 'один', 'два', 'три', 'четыре', 'пять', 'шесть', 'семь', 'восемь', 'девять', 'десять', 'одиннадцать', 'двенадцать', 'тринадцать', 'четырнадцать', 'пятнадцать', 'шестнадцать', 'семнадцать', 'восемнадцать', 'девятнадцать'];
+  const DZ = ['', '', 'двадцать', 'тридцать', 'сорок', 'пятьдесят', 'шестьдесят', 'семьдесят', 'восемьдесят', 'девяносто'];
+  const C = ['', 'сто', 'двести', 'триста', 'четыреста', 'пятьсот', 'шестьсот', 'семьсот', 'восемьсот', 'девятьсот'];
+  const g3 = (n, f1, f2) => { const r = [], c = Math.floor(n / 100), du = n % 100, u = du < 20 ? du : du % 10; if (c) r.push(C[c]); if (du >= 20) r.push(DZ[Math.floor(du / 10)]); if (u) r.push(u === 1 ? f1 : u === 2 ? f2 : U[u]); return r; };
+  const forma = (n, a, b, c) => { const du = n % 100, u = n % 10; return du >= 11 && du <= 14 ? c : u === 1 ? a : u >= 2 && u <= 4 ? b : c; };
+  const entero = (n, f1 = 'один', f2 = 'два') => {
+    if (!n) return ['ноль'];
+    const r = [], mrd = Math.floor(n / 1e9), mln = Math.floor(n / 1e6) % 1000, mil = Math.floor(n / 1000) % 1000, u = n % 1000;
+    if (mrd) r.push(...g3(mrd, 'один', 'два'), forma(mrd, 'миллиард', 'миллиарда', 'миллиардов'));
+    if (mln) r.push(...g3(mln, 'один', 'два'), forma(mln, 'миллион', 'миллиона', 'миллионов'));
+    if (mil) { if (mil > 1 || mrd || mln) r.push(...g3(mil, 'одна', 'две')); r.push(forma(mil, 'тысяча', 'тысячи', 'тысяч')); }
+    if (u) r.push(...g3(u, f1, f2));
+    return r;
+  };
+  const FEM = { 'секунду': ['одну', 'две'], 'минуту': ['одну', 'две'], 'секунда': ['одна', 'две'], 'минута': ['одна', 'две'], 'секунды': ['одна', 'две'], 'минуты': ['одна', 'две'], 'секунд': ['одна', 'две'], 'минут': ['одна', 'две'] };
+  const numero = (p, ctx) => {
+    const r = [], n = +p.ent, cifras = (s) => [...s].map((c) => U[+c]);
+    if (p.signo) r.push(...(p.signo === '+' ? ['плюс'] : p.signo === '±' ? ['плюс', 'минус'] : ['минус']));
+    if (p.ent.length > 12) r.push(...cifras(p.ent));
+    else if (p.dec) r.push(...entero(n));
+    else { const f = FEM[ctx.sig] || ['один', 'два']; r.push(...entero(n, f[0], f[1])); }
+    if (p.dec) { r.push('и'); r.push(...(p.dec.length <= 2 && p.dec[0] !== '0' ? entero(+p.dec) : cifras(p.dec))); }
+    if (p.pct) r.push(p.dec ? 'процента' : forma(n, 'процент', 'процента', 'процентов'));
+    return r;
+  };
+  Decir6.def('ru', {
+    llano: true, sep: ['.', ','], pct: 'процентов', entero: (n) => entero(n), numero,
+    variantes: [{}, { sig: 'секунду' }, { sig: 'секунды' }, { pct: true }],
+    simbolos: { '%': 'процентов', '=': 'равно', '+': 'плюс', '×': 'на', '≈': 'около' },
+  });
+})();
+
+;
 // Paquete de idioma: ruso, para la página v5-panel. Se carga sólo cuando alguien elige el idioma.
 // Traducción hecha por la máquina y SIN revisar por un hablante nativo (revisada: false → la página lo avisa en el menú).
 // Reglas del paquete (ESTANDAR-KATARIBE, capítulo de idiomas): mismas claves que el castellano, mismas llaves {dato},
@@ -11,10 +56,10 @@ Ser5.idiomaDef('ru', {
   neg: /(?<![а-яё])(?:не|нет|ни|без|никогда|ничего|никто|нельзя)(?![а-яё])/gi,
   anclas: {
     'zona.edad': ['назад'], 'zona.n': ['блок', 'quai'], 'zona.media': ['раз в'],
-    'rate': ['стоит', 'изменилась с'], 'rate.antes': ['тогда'], 'rate.delta': ['больше', 'меньше'], 'visita.hace': ['назад'],
-    'v.ini': ['изменилась с'], 'v.min': ['минимум'], 'v.max': ['максимум'], 'v.horas': ['назад', 'за '], 'v.cambio': ['больше', 'меньше'],
+    'rate': ['стоит'], 'rate.antes': ['тогда'], 'rate.delta': ['больше', 'меньше'], 'visita.hace': ['назад'],
+    'v.ini': ['стоил'], 'v.min': ['минимум'], 'v.max': ['максимум'], 'v.horas': ['назад', 'за '], 'v.cambio': ['больше', 'меньше'],
     'ratio': ['весы'], 'lean': ['в пользу'], 'prime.n': ['prime', 'блок'], 'prime.edad': ['назад'],
-    'c#.qi': ['при '], 'c#.desc': ['удержание'],
+    'c#.qi': ['за '], 'c#.desc': ['удержание'],
     'calc.de': ['за '], 'calc.con': ['получ'], 'calc.base': ['без удержания'], 'calc.desc': ['удержание уходит'],
     'pool.on': ['подключен', 'сообщает'], 'pool.total': ['майнер', 'всего'], 'pool.hash': ['мощность'], 'pool.blocks': ['нашёл'],
     'pool.b#.edad': ['назад'], 'pool.uptime': ['работает'],
@@ -106,23 +151,25 @@ Ser5.idiomaDef('ru', {
     'f.rate.vigual': '{qi.uno} стоит {rate}. За {v.horas} курс почти не изменился.',
     'f.rate.solo': 'Сейчас {qi.uno} стоит {rate}.',
     'f.fresh': 'Сеть прочитана {zona.edad} назад: идёт блок {zona.n}, новый блок выходит раз в {zona.media}.',
-    'f.trend': 'За {v.horas} цена {qi.uno} изменилась с {v.ini} до {rate}. Минимум был {v.min}, а максимум {v.max}.',
-    'f.trend.alto': 'За {v.horas} цена {qi.uno} изменилась с {v.ini} до {rate}, это самое высокое значение за это время. Минимум был {v.min}.',
-    'f.trend.bajo': 'За {v.horas} цена {qi.uno} изменилась с {v.ini} до {rate}, это самое низкое значение за это время. Максимум был {v.max}.',
+    // vuelta 10: las frases con números se escribieron de modo que el número quede siempre en su forma de diccionario (sin declinar):
+    // así la voz grabada lo dice con los mismos pedazos en todas las frases. Antes: «изменилась с {v.ini} до {rate}», «при {c1.qi}», «{pool.on} из {pool.total}».
+    'f.trend': 'За {v.horas} курс изменился: {qi.uno} стоил {v.ini}, а теперь стоит {rate}. Минимум был {v.min}, а максимум {v.max}.',
+    'f.trend.alto': 'За {v.horas} курс изменился: {qi.uno} стоил {v.ini}, а теперь стоит {rate}, это максимум за это время. Минимум был {v.min}.',
+    'f.trend.bajo': 'За {v.horas} курс изменился: {qi.uno} стоил {v.ini}, а теперь стоит {rate}, это минимум за это время. Максимум был {v.max}.',
     'f.lean.bajo': 'Сеть подталкивает курс в пользу {lean}: её весы показывают {ratio}, ниже единицы.',
     'f.lean.alto': 'Сеть подталкивает курс в пользу {lean}: её весы показывают {ratio}, выше единицы.',
     'f.lean.casi': 'Сеть почти не подталкивает: её весы показывают {ratio}, очень близко к единице, чуть в пользу {lean}.',
     'f.lean.neutro': 'Сеть не подталкивает ни в одну сторону: её весы показывают {ratio}, точное равновесие.',
     'f.calc': 'За {calc.de} вы получили бы {calc.con}. Без удержания было бы {calc.base}: на удержание уходит {calc.desc}.',
     'f.calc.sin': 'За {calc.de} вы получили бы {calc.con}: всю сумму, без удержания.',
-    'f.desc': 'Смотрите: при {c1.qi} на удержание уходит {c1.desc}, а при {c10.qi} уже {c10.desc}.',
+    'f.desc': 'Смотрите: за {c1.qi} удержание {c1.desc}, а за {c10.qi} уже {c10.desc}.',
     'f.prime': 'Курс я читаю из Prime, главной цепи: её последний блок {prime.n}, он вышел {prime.edad} назад.',
     'f.corte': 'Сейчас не могу прочитать цепь Prime. Последнее, что прочитано, это её блок {prime.n}, {prime.edad} назад.',
     'f.sinprime': 'Сейчас не могу прочитать цепь Prime, так что курса пока нет. Продолжаю пробовать.',
-    'f.pool.parte': 'Подключено {pool.on} из {pool.total} майнеров.',
+    'f.pool.parte': 'Майнеров всего {pool.total}, подключено {pool.on}.',
     'f.pool.todos': 'Подключены все майнеры, всего {pool.total}.',
     'f.pool.cero': 'Нет подключённых майнеров: сервер сообщает {pool.on}.',
-    'f.nodo.parte': 'На вашем узле подключено {pool.on} из {pool.total} майнеров.',
+    'f.nodo.parte': 'На вашем узле майнеров всего {pool.total}, подключено {pool.on}.',
     'f.nodo.todos': 'На вашем узле подключены все майнеры, всего {pool.total}.',
     'f.nodo.cero': 'На вашем узле нет подключённых майнеров: сервер сообщает {pool.on}.',
     'f.pool.hash': 'Вместе майнеры дают мощность {pool.hash}.',
