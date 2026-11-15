@@ -1,5 +1,5 @@
-╭┬─┬─┬─┬╮  kataribe panel
- ● │ ● │   ● recorded · 7 seconds ago
+╭┬─┬─┬─┬╮  kataribe
+ ● │ ● │
  │ ●   ●
    │
 
@@ -9,7 +9,7 @@
 ╰┬─┬─┬─┬╯
  ● ● ● ○
 
-              √ checked · real, recorded + worked out here
+
 
 ╔═ 1 Qi is worth ══════════════════════╗ ┌─ On the market ─────────────────────┐
 ║ 1 5 4 . 3 8   Q u a i                ║ │ 1 WQI is worth ········ 134.99 Quai │
@@ -42,10 +42,9 @@
                                          └─────────────────────────────────────┘
 
 ────────────────────────────────────────────────────────────────────────────────
-A page made of letters, with no images and no artificial intelligence: every
-sentence comes from the data you see.
 Version without the program: real data recorded on 12 Nov 2026, 04:45 UTC. With
 the program on, it is read live.
 
-[ this page as text ]
-
+╭───────────────────╮
+│ this page as text │
+╰───────────────────╯

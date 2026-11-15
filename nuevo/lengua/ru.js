@@ -3,6 +3,8 @@
 // Reglas del paquete (ESTANDAR-KATARIBE, capítulo de idiomas): mismas claves que el castellano, mismas llaves {dato},
 // la palabra ancla y su dato del mismo lado de los dos puntos, y las formas de plural que el idioma pida (.few / .many).
 Ser5.idiomaDef('ru', {
+  // la boca del ser (estándar, A12): qué vocales abren mucho (O), a medias (o) o poco (c)
+  boca: { O: 'ая', o: 'эеёо', c: 'иыую' },
   nombre: 'Русский', miles: ' ', coma: ',', voz: ['ru-ru', 'ru'], letra: ['cirilico'], revisada: false,
   // 1 секунду · 2 секунды · 5 секунд · 21 секунду · 5,1 секунды
   plural: (n) => { if (n % 1) return 'few'; const a = n % 10, b = n % 100; return a === 1 && b !== 11 ? 'one' : a >= 2 && a <= 4 && !(b >= 12 && b <= 14) ? 'few' : 'many'; },
@@ -78,7 +80,7 @@ Ser5.idiomaDef('ru', {
     '_usados': 'Использованные данные', '_elegido': 'выбрано', '_calcular': 'посчитать',
     '_c.suelto': 'вы изменили размер или интервал букв: убираю рамки, чтобы ничего не обрезалось',
     '_e.edad': 'возраст последнего блока', '_e.media': 'один блок раз в',
-    '_sinc': 'не проверено', '_sub': 'панель',
+    '_menu': 'меню', '_sinc': 'не проверено', '_sub': 'панель',
     '_idioma.trae': 'Загружаю {x}…', '_idioma.falla': 'Не удалось загрузить {x}. Попробуйте ещё раз.', '_idioma.sinrev': 'Перевод ещё не проверен носителем языка.',
     '_t.cambio': 'курс', '_t.control': 'весы сети', '_t.cadena': 'сеть', '_t.pool': 'майнеры',
     '_caja.cambio': '1 Qi стоит', '_caja.calc': 'Калькулятор', '_caja.montos': 'Если обменять Qi сейчас', '_caja.movio': 'Как менялся курс',

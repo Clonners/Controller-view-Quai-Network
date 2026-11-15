@@ -73,7 +73,7 @@ Ser5.idiomaDef('zh', {
     '_usados': '用到的数据', '_elegido': '已选', '_calcular': '计算',
     '_c.suelto': '你改了字的大小或间距。为了不让内容被截掉，我把边框去掉了',
     '_e.edad': '最新区块距今', '_e.media': '出块间隔',
-    '_sinc': '未核实', '_sub': '面板',
+    '_menu': '菜单', '_sinc': '未核实', '_sub': '面板',
     // hilos y cajas
     '_t.cambio': '汇率', '_t.control': '网络的天平', '_t.cadena': '网络', '_t.pool': '矿机',
     '_caja.cambio': '1 Qi 的价值', '_caja.calc': '计算器', '_caja.montos': '现在兑换 Qi 的话', '_caja.movio': '价格走势', '_caja.lean': '网络推动的方向', '_caja.red': '网络',

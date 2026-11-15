@@ -1,5 +1,5 @@
-╭┬─┬─┬─┬╮  kataribe panel
- ● │ ● │   ● grabado · hace 7 segundos
+╭┬─┬─┬─┬╮  kataribe
+ ● │ ● │
  │ ●   ●
    │
 
@@ -9,7 +9,7 @@
 ╰┬─┬─┬─┬╯
  ● ● ● ○
 
-              √ comprobado · real, grabado + calculado acá
+
 
 ╔═ 1 Qi vale ══════════════════════════╗ ┌─ En el mercado ─────────────────────┐
 ║ 1 5 4 , 3 8   Q u a i                ║ │ 1 WQI vale ············ 134,99 Quai │
@@ -42,10 +42,9 @@
                                          └─────────────────────────────────────┘
 
 ────────────────────────────────────────────────────────────────────────────────
-Página armada con letras, sin imágenes y sin inteligencia artificial: cada frase
-sale de los datos que ves.
 Versión sin programa: datos reales grabados el 12 nov 2026, 04:45 UTC. Con el
 programa activo se leen en vivo.
 
-[ esta página en texto ]
-
+╭──────────────────────╮
+│ esta página en texto │
+╰──────────────────────╯

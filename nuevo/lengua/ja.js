@@ -7,6 +7,9 @@
 //  - lo que dice el ser (frases f.* y explicaciones q.*) no lleva cifras propias: el validador las toma por un número ajeno. «Uno» se escribe 一 («一より下») o 一つ («Qi 一つ»).
 // Traducción SIN revisar por un hablante nativo (revisada: false): la página lo avisa en el menú de idiomas.
 Ser5.idiomaDef('ja', {
+  // la boca del ser (estándar, A12): la vocal de cada letra silábica — abre mucho (O: a), a medias (o: e, o) o poco (c: i, u).
+  // Sólo hiragana: la pieza común pasa el katakana a hiragana. Las letras chinas (kanji) no dicen su vocal: llevan el ritmo, no la forma.
+  boca: { O: 'あかさたなはまやらわがざだばぱぁゃ', o: 'えけせてねへめれげぜでべぺぇおこそとのほもよろをごぞどぼぽぉょ', c: 'いきしちにひみりぎじぢびぴぃうくすつぬふむゆるぐずづぶぷぅゅ' },
   nombre: '日本語', miles: ',', coma: '.', voz: ['ja-jp', 'ja'], junta: true, punto: '。', sinEspacios: true, revisada: false,
   fecha: '{a}年{m}{d}日',
   neg: /ない|なく|ません|なし/g,
@@ -73,7 +76,7 @@ Ser5.idiomaDef('ja', {
     '_usados': '使ったデータ', '_elegido': '選択中', '_calcular': '計算する',
     '_c.suelto': '文字の大きさか間隔を変えましたね。何も切れないように枠をはずします',
     '_e.edad': '最新ブロックからの時間', '_e.media': 'ブロックの間隔',
-    '_sinc': '未確認', '_sub': 'パネル',
+    '_menu': 'メニュー', '_sinc': '未確認', '_sub': 'パネル',
     // hilos y cajas
     '_t.cambio': 'レート', '_t.control': 'ネットワークの天秤', '_t.cadena': 'ネットワーク', '_t.pool': 'マイナー',
     '_caja.cambio': '1 Qi の価値', '_caja.calc': '計算機', '_caja.montos': 'いま Qi を替えると', '_caja.movio': '値動き', '_caja.lean': 'ネットワークが押す向き', '_caja.red': 'ネットワーク',
