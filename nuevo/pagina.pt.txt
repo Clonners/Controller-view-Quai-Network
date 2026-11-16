@@ -4,42 +4,48 @@
    │
 
 ────┬────────●──────────────────────────────────────────────────────────────────
-╭───┴───╮     1 Qi vale 154,38 Quai: 31,3% a mais do que
-│  ● ●  │     há 25 horas.
+╭───┴───╮     1 Qi vale 134,99 Quai no mercado: 9,8% a
+│  ● ●  │     menos do que há um dia.
 ╰┬─┬─┬─┬╯
  ● ● ● ○
 
 
 
-╔═ 1 Qi vale ══════════════════════════╗ ┌─ No mercado ────────────────────────┐
-║ 1 5 4 , 3 8   Q u a i                ║ │ 1 WQI vale ············ 134,99 Quai │
-║                                      ║ │ segundo a rede ········ 154,38 Quai │
-║ em 25 horas ············ subiu 31,3% ║ │ diferença ··········· 12,6% a menos │
-║ WQI no mercado ········· 134,99 Quai ║ │ fundo em WQI ··········· 30.195 WQI │
-║ a rede empurra a favor de ····· Quai ║ │ fundo em Quai ······ 4.076.094 Quai │
-╚══════════════════════════════════════╝ │ última troca há ··········· 3 horas │
+╔═ 1 Qi vale no mercado ═══════════════╗ ┌─ O mercado ─────────────────────────┐
+║ 1 3 4 , 9 9   Q u a i                ║ │ t r a n q u i l o                   │
+║                                      ║ │                                     │
+║ em dólares ············· ≈ 0,872 USD ║ │ trocas em um dia ··············· 28 │
+║ em um dia ················ caiu 9,8% ║ │ Qi trocados em um dia ···· 2.587 Qi │
+║ em 7 dias ··············· caiu 23,2% ║ │ custo menor que 1 % até ···· 214 Qi │
+║ última troca há ············ 3 horas ║ │ fundo em WQI ··········· 30.195 WQI │
+╚══════════════════════════════════════╝ │ fundo em Quai ······ 4.076.094 Quai │
                                          └─────────────────────────────────────┘
-┌─ Se você trocar Qi agora ────────────┐
-│ Qi          você recebe    desconto  │ ┌─ Como se moveu ─────────────────────┐
-│ 1           153,59 Quai       0,47%  │ │ ▁▁▁▁▁▁▁▁▁▁▁▁▁▂▃▄▅▆▇▇▇▇▇█████▇▇▇████ │
-│ 10          154,36 Quai         90%  │ │ tempo observado ·········· 25 horas │
-│ 100       1.543,64 Quai         90%  │ │ o mais baixo ·········· 116,88 Quai │
-│ 1.000    15.436,39 Quai         90%  │ │ o mais alto ··········· 154,38 Quai │
-└──────────────────────────────────────┘ └─────────────────────────────────────┘
-
-┌─ Calculadora ────────────────────────┐ ┌─ Para onde a rede empurra ──────────┐
-│ Lendo a rede…                        │ │ a favor de ··················· Quai │
-└──────────────────────────────────────┘ │ Quai ├───────────●┼────────────┤ Qi │
-                                         │ balança ···················· 0,9989 │
-┌─ Mineração: nó da Kataribe ──────────┐ └─────────────────────────────────────┘
-│ Esta cópia gravada não consulta      │
-│ nenhum nó. Na página ao vivo você    │ ┌─ A rede ────────────────────────────┐
-│ pode escrever o endereço do seu.     │ │ último bloco ·········· #11.091.089 │
-└──────────────────────────────────────┘ │ lido há ················ 7 segundos │
-                                         │ um bloco a cada ······ 4,8 segundos │
-                                         │ bloco da Prime ········· #2.453.647 │
-                                         │ saiu há ··············· 22 segundos │
-                                         └─────────────────────────────────────┘
+┌─ Como se moveu ──────────────────────┐
+│ o mais alto ············ 175,71 Quai │ ┌─ Direto com a rede ─────────────────┐
+│ ─────────────────╮                   │ │ a rede dá por 1 Qi ···· 154,36 Quai │
+│                  ╰────╮              │ │ o mercado paga ······ 12,5% a menos │
+│                       ╰──╮           │ │ A rede faz você esperar duas        │
+│                          ╰─────╮     │ │ semanas e aplica descontos. No      │
+│                                │     │ │ mercado a troca é na hora.          │
+│                                ╰──── │ └─────────────────────────────────────┘
+│ o mais baixo ··········· 132,30 Quai │
+│ há 7 dias                      agora │ ┌─ A rede ────────────────────────────┐
+└──────────────────────────────────────┘ │ a n d a   b e m                     │
+                                         │                                     │
+┌─ Calculadora ────────────────────────┐ │ último bloco há ········ 7 segundos │
+│ A calculadora funciona com a página  │ │ um bloco a cada ······ 4,8 segundos │
+│ completa. Abaixo estão os valores    │ └─────────────────────────────────────┘
+│ mais comuns.                         │
+└──────────────────────────────────────┘ ┌─ Mineração: nó da Kataribe ─────────┐
+                                         │ Esta cópia gravada não consulta     │
+┌─ Se você vender Qi agora ────────────┐ │ nenhum nó. Na página ao vivo você   │
+│ Qi           você recebe    custo    │ │ pode escrever o endereço do seu.    │
+│ 1            134,58 Quai     0,3%    │ └─────────────────────────────────────┘
+│ 10            1.345 Quai    0,33%    │
+│ 100          13.414 Quai    0,63%    │
+│ 1.000       130.286 Quai     3,5%    │
+│ 10.000    1.011.793 Quai      25%    │
+└──────────────────────────────────────┘
 
 ────────────────────────────────────────────────────────────────────────────────
 Versão sem o programa: dados reais gravados em 12 nov 2026, 04:45 UTC. Com o

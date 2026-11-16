@@ -4,42 +4,48 @@
    │
 
 ────┬────────●──────────────────────────────────────────────────────────────────
-╭───┴───╮     1 Qi is worth 154.38 Quai: 31.3% more than
-│  ● ●  │     25 hours ago.
+╭───┴───╮     1 Qi is worth 134.99 Quai on the market:
+│  ● ●  │     9.8% less than a day ago.
 ╰┬─┬─┬─┬╯
  ● ● ● ○
 
 
 
-╔═ 1 Qi is worth ══════════════════════╗ ┌─ On the market ─────────────────────┐
-║ 1 5 4 . 3 8   Q u a i                ║ │ 1 WQI is worth ········ 134.99 Quai │
-║                                      ║ │ by the network ········ 154.38 Quai │
-║ in 25 hours ··············· up 31.3% ║ │ difference ············· 12.6% less │
-║ WQI on the market ······ 134.99 Quai ║ │ pool, in WQI ··········· 30,195 WQI │
-║ the network pushes in favour of      ║ │ pool, in Quai ······ 4,076,094 Quai │
-║                                 Quai ║ │ last trade ············ 3 hours ago │
-╚══════════════════════════════════════╝ └─────────────────────────────────────┘
-
-┌─ If you convert Qi now ──────────────┐ ┌─ How it moved ──────────────────────┐
-│ Qi          you receive    discount  │ │ ▁▁▁▁▁▁▁▁▁▁▁▁▁▂▃▄▅▆▇▇▇▇▇█████▇▇▇████ │
-│ 1           153.59 Quai       0.47%  │ │ time watched ············· 25 hours │
-│ 10          154.36 Quai         90%  │ │ the low ··············· 116.88 Quai │
-│ 100       1,543.64 Quai         90%  │ │ the high ·············· 154.38 Quai │
-│ 1,000    15,436.39 Quai         90%  │ └─────────────────────────────────────┘
+╔═ 1 Qi on the market is worth ════════╗ ┌─ The market ────────────────────────┐
+║ 1 3 4 . 9 9   Q u a i                ║ │ c a l m                             │
+║                                      ║ │                                     │
+║ in dollars ············· ≈ 0.872 USD ║ │ trades in a day ················ 28 │
+║ in a day ················· down 9.8% ║ │ Qi traded in a day ······· 2,587 Qi │
+║ in 7 days ··············· down 23.2% ║ │ cost under 1 % up to ······· 214 Qi │
+║ last trade ················· 3 hours ║ │ pool, in WQI ··········· 30,195 WQI │
+╚══════════════════════════════════════╝ │ pool, in Quai ······ 4,076,094 Quai │
+                                         └─────────────────────────────────────┘
+┌─ How it moved ───────────────────────┐
+│ the high ··············· 175.71 Quai │ ┌─ Straight with the network ─────────┐
+│ ─────────────────╮                   │ │ the network gives for 1 Qi          │
+│                  ╰────╮              │ │                         154.36 Quai │
+│                       ╰──╮           │ │ the market pays ········ 12.5% less │
+│                          ╰─────╮     │ │ The network makes you wait two      │
+│                                │     │ │ weeks and applies discounts. On the │
+│                                ╰──── │ │ market the trade is immediate.      │
+│ the low ················ 132.30 Quai │ └─────────────────────────────────────┘
+│ 7 days ago                       now │
+└──────────────────────────────────────┘ ┌─ The network ───────────────────────┐
+                                         │ r u n n i n g   w e l l             │
+┌─ Calculator ─────────────────────────┐ │                                     │
+│ The calculator works with the full   │ │ since the last block ···· 7 seconds │
+│ page. The most common amounts are    │ │ a block every ········· 4.8 seconds │
+│ below.                               │ └─────────────────────────────────────┘
 └──────────────────────────────────────┘
-                                         ┌─ Which way the network pushes ──────┐
-┌─ Calculator ─────────────────────────┐ │ in favour of ················· Quai │
-│ Reading the network…                 │ │ Quai ├───────────●┼────────────┤ Qi │
-└──────────────────────────────────────┘ │ scale ······················ 0.9989 │
-                                         └─────────────────────────────────────┘
-┌─ Mining: Kataribe node ──────────────┐
-│ This recorded copy does not ask any  │ ┌─ The network ───────────────────────┐
-│ node. On the live page you can type  │ │ latest block ·········· #11,091,089 │
-│ the address of yours.                │ │ read ················ 7 seconds ago │
-└──────────────────────────────────────┘ │ a block every ········· 4.8 seconds │
-                                         │ Prime block ············ #2,453,647 │
-                                         │ came out ··········· 22 seconds ago │
-                                         └─────────────────────────────────────┘
+                                         ┌─ Mining: Kataribe node ─────────────┐
+┌─ If you sell Qi now ─────────────────┐ │ This recorded copy does not ask any │
+│ Qi           you receive     cost    │ │ node. On the live page you can type │
+│ 1            134.58 Quai     0.3%    │ │ the address of yours.               │
+│ 10            1,345 Quai    0.33%    │ └─────────────────────────────────────┘
+│ 100          13,414 Quai    0.63%    │
+│ 1,000       130,286 Quai     3.5%    │
+│ 10,000    1,011,793 Quai      25%    │
+└──────────────────────────────────────┘
 
 ────────────────────────────────────────────────────────────────────────────────
 Version without the program: real data recorded on 12 Nov 2026, 04:45 UTC. With
