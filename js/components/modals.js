@@ -3,10 +3,10 @@
  * Handles modal dialogs (miner stats, search, diagnostics)
  */
 
-import { AppState } from '../state.js?v=3f5e57cd54';
-import { formatHashrate, formatNumber } from '../utils/formatters.js?v=3f5e57cd54';
-import { fetchMinerStats, fetchMinerWorkers } from '../api/poolApi.js?v=3f5e57cd54';
-import { el, note, shortAddress, showDialog, hideDialog } from '../utils/dom.js?v=3f5e57cd54';
+import { AppState } from '../state.js?v=b54d6479d2';
+import { formatHashrate, formatNumber } from '../utils/formatters.js?v=b54d6479d2';
+import { fetchMinerStats, fetchMinerWorkers } from '../api/poolApi.js?v=b54d6479d2';
+import { el, note, shortAddress, showDialog, hideDialog } from '../utils/dom.js?v=b54d6479d2';
 
 // =====================
 // Miner Stats Modal
@@ -547,7 +547,7 @@ export function selectBlockAddressFilter(address) {
     updateBlockFilterIndicator();
     
     // Import updateBlocks dynamically to avoid circular imports
-    import('./blocks.js?v=3f5e57cd54').then(module => {
+    import('./blocks.js?v=b54d6479d2').then(module => {
         if (AppState.cache.blocks) {
             module.updateBlocks(AppState.cache.blocks);
         }

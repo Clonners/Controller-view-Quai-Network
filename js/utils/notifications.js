@@ -6,8 +6,8 @@
  * nothing slides or spins, and messages are written with textContent.
  */
 
-import { Config } from '../config.js?v=3f5e57cd54';
-import { el, layerRoot } from './dom.js?v=3f5e57cd54';
+import { Config } from '../config.js?v=b54d6479d2';
+import { el, layerRoot } from './dom.js?v=b54d6479d2';
 
 // Notification types
 export const NotificationType = {

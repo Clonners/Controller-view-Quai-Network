@@ -3,8 +3,8 @@
  * Handles all communication with the Stratum pool server
  */
 
-import { AppState } from '../state.js?v=3f5e57cd54';
-import { Config } from '../config.js?v=3f5e57cd54';
+import { AppState } from '../state.js?v=b54d6479d2';
+import { Config } from '../config.js?v=b54d6479d2';
 
 // Helper: build fetch URL, using proxy if configured
 function buildFetchUrl(path, baseOverride = null, forceProxy = false) {
