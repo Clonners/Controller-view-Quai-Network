@@ -22,29 +22,29 @@
                                          └─────────────────────────────────────┘
 ┌─ How it moved ───────────────────────┐
 │ the high ··············· 175.71 Quai │ ┌─ Straight with the network ─────────┐
-│ ─────────────────╮                   │ │ the network gives for 1 Qi          │
-│                  ╰────╮              │ │                         154.36 Quai │
-│                       ╰──╮           │ │ the market pays ········ 12.5% less │
-│                          ╰─────╮     │ │ The network makes you wait two      │
-│                                │     │ │ weeks and applies discounts. On the │
-│                                ╰──── │ │ market the trade is immediate.      │
-│ the low ················ 132.30 Quai │ └─────────────────────────────────────┘
-│ 7 days ago                       now │
-└──────────────────────────────────────┘ ┌─ The network ───────────────────────┐
-                                         │ r u n n i n g   w e l l             │
-┌─ Calculator ─────────────────────────┐ │                                     │
-│ The calculator works with the full   │ │ since the last block ···· 7 seconds │
-│ page. The most common amounts are    │ │ a block every ········· 4.8 seconds │
-│ below.                               │ └─────────────────────────────────────┘
-└──────────────────────────────────────┘
-                                         ┌─ Mining: Kataribe node ─────────────┐
-┌─ If you sell Qi now ─────────────────┐ │ This recorded copy does not ask any │
-│ Qi           you receive     cost    │ │ node. On the live page you can type │
-│ 1            134.58 Quai     0.3%    │ │ the address of yours.               │
-│ 10            1,345 Quai    0.33%    │ └─────────────────────────────────────┘
-│ 100          13,414 Quai    0.63%    │
-│ 1,000       130,286 Quai     3.5%    │
-│ 10,000    1,011,793 Quai      25%    │
+│ ─────────────────╮                   │ │ for 1 Qi                            │
+│                  ╰────╮              │ │ the network ··········· 154.36 Quai │
+│                       ╰──╮           │ │ the market ············ 134.99 Quai │
+│                          ╰─────╮     │ │ The network gives more: the market  │
+│                                │     │ │ pays 12.5% less than the network.   │
+│                                ╰──── │ │ The network makes you wait two      │
+│ the low ················ 132.30 Quai │ │ weeks and applies discounts. On the │
+│ 7 days ago                       now │ │ market the trade is immediate.      │
+└──────────────────────────────────────┘ └─────────────────────────────────────┘
+
+┌─ Calculator ─────────────────────────┐ ┌─ The network ───────────────────────┐
+│ The calculator works with the full   │ │ r u n n i n g   w e l l             │
+│ page. The most common amounts are    │ │                                     │
+│ below.                               │ │ since the last block ···· 7 seconds │
+└──────────────────────────────────────┘ │ a block every ········· 4.8 seconds │
+                                         └─────────────────────────────────────┘
+┌─ If you sell Qi now ─────────────────┐
+│     Qi      you get Quai        cost │ ┌─ Mining: Kataribe node ─────────────┐
+│      1            134.58       0.30% │ │ This recorded copy does not ask any │
+│     10          1,345.43       0.33% │ │ node. On the live page you can type │
+│    100         13,414.45       0.63% │ │ the address of yours.               │
+│  1,000        130,285.53       3.49% │ └─────────────────────────────────────┘
+│ 10,000      1,011,792.87      25.05% │
 └──────────────────────────────────────┘
 
 ────────────────────────────────────────────────────────────────────────────────
