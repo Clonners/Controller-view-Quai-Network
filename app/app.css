@@ -1,9 +1,11 @@
 /* Kataribe · app instalable (estandar/app, APP-PAQUETE.md). Usa las tintas y medidas de ser.css (--papel, --tinta, --linea,
    --esquina, --fila, --ambar, --gris); los dos sitios las cargan. */
-/* El aviso «instalar» (O35): un renglón propio antes del contenido; el borde es una sombra hacia adentro, así no suma ni un
+/* El aviso «instalar» (O35): un renglón propio antes del contenido, con un renglón (--fila) de aire arriba y otro abajo, así no
+   queda pegado a lo que sigue; a los costados no entra en el borde que la pantalla no muestra (safe-area). El borde es una sombra hacia adentro, así no suma ni un
    píxel al alto (todo sigue cayendo en renglones enteros). Los selectores llevan la etiqueta para pesar más que el «.k-pagina *»
    del panel, que pone en cero márgenes y rellenos. */
-aside.ka-aviso { box-sizing: border-box; display: block; max-width: var(--ancho, none); margin: var(--fila) max(1ch, calc((100% - var(--ancho, 100%)) / 2)) 0;
+aside.ka-aviso { box-sizing: border-box; display: block; max-width: var(--ancho, none); margin: var(--fila) max(1ch, env(safe-area-inset-right, 0px), calc((100% - var(--ancho, 100%)) / 2)) var(--fila)
+    max(1ch, env(safe-area-inset-left, 0px), calc((100% - var(--ancho, 100%)) / 2));
   padding: calc(var(--fila) / 2) 1ch; box-shadow: inset 0 0 0 1px var(--linea); border-radius: var(--esquina);
   background: var(--papel); color: var(--tinta); line-height: var(--fila); }
 p.ka-aviso-t { margin: 0; }

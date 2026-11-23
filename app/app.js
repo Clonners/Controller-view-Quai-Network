@@ -1,14 +1,17 @@
 /* Kataribe · app instalable (estandar/app, APP-PAQUETE.md, estándar §20). La misma pieza en el panel y en el Portal.
    - Registra el service worker mínimo (sw.js: no guarda nada ni atiende pedidos). Es lo único que pide a la red.
-   - El aviso «instalar» (O35): discreto, en su renglón antes del contenido (no tapa nada); al cerrarlo no vuelve.
+   - El aviso «instalar» (O35): discreto, en su renglón antes del contenido (no tapa nada). Sale por el estado de verdad: sólo si la
+     página no está abierta como app y el navegador ofrece instalarla (beforeinstallprompt; Chrome no lo manda si ya está
+     instalada, y lo vuelve a mandar después de desinstalarla). «No, gracias» lo cierra hasta que el navegador la vuelva a ofrecer
+     (el próximo beforeinstallprompt); no se guarda nada, así que desinstalar la app lo trae de vuelta.
    - La entrada del ser (O36): sólo al abrir la app instalada, una vez por sesión. Una apertura: el ser al doble en el centro de la
      pantalla hace su gesto y viaja a su lugar en el pie; dura (hilos + 3) compases de 1/3 s (§10.4). Se corta con cualquier
      toque, tecla, rueda o desplazamiento; con «reducir movimiento» o sin programa no aparece. Por eso va en la cabeza sin «defer».
    - Las barras del sistema (O37): <meta name="theme-color"> sigue al tema efectivo de la página. La cabeza de la marca trae dos
      con media prefers-color-scheme (los papeles de la marca, para antes de que haya programa); si el tema se elige a mano (el sol
      o la luna), el que manda es uno más, sin media, primero, con el papel que la página tiene pintado de verdad.
-   No lee ni escribe nada del sitio: ni /api, ni montos, ni la sesión. Sólo dos marcas propias: localStorage «kataribe-app-aviso»
-   y sessionStorage «kataribe-app-entrada». */
+   No lee ni escribe nada del sitio: ni /api, ni montos, ni la sesión. Sólo una marca propia: sessionStorage «kataribe-app-entrada»
+   (y borra la vieja localStorage «kataribe-app-aviso», que escondía el aviso para siempre). */
 (() => {
   'use strict';
   const S = document.currentScript, D = (S && S.dataset) || {}, SITIO = D.sitio || '', SW = D.sw || '';
@@ -17,6 +20,7 @@
   const mm = (q) => !!(window.matchMedia && matchMedia(q).matches);
   const leer = (st, k) => { try { return window[st].getItem(k); } catch (e) { return null; } };
   const anotar = (st, k, v) => { try { window[st].setItem(k, v); } catch (e) { /* sin almacenamiento: vale sólo por esta vez */ } };
+  const borrar = (st, k) => { try { window[st].removeItem(k); } catch (e) { /* sin almacenamiento: no hay nada que borrar */ } };
   const instalada = () => mm('(display-mode: standalone)') || mm('(display-mode: fullscreen)') || mm('(display-mode: minimal-ui)') || navigator.standalone === true;
   const quieto = () => mm('(prefers-reduced-motion: reduce)');
 
@@ -37,8 +41,10 @@
   const tx = () => TX[(document.documentElement.lang || '').slice(0, 2).toLowerCase()] || TX.en;
   const IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   let pedido = null, aviso = null, modo = '';
-  const sePuedeAvisar = () => !instalada() && leer('localStorage', AVISO) !== 'no';
-  const cerrar = () => { anotar('localStorage', AVISO, 'no'); if (aviso) aviso.remove(); aviso = null; pedido = null; };
+  borrar('localStorage', AVISO);                                   // la marca vieja «no» lo escondía para siempre, aun desinstalada
+  const sePuedeAvisar = () => !instalada();
+  // cerrado (o instalada): fuera hasta que el navegador la vuelva a ofrecer; nada queda anotado
+  const cerrar = () => { if (aviso) aviso.remove(); aviso = null; pedido = null; };
   const boton = (k, f) => { const b = document.createElement('button'); b.type = 'button'; b.dataset.k = k; b.addEventListener('click', f); return b; };
   const rotular = () => {
     if (!aviso) return;
@@ -71,6 +77,12 @@
   new MutationObserver(rotular).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
   addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); pedido = e; mostrar('pedido'); });
   addEventListener('appinstalled', cerrar);
+  // si la página pasa a abrirse como app (el navegador la mueve a su ventana), el aviso se va
+  ['(display-mode: standalone)', '(display-mode: fullscreen)', '(display-mode: minimal-ui)'].forEach((q) => {
+    const l = window.matchMedia && matchMedia(q); if (l && l.addEventListener) l.addEventListener('change', () => { if (instalada()) cerrar(); });
+  });
+  // Safari del iPhone no ofrece instalar (sin beforeinstallprompt): el aviso con los pasos sale en el navegador, no en la app;
+  // cerrado, vuelve la próxima vez que se abra la página
   if (IOS && !('BeforeInstallPromptEvent' in window)) mostrar('ios');
 
   // ---------------------------------------------------------------------------------------------- la entrada del ser
