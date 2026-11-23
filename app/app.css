@@ -22,7 +22,7 @@ html[data-ka-entrada] body { visibility: hidden; }
 div.ka-entrada { position: fixed; inset: 0; z-index: 2147483647; display: flex; align-items: center; justify-content: center;
   margin: 0; padding: 0; overflow: hidden; background: var(--papel); visibility: visible; }
 div.ka-entrada[data-cortada] { opacity: 0; }
-div.ka-entrada-ser { flex: none; margin: 0; padding: 0; overflow: hidden; transform-origin: 0 0; }
+div.ka-entrada-ser { flex: none; position: relative; margin: 0; padding: 0; overflow: hidden; transform-origin: 0 0; }
 div.ka-entrada .k-arte { display: block; margin: 0; white-space: pre; }
 div.ka-entrada .k-a { color: var(--ambar); }
 div.ka-entrada .k-g { color: var(--gris); }

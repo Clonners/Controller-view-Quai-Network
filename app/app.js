@@ -75,7 +75,7 @@
   //   1. app.js va en la cabeza sin «defer»: corre antes de que la página tenga nada que pintar y marca <html data-ka-entrada>;
   //      app.css esconde entonces el cuerpo (visibility), así que el primer cuadro es el papel del sitio, sin la página a medio
   //      armar. La página carga detrás igual que siempre; nada espera a la entrada.
-  //   2. Cuando el ser está, una capa del tamaño de la pantalla lo dibuja en el centro al doble (T2; a tamaño normal si al doble
+  //   2. Cuando el ser está, una capa del tamaño de la pantalla lo dibuja con su cuerpo en el centro, al doble (T2; normal si al doble
   //      no entra) y hace el gesto del sitio (repertorio §10.3): un compás para despertarse con los ojos cerrados, uno por hilo
   //      de izquierda a derecha mirándolo, uno contento.
   //   3. Un compás más, el viaje: el ser va a su lugar (el de .k-pj, en el pie) achicándose, el papel se aclara y la página se ve.
@@ -105,7 +105,7 @@
     const fin = () => {
       if (!viva) return; viva = false; cancelAnimationFrame(raf);
       EV.forEach((e) => removeEventListener(e, cortar, true)); document.removeEventListener('visibilitychange', fin);
-      removeEventListener('resize', reubicar); document.removeEventListener('DOMContentLoaded', sinSer);
+      document.removeEventListener('DOMContentLoaded', sinSer);
       raiz.removeAttribute('data-ka-entrada');
       if (capa && capa.dataset.cortada === undefined) capa.remove();
     };
@@ -116,12 +116,10 @@
       if (e.type === 'pointerdown' && capa) { capa.dataset.cortada = ''; TOQUE.forEach((t) => addEventListener(t, soltar, { capture: true })); }
       fin();
     };
-    const reubicar = () => { if (ubicar) ubicar(); };
     // un sitio sin ser (Ser5 llega con los programas de la página, también los «defer»): nada que esperar, la página se ve ya
     const sinSer = () => { if (!window.Ser5) fin(); };
     document.addEventListener('DOMContentLoaded', sinSer);
     EV.forEach((e) => addEventListener(e, cortar, { capture: true, passive: true })); document.addEventListener('visibilitychange', fin);
-    addEventListener('resize', reubicar, { passive: true });
     // espera al ser: como mucho un compás después de que la página terminó de cargar; si no está, o está quieto, no hay entrada
     const listo = () => {
       if (!viva) return;
@@ -129,7 +127,7 @@
       if (Ser && (Ser.QUIETO || (Ser.est && Ser.est.estatica))) return fin();
       if (f && el && Ser.B && Ser.dibujar && document.body) return empezar(Ser, f, el);
       if (document.readyState === 'complete') { if (!plazo) plazo = performance.now() + COMPAS; else if (performance.now() > plazo) return fin(); }
-      raf = requestAnimationFrame(listo);
+      raf = requestAnimationFrame(() => { try { listo(); } catch (e) { fin(); } });
     };
     const empezar = (Ser, f, el) => {
       const cs = getComputedStyle(el), base = (Ser.pj && Ser.pj.p) || {};
@@ -143,19 +141,31 @@
       const st = dib.style;
       st.fontFamily = cs.fontFamily; st.fontWeight = cs.fontWeight; st.color = cs.color;
       ['--ambar', '--gris'].forEach((v) => { const x = cs.getPropertyValue(v); if (x) st.setProperty(v, x.trim()); });
-      // al doble (T2: .k-2x) si entra en la pantalla; si no, a tamaño normal. Se vuelve a medir si la ventana cambia de tamaño
+      // la caja del ser, como la mide el ser (cajaPj): a lo ancho su dibujo (el primer hijo de .k-pj: el bloque ocupa la línea
+      // entera mientras la hoja del ser no está), a lo alto .k-pj. El dibujo tiene más columnas que el cuerpo (las del cuerpo
+      // son las f.w primeras; después, el lugar de la marca): lo que va al centro de la capa es el cuerpo.
+      const caja = () => { const a = (el.firstElementChild || el).getBoundingClientRect(), b = el.getBoundingClientRect();
+        return { left: a.left, top: b.top, width: a.width, height: b.height }; };
+      const cols = Ser.B.arte(Ser.dibujar(f, cuadro(Ser, f, base, 0))).w;
+      // al doble (T2: .k-2x) si entra en la capa con el cuerpo en el centro; si no, a tamaño normal. Se mide en cada cuadro hasta
+      // el viaje (la hoja del ser, la letra o la ventana pueden llegar o cambiar después del primero) y se escribe sólo si cambió
+      let medida = '';
       ubicar = () => {
-        const r = el.getBoundingClientRect(), tam = parseFloat(cs.fontSize), fila = parseFloat(cs.lineHeight);
-        const x = 2 * r.width <= innerWidth && 2 * r.height <= innerHeight ? 2 : 1;
+        const r = caja(), p = capa.getBoundingClientRect(), tam = parseFloat(cs.fontSize), fila = parseFloat(cs.lineHeight);
+        const c = r.width / cols, ala = Math.max(f.w / 2, cols - f.w / 2) * c;
+        const x = 2 * 2 * ala <= p.width && 2 * r.height <= p.height ? 2 : 1;
+        const m = [x, r.width, r.height, tam, fila].join(' ');
+        if (m === medida) return; medida = m;
         capa.dataset.tam = x === 2 ? 'doble' : 'normal';
         st.width = r.width * x + 'px'; st.height = r.height * x + 'px'; st.fontSize = tam * x + 'px'; st.lineHeight = Number.isFinite(fila) ? fila * x + 'px' : 'normal';
+        st.left = (cols - f.w) / 2 * c * x + 'px';
       };
-      ubicar();
       document.body.append(capa);
+      ubicar();
       const viaje = () => {
         // un compás: del centro a su lugar en el pie, del tamaño de la apertura al suyo; el papel se aclara y la página aparece
         ubicar = null; raiz.removeAttribute('data-ka-entrada');
-        const a = dib.getBoundingClientRect(), r = el.getBoundingClientRect(), s = a.width ? r.width / a.width : 1;
+        const a = dib.getBoundingClientRect(), r = caja(), s = a.width ? r.width / a.width : 1;
         capa.dataset.viaje = [r.left, r.top, r.width, r.height].map(Math.round).join(' ');
         if (dib.animate) {
           dib.animate([{ transform: 'none' }, { transform: `translate(${r.left - a.left}px, ${r.top - a.top}px) scale(${s})` }], { duration: COMPAS, easing: 'ease', fill: 'forwards' });
@@ -167,6 +177,7 @@
       const paso = () => {
         if (!viva) return;
         try {
+          if (ubicar) ubicar();
           const k = Math.floor((performance.now() - t0) / COMPAS);
           if (k >= pasos) return fin();
           if (k !== ultimo) {
