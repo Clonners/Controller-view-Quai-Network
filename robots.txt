@@ -1,4 +1,2 @@
 User-agent: *
 Allow: /
-
-Sitemap: https://panel.kataribe.org/sitemap.xml
