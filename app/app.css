@@ -14,11 +14,18 @@ div.ka-aviso-b button[data-k="si"] { font-weight: 700; }
 div.ka-aviso-b button:hover { text-decoration: underline; }
 div.ka-aviso-b button:active { background: var(--tinta); color: var(--papel); }
 div.ka-aviso-b button:focus-visible { outline: 2px solid var(--ambar); outline-offset: -2px; }
-/* La entrada del ser (O36): una capa encima del ser, del mismo tamaño; no recibe toques (el toque que la corta llega a la página). */
-div.ka-entrada { position: fixed; z-index: 2147483647; margin: 0; padding: 0; overflow: hidden; pointer-events: none; }
+/* La entrada del ser (O36), una apertura. Mientras dura, <html data-ka-entrada> esconde la página (el papel del sitio queda a la
+   vista, sin la página a medio armar); la capa ocupa la pantalla con el ser en el centro, y en el último compás el ser viaja a su
+   lugar mientras la página aparece. El toque que la corta cae sobre la capa (no sobre lo que no se veía): la capa se apaga en el acto
+   y se va cuando el toque termina. Con «reducir movimiento», al imprimir o sin programa no hay nada que esconder ni capa. */
+html[data-ka-entrada] body { visibility: hidden; }
+div.ka-entrada { position: fixed; inset: 0; z-index: 2147483647; display: flex; align-items: center; justify-content: center;
+  margin: 0; padding: 0; overflow: hidden; background: var(--papel); visibility: visible; }
+div.ka-entrada[data-cortada] { opacity: 0; }
+div.ka-entrada-ser { flex: none; margin: 0; padding: 0; overflow: hidden; transform-origin: 0 0; }
 div.ka-entrada .k-arte { display: block; margin: 0; white-space: pre; }
 div.ka-entrada .k-a { color: var(--ambar); }
 div.ka-entrada .k-g { color: var(--gris); }
 div.ka-entrada .k-n { font-weight: 700; }
-@media (prefers-reduced-motion: reduce) { .ka-entrada { display: none; } }
-@media print { .ka-aviso, .ka-entrada { display: none; } }
+@media (prefers-reduced-motion: reduce) { html[data-ka-entrada] body { visibility: visible; } .ka-entrada { display: none; } }
+@media print { html[data-ka-entrada] body { visibility: visible; } .ka-aviso, .ka-entrada { display: none; } }
