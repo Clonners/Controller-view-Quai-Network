@@ -4,6 +4,9 @@
    - La entrada del ser (O36): sólo al abrir la app instalada, una vez por sesión. Una apertura: el ser al doble en el centro de la
      pantalla hace su gesto y viaja a su lugar en el pie; dura (hilos + 3) compases de 1/3 s (§10.4). Se corta con cualquier
      toque, tecla, rueda o desplazamiento; con «reducir movimiento» o sin programa no aparece. Por eso va en la cabeza sin «defer».
+   - Las barras del sistema (O37): <meta name="theme-color"> sigue al tema efectivo de la página. La cabeza de la marca trae dos
+     con media prefers-color-scheme (los papeles de la marca, para antes de que haya programa); si el tema se elige a mano (el sol
+     o la luna), el que manda es uno más, sin media, primero, con el papel que la página tiene pintado de verdad.
    No lee ni escribe nada del sitio: ni /api, ni montos, ni la sesión. Sólo dos marcas propias: localStorage «kataribe-app-aviso»
    y sessionStorage «kataribe-app-entrada». */
 (() => {
@@ -94,7 +97,36 @@
     const i = k - 1;
     return Object.assign(p, { mira: Math.sign(f.cols[i] - cx) }, (HACE[SITIO] || HACE.panel)(f.hilos, i, k));
   };
+  // el papel de la página: el fondo del cuerpo y, si es transparente, el de <html> (lo pinta la hoja del sitio, no este programa)
   const opaco = (c) => !!c && !/^transparent$|rgba\(.*,\s*0\)$/.test(c);
+  const fondo = () => {
+    const bd = document.body ? getComputedStyle(document.body).backgroundColor : '', ht = getComputedStyle(document.documentElement).backgroundColor;
+    return opaco(bd) ? bd : opaco(ht) ? ht : '';
+  };
+
+  // ---------------------------------------------------------------------------------------------- las barras del sistema (O37)
+  // El navegador pinta sus barras con el primer theme-color que aplica (sin media, o con media que se cumple). Los dos con media
+  // siguen al tema del sistema; este, sin media y primero, sigue al tema que la página tiene de verdad, también el elegido a mano.
+  // Se escribe en #rrggbb (el papel tal como lo pinta la hoja) y sólo si cambió; sin papel opaco no se pone nada.
+  const hex = (c) => { const m = /^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*1)?\)$/.exec(c); return m ? '#' + m.slice(1).map((x) => (+x).toString(16).padStart(2, '0')).join('') : c; };
+  let barra = null;
+  const barras = () => {
+    const c = fondo(); if (!c) return;
+    const v = hex(c);
+    if (!barra) {
+      barra = document.createElement('meta'); barra.name = 'theme-color'; barra.dataset.ka = '';
+      const h = document.head || document.documentElement, pri = h.querySelector('meta[name="theme-color"]');
+      h.insertBefore(barra, pri || null);
+    }
+    if (barra.content !== v) barra.content = v;
+  };
+  const seguir = () => { try { barras(); } catch (e) { /* sin barras propias: quedan las de la cabeza */ } };
+  const tema = new MutationObserver(seguir);
+  tema.observe(document.documentElement, { attributes: true });
+  const conCuerpo = () => { if (document.body) tema.observe(document.body, { attributes: true }); seguir(); };
+  if (document.body) conCuerpo(); else document.addEventListener('DOMContentLoaded', conCuerpo);
+  addEventListener('load', seguir);
+  if (window.matchMedia) { const q = matchMedia('(prefers-color-scheme: dark)'); if (q.addEventListener) q.addEventListener('change', seguir); else if (q.addListener) q.addListener(seguir); }
   const entrar = () => {
     if (!instalada() || quieto() || document.hidden || leer('sessionStorage', ENTRADA)) return;
     anotar('sessionStorage', ENTRADA, '1');
@@ -135,9 +167,8 @@
       capa = document.createElement('div'); capa.className = 'ka-entrada'; capa.setAttribute('aria-hidden', 'true');
       capa.dataset.sitio = SITIO; capa.dataset.pasos = String(pasos); capa.dataset.compas = String(COMPAS);
       const dib = document.createElement('div'); dib.className = 'ka-entrada-ser'; capa.append(dib);
-      const bd = getComputedStyle(document.body).backgroundColor, ht = getComputedStyle(raiz).backgroundColor;
-      const fondo = opaco(bd) ? bd : opaco(ht) ? ht : '';
-      if (fondo) capa.style.backgroundColor = fondo;
+      const papel = fondo();
+      if (papel) capa.style.backgroundColor = papel;
       const st = dib.style;
       st.fontFamily = cs.fontFamily; st.fontWeight = cs.fontWeight; st.color = cs.color;
       ['--ambar', '--gris'].forEach((v) => { const x = cs.getPropertyValue(v); if (x) st.setProperty(v, x.trim()); });
