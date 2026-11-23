@@ -1,0 +1,24 @@
+/* Kataribe · app instalable (estandar/app, APP-PAQUETE.md). Usa las tintas y medidas de ser.css (--papel, --tinta, --linea,
+   --esquina, --fila, --ambar, --gris); los dos sitios las cargan. */
+/* El aviso «instalar» (O35): un renglón propio antes del contenido; el borde es una sombra hacia adentro, así no suma ni un
+   píxel al alto (todo sigue cayendo en renglones enteros). Los selectores llevan la etiqueta para pesar más que el «.k-pagina *»
+   del panel, que pone en cero márgenes y rellenos. */
+aside.ka-aviso { box-sizing: border-box; display: block; max-width: var(--ancho, none); margin: var(--fila) max(1ch, calc((100% - var(--ancho, 100%)) / 2)) 0;
+  padding: calc(var(--fila) / 2) 1ch; box-shadow: inset 0 0 0 1px var(--linea); border-radius: var(--esquina);
+  background: var(--papel); color: var(--tinta); line-height: var(--fila); }
+p.ka-aviso-t { margin: 0; }
+div.ka-aviso-b { display: flex; flex-wrap: wrap; gap: 0 1ch; margin: 0 -1.5ch; }
+div.ka-aviso-b button { min-height: calc(var(--fila) * 2); padding: 0 1.5ch; border: 0; border-radius: var(--esquina); background: none;
+  color: inherit; font: inherit; line-height: var(--fila); cursor: pointer; }
+div.ka-aviso-b button[data-k="si"] { font-weight: 700; }
+div.ka-aviso-b button:hover { text-decoration: underline; }
+div.ka-aviso-b button:active { background: var(--tinta); color: var(--papel); }
+div.ka-aviso-b button:focus-visible { outline: 2px solid var(--ambar); outline-offset: -2px; }
+/* La entrada del ser (O36): una capa encima del ser, del mismo tamaño; no recibe toques (el toque que la corta llega a la página). */
+div.ka-entrada { position: fixed; z-index: 2147483647; margin: 0; padding: 0; overflow: hidden; pointer-events: none; }
+div.ka-entrada .k-arte { display: block; margin: 0; white-space: pre; }
+div.ka-entrada .k-a { color: var(--ambar); }
+div.ka-entrada .k-g { color: var(--gris); }
+div.ka-entrada .k-n { font-weight: 700; }
+@media (prefers-reduced-motion: reduce) { .ka-entrada { display: none; } }
+@media print { .ka-aviso, .ka-entrada { display: none; } }

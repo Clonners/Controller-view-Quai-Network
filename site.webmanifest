@@ -1,7 +1,6 @@
 {
-  "name": "Kataribe panel",
+  "name": "Kataribe Dashboard",
   "short_name": "Kataribe",
-  "description": "Kataribe panel: mining telemetry and controller analytics for Quai Network.",
   "icons": [
     {
       "src": "brand/icon-192.png",
@@ -12,20 +11,6 @@
       "src": "brand/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Mining Dashboard",
-      "short_name": "Mining",
-      "url": "/mining.html",
-      "icons": [{ "src": "brand/icon-192.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "Controller",
-      "short_name": "Controller",
-      "url": "/controller_view.html",
-      "icons": [{ "src": "brand/icon-192.png", "sizes": "192x192" }]
     }
   ],
   "theme_color": "#f5f2ea",
